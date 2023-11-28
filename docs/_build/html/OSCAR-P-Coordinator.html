@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OSCAR-P-Coordinator package &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="classes package" href="classes.html" />
+    <link rel="prev" title="Welcome to OSCAR-P’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">OSCAR-P-Coordinator package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes.html">classes package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html">oscarp package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-coordinator">coordinator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coordinator.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-deployment_generator">deployment_generator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#deployment_generator.check_match_combined_used_resources"><code class="docutils literal notranslate"><span class="pre">check_match_combined_used_resources()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment_generator.get_deployments"><code class="docutils literal notranslate"><span class="pre">get_deployments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment_generator.get_resources_combinations"><code class="docutils literal notranslate"><span class="pre">get_resources_combinations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment_generator.get_services_to_test"><code class="docutils literal notranslate"><span class="pre">get_services_to_test()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment_generator.get_testing_units"><code class="docutils literal notranslate"><span class="pre">get_testing_units()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment_generator.has_completes_results"><code class="docutils literal notranslate"><span class="pre">has_completes_results()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment_generator.make_deployments_summary"><code class="docutils literal notranslate"><span class="pre">make_deployments_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment_generator.make_resources_requirements"><code class="docutils literal notranslate"><span class="pre">make_resources_requirements()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment_generator.reorder_deployments"><code class="docutils literal notranslate"><span class="pre">reorder_deployments()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-global_parameters">global_parameters module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#global_parameters.make_campaign_dir"><code class="docutils literal notranslate"><span class="pre">make_campaign_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#global_parameters.set_application_dir"><code class="docutils literal notranslate"><span class="pre">set_application_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#global_parameters.set_current_deployment"><code class="docutils literal notranslate"><span class="pre">set_current_deployment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#global_parameters.set_current_work_dir"><code class="docutils literal notranslate"><span class="pre">set_current_work_dir()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-infrastructure_manager">infrastructure_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager._generate_modified_candidate_files"><code class="docutils literal notranslate"><span class="pre">_generate_modified_candidate_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager._generate_modified_dag"><code class="docutils literal notranslate"><span class="pre">_generate_modified_dag()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.adjust_physical_infrastructures_configuration"><code class="docutils literal notranslate"><span class="pre">adjust_physical_infrastructures_configuration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.clean_and_rename_tosca"><code class="docutils literal notranslate"><span class="pre">clean_and_rename_tosca()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.clean_and_rename_tosca_files"><code class="docutils literal notranslate"><span class="pre">clean_and_rename_tosca_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.configure_executables"><code class="docutils literal notranslate"><span class="pre">configure_executables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.configure_jmeter_cluster"><code class="docutils literal notranslate"><span class="pre">configure_jmeter_cluster()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.create_virtual_infrastructures"><code class="docutils literal notranslate"><span class="pre">create_virtual_infrastructures()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.delete_all_virtual_infrastructures"><code class="docutils literal notranslate"><span class="pre">delete_all_virtual_infrastructures()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.delete_unused_virtual_infrastructures"><code class="docutils literal notranslate"><span class="pre">delete_unused_virtual_infrastructures()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.delete_virtual_infrastructure"><code class="docutils literal notranslate"><span class="pre">delete_virtual_infrastructure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.deploy_virtual_infrastructure"><code class="docutils literal notranslate"><span class="pre">deploy_virtual_infrastructure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.generate_tosca"><code class="docutils literal notranslate"><span class="pre">generate_tosca()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.get_all_infrastructures"><code class="docutils literal notranslate"><span class="pre">get_all_infrastructures()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.get_infrastructures_outputs"><code class="docutils literal notranslate"><span class="pre">get_infrastructures_outputs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.get_node_list"><code class="docutils literal notranslate"><span class="pre">get_node_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.get_outputs"><code class="docutils literal notranslate"><span class="pre">get_outputs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.get_state"><code class="docutils literal notranslate"><span class="pre">get_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.update_tosca"><code class="docutils literal notranslate"><span class="pre">update_tosca()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.update_virtual_infrastructures"><code class="docutils literal notranslate"><span class="pre">update_virtual_infrastructures()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infrastructure_manager.wait_for_infrastructure_deployment"><code class="docutils literal notranslate"><span class="pre">wait_for_infrastructure_deployment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-input_files_parser">input_files_parser module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser._check_device_constraints"><code class="docutils literal notranslate"><span class="pre">_check_device_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser._get_actual_partitions"><code class="docutils literal notranslate"><span class="pre">_get_actual_partitions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser._get_bucket_name_for_lambda"><code class="docutils literal notranslate"><span class="pre">_get_bucket_name_for_lambda()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser._get_physical_nodes"><code class="docutils literal notranslate"><span class="pre">_get_physical_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser._set_containers"><code class="docutils literal notranslate"><span class="pre">_set_containers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser.check_parallelism_is_in_decreasing_order"><code class="docutils literal notranslate"><span class="pre">check_parallelism_is_in_decreasing_order()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser.get_components"><code class="docutils literal notranslate"><span class="pre">get_components()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser.get_resources"><code class="docutils literal notranslate"><span class="pre">get_resources()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser.get_run_parameters"><code class="docutils literal notranslate"><span class="pre">get_run_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser.set_testing_parameters"><code class="docutils literal notranslate"><span class="pre">set_testing_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input_files_parser.shorten_key"><code class="docutils literal notranslate"><span class="pre">shorten_key()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-lambda_manager">lambda_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lambda_manager._apply_fdl_configuration_scar"><code class="docutils literal notranslate"><span class="pre">_apply_fdl_configuration_scar()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lambda_manager.generate_scar_fdl_configuration"><code class="docutils literal notranslate"><span class="pre">generate_scar_fdl_configuration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lambda_manager.generate_script_lambda"><code class="docutils literal notranslate"><span class="pre">generate_script_lambda()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lambda_manager.remove_all_lambdas"><code class="docutils literal notranslate"><span class="pre">remove_all_lambdas()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lambda_manager.remove_s3_buckets"><code class="docutils literal notranslate"><span class="pre">remove_s3_buckets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lambda_manager.setup_scar"><code class="docutils literal notranslate"><span class="pre">setup_scar()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lambda_manager.verify_correct_scar_deployment"><code class="docutils literal notranslate"><span class="pre">verify_correct_scar_deployment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-results_maker">results_maker module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.find_actual_parallelism_run"><code class="docutils literal notranslate"><span class="pre">find_actual_parallelism_run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.fix_time_table_interval"><code class="docutils literal notranslate"><span class="pre">fix_time_table_interval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.generate_response_throughput_graphs"><code class="docutils literal notranslate"><span class="pre">generate_response_throughput_graphs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.get_actual_parallelism_list"><code class="docutils literal notranslate"><span class="pre">get_actual_parallelism_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.get_first_job"><code class="docutils literal notranslate"><span class="pre">get_first_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.get_last_job"><code class="docutils literal notranslate"><span class="pre">get_last_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.get_run_runtime"><code class="docutils literal notranslate"><span class="pre">get_run_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.get_run_runtime_full"><code class="docutils literal notranslate"><span class="pre">get_run_runtime_full()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.get_runtime_of_job"><code class="docutils literal notranslate"><span class="pre">get_runtime_of_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_dataframe_async"><code class="docutils literal notranslate"><span class="pre">make_dataframe_async()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_dataframe_async_run"><code class="docutils literal notranslate"><span class="pre">make_dataframe_async_run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_dataframe_sync"><code class="docutils literal notranslate"><span class="pre">make_dataframe_sync()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_dataframe_sync_run"><code class="docutils literal notranslate"><span class="pre">make_dataframe_sync_run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_gantts"><code class="docutils literal notranslate"><span class="pre">make_gantts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_loads"><code class="docutils literal notranslate"><span class="pre">make_loads()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_results"><code class="docutils literal notranslate"><span class="pre">make_results()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_results_for_full"><code class="docutils literal notranslate"><span class="pre">make_results_for_full()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_results_for_jmeter"><code class="docutils literal notranslate"><span class="pre">make_results_for_jmeter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_results_for_unit"><code class="docutils literal notranslate"><span class="pre">make_results_for_unit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_runtime_runs_parallelism_graph"><code class="docutils literal notranslate"><span class="pre">make_runtime_runs_parallelism_graph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.make_runtime_runs_parallelism_graph_full"><code class="docutils literal notranslate"><span class="pre">make_runtime_runs_parallelism_graph_full()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.ready_data_for_gantt"><code class="docutils literal notranslate"><span class="pre">ready_data_for_gantt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.ready_data_for_histogram"><code class="docutils literal notranslate"><span class="pre">ready_data_for_histogram()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.ready_dataframes_of_component"><code class="docutils literal notranslate"><span class="pre">ready_dataframes_of_component()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.ready_dataframes_of_full_workflow"><code class="docutils literal notranslate"><span class="pre">ready_dataframes_of_full_workflow()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results_maker.remove_outliers_iqr"><code class="docutils literal notranslate"><span class="pre">remove_outliers_iqr()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-run_coordinator">run_coordinator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run_coordinator.make_current_services"><code class="docutils literal notranslate"><span class="pre">make_current_services()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_coordinator.make_oscar_p_input_file"><code class="docutils literal notranslate"><span class="pre">make_oscar_p_input_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_coordinator.make_oscar_p_input_file_single"><code class="docutils literal notranslate"><span class="pre">make_oscar_p_input_file_single()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_coordinator.run_scheduler"><code class="docutils literal notranslate"><span class="pre">run_scheduler()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">OSCAR-P-Coordinator package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/OSCAR-P-Coordinator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="oscar-p-coordinator-package">
+<h1>OSCAR-P-Coordinator package<a class="headerlink" href="#oscar-p-coordinator-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">classes package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.Component">classes.Component module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.Component.Component"><code class="docutils literal notranslate"><span class="pre">Component</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Component.Component._get_correct_image"><code class="docutils literal notranslate"><span class="pre">Component._get_correct_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Component.Component._update_name"><code class="docutils literal notranslate"><span class="pre">Component._update_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Component.Component.add_container"><code class="docutils literal notranslate"><span class="pre">Component.add_container()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Component.Component.is_partition"><code class="docutils literal notranslate"><span class="pre">Component.is_partition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Component.Component.set_following_partition"><code class="docutils literal notranslate"><span class="pre">Component.set_following_partition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Component.Component.set_parallelism"><code class="docutils literal notranslate"><span class="pre">Component.set_parallelism()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Component.Component.set_time_distribution"><code class="docutils literal notranslate"><span class="pre">Component.set_time_distribution()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.Component.Container"><code class="docutils literal notranslate"><span class="pre">Container</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Component.Container._update_id"><code class="docutils literal notranslate"><span class="pre">Container._update_id()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.Component.generalize_name"><code class="docutils literal notranslate"><span class="pre">generalize_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.Component.generalize_unit_id"><code class="docutils literal notranslate"><span class="pre">generalize_unit_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.Component.get_alternative_containers"><code class="docutils literal notranslate"><span class="pre">get_alternative_containers()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.Resource">classes.Resource module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.Resource.Resource"><code class="docutils literal notranslate"><span class="pre">Resource</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Resource.Resource._set_ssh"><code class="docutils literal notranslate"><span class="pre">Resource._set_ssh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Resource.Resource._set_type"><code class="docutils literal notranslate"><span class="pre">Resource._set_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Resource.Resource.is_lambda"><code class="docutils literal notranslate"><span class="pre">Resource.is_lambda()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Resource.Resource.is_physical"><code class="docutils literal notranslate"><span class="pre">Resource.is_physical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Resource.Resource.set_storage_provider_alias"><code class="docutils literal notranslate"><span class="pre">Resource.set_storage_provider_alias()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.Service">classes.Service module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.Service.Service"><code class="docutils literal notranslate"><span class="pre">Service</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Service.Service.set_buckets_full_workflow"><code class="docutils literal notranslate"><span class="pre">Service.set_buckets_full_workflow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.Service.Service.set_buckets_single_testing"><code class="docutils literal notranslate"><span class="pre">Service.set_buckets_single_testing()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jmeterLoadInjector.html">jmeterLoadInjector package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jmeterLoadInjector.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jmeterLoadInjector.html#module-jmeterLoadInjector.main">jmeterLoadInjector.main module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.main.encode_input_file"><code class="docutils literal notranslate"><span class="pre">encode_input_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.main.execute_command"><code class="docutils literal notranslate"><span class="pre">execute_command()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.main.load_configuration"><code class="docutils literal notranslate"><span class="pre">load_configuration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.main.pull_image"><code class="docutils literal notranslate"><span class="pre">pull_image()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.main.start_test"><code class="docutils literal notranslate"><span class="pre">start_test()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jmeterLoadInjector.html#module-jmeterLoadInjector.make_test_file">jmeterLoadInjector.make_test_file module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.make_test_file.get_end"><code class="docutils literal notranslate"><span class="pre">get_end()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.make_test_file.get_start"><code class="docutils literal notranslate"><span class="pre">get_start()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.make_test_file.make_test_file"><code class="docutils literal notranslate"><span class="pre">make_test_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.make_test_file.set_generic_variables"><code class="docutils literal notranslate"><span class="pre">set_generic_variables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.make_test_file.set_samplers"><code class="docutils literal notranslate"><span class="pre">set_samplers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.make_test_file.set_thread_group"><code class="docutils literal notranslate"><span class="pre">set_thread_group()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.make_test_file.set_thread_variables"><code class="docutils literal notranslate"><span class="pre">set_thread_variables()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jmeterLoadInjector.html#module-jmeterLoadInjector.process_results">jmeterLoadInjector.process_results module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.process_results.calculate_throughput"><code class="docutils literal notranslate"><span class="pre">calculate_throughput()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jmeterLoadInjector.html#jmeterLoadInjector.process_results.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jmeterLoadInjector.html#module-jmeterLoadInjector">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="oscarp.html">oscarp package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.cluster_manager">oscarp.cluster_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager._apply_fdl_configuration_oscar"><code class="docutils literal notranslate"><span class="pre">_apply_fdl_configuration_oscar()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.apply_fdl_configuration_wrapped"><code class="docutils literal notranslate"><span class="pre">apply_fdl_configuration_wrapped()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.clean_s3_buckets"><code class="docutils literal notranslate"><span class="pre">clean_s3_buckets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.generate_fdl_configuration"><code class="docutils literal notranslate"><span class="pre">generate_fdl_configuration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.generate_fdl_storage_providers"><code class="docutils literal notranslate"><span class="pre">generate_fdl_storage_providers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.generate_service_script"><code class="docutils literal notranslate"><span class="pre">generate_service_script()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.get_deployed_services"><code class="docutils literal notranslate"><span class="pre">get_deployed_services()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.remove_all_buckets"><code class="docutils literal notranslate"><span class="pre">remove_all_buckets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.remove_all_services"><code class="docutils literal notranslate"><span class="pre">remove_all_services()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.set_default_oscar_cluster_from_alias"><code class="docutils literal notranslate"><span class="pre">set_default_oscar_cluster_from_alias()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.upload_input_files_to_storage"><code class="docutils literal notranslate"><span class="pre">upload_input_files_to_storage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.cluster_manager.verify_correct_oscar_deployment"><code class="docutils literal notranslate"><span class="pre">verify_correct_oscar_deployment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.executables">oscarp.executables module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.executables.Mc"><code class="docutils literal notranslate"><span class="pre">Mc</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="oscarp.html#oscarp.executables.Mc.get_command"><code class="docutils literal notranslate"><span class="pre">Mc.get_command()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.executables.Oscarcli"><code class="docutils literal notranslate"><span class="pre">Oscarcli</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="oscarp.html#oscarp.executables.Oscarcli.get_command"><code class="docutils literal notranslate"><span class="pre">Oscarcli.get_command()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.executables.init"><code class="docutils literal notranslate"><span class="pre">init()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.gui">oscarp.gui module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.gui.append_to_deployment_summary"><code class="docutils literal notranslate"><span class="pre">append_to_deployment_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.gui.runs_diff_resources"><code class="docutils literal notranslate"><span class="pre">runs_diff_resources()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.gui.runs_diff_services"><code class="docutils literal notranslate"><span class="pre">runs_diff_services()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.gui.show_all_resources"><code class="docutils literal notranslate"><span class="pre">show_all_resources()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.gui.show_all_services"><code class="docutils literal notranslate"><span class="pre">show_all_services()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.gui.show_and_save_to_summary"><code class="docutils literal notranslate"><span class="pre">show_and_save_to_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.gui.show_runs"><code class="docutils literal notranslate"><span class="pre">show_runs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.input_file_processing">oscarp.input_file_processing module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.input_file_processing.show_workflow"><code class="docutils literal notranslate"><span class="pre">show_workflow()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.mllibrary_manager">oscarp.mllibrary_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.mllibrary_manager.add_to_performance_models_json"><code class="docutils literal notranslate"><span class="pre">add_to_performance_models_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.mllibrary_manager.make_prediction"><code class="docutils literal notranslate"><span class="pre">make_prediction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.mllibrary_manager.run_mllibrary"><code class="docutils literal notranslate"><span class="pre">run_mllibrary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.mllibrary_manager.set_mllibrary_config_path"><code class="docutils literal notranslate"><span class="pre">set_mllibrary_config_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.mllibrary_manager.set_mllibrary_predict_path"><code class="docutils literal notranslate"><span class="pre">set_mllibrary_predict_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.mllibrary_manager.train_and_predict"><code class="docutils literal notranslate"><span class="pre">train_and_predict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.mllibrary_manager.train_models"><code class="docutils literal notranslate"><span class="pre">train_models()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.oscarp">oscarp.oscarp module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.oscarp.end_run_full"><code class="docutils literal notranslate"><span class="pre">end_run_full()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.oscarp.final_processing"><code class="docutils literal notranslate"><span class="pre">final_processing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.oscarp.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.oscarp.manage_campaign_dir"><code class="docutils literal notranslate"><span class="pre">manage_campaign_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.oscarp.prepare_clusters"><code class="docutils literal notranslate"><span class="pre">prepare_clusters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.oscarp.process_subfolder"><code class="docutils literal notranslate"><span class="pre">process_subfolder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.oscarp.start_run_full"><code class="docutils literal notranslate"><span class="pre">start_run_full()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.oscarp.test_single_lambda"><code class="docutils literal notranslate"><span class="pre">test_single_lambda()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.postprocessing">oscarp.postprocessing module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.calculate_average"><code class="docutils literal notranslate"><span class="pre">calculate_average()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.calculate_maximum_parallelism"><code class="docutils literal notranslate"><span class="pre">calculate_maximum_parallelism()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.calculate_parallelism"><code class="docutils literal notranslate"><span class="pre">calculate_parallelism()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.calculate_runtime"><code class="docutils literal notranslate"><span class="pre">calculate_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.find_best_model"><code class="docutils literal notranslate"><span class="pre">find_best_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.find_best_prediction"><code class="docutils literal notranslate"><span class="pre">find_best_prediction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.find_best_predictions"><code class="docutils literal notranslate"><span class="pre">find_best_predictions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.get_first_job"><code class="docutils literal notranslate"><span class="pre">get_first_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.get_last_job"><code class="docutils literal notranslate"><span class="pre">get_last_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.load_dataframes"><code class="docutils literal notranslate"><span class="pre">load_dataframes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.make_runtime_core_csv"><code class="docutils literal notranslate"><span class="pre">make_runtime_core_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.make_runtime_core_csv_for_ml"><code class="docutils literal notranslate"><span class="pre">make_runtime_core_csv_for_ml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.make_statistics"><code class="docutils literal notranslate"><span class="pre">make_statistics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.merge_csv_of_service"><code class="docutils literal notranslate"><span class="pre">merge_csv_of_service()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.plot_ml_predictions_graph"><code class="docutils literal notranslate"><span class="pre">plot_ml_predictions_graph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.plot_ml_predictions_graphs"><code class="docutils literal notranslate"><span class="pre">plot_ml_predictions_graphs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.plot_runtime_core_graphs"><code class="docutils literal notranslate"><span class="pre">plot_runtime_core_graphs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.prepare_runtime_data"><code class="docutils literal notranslate"><span class="pre">prepare_runtime_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.read_csv_content"><code class="docutils literal notranslate"><span class="pre">read_csv_content()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.read_csv_header"><code class="docutils literal notranslate"><span class="pre">read_csv_header()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.postprocessing.save_dataframes"><code class="docutils literal notranslate"><span class="pre">save_dataframes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.process_logs">oscarp.process_logs module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.process_logs.delete_logs_folder"><code class="docutils literal notranslate"><span class="pre">delete_logs_folder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.process_logs.make_csv_table"><code class="docutils literal notranslate"><span class="pre">make_csv_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.process_logs.make_done_file"><code class="docutils literal notranslate"><span class="pre">make_done_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.process_logs.zip_logs"><code class="docutils literal notranslate"><span class="pre">zip_logs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.retrieve_logs">oscarp.retrieve_logs module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.calculate_throughput"><code class="docutils literal notranslate"><span class="pre">calculate_throughput()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.get_data_size"><code class="docutils literal notranslate"><span class="pre">get_data_size()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.get_kubectl_log"><code class="docutils literal notranslate"><span class="pre">get_kubectl_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.get_kubernetes_pod_list"><code class="docutils literal notranslate"><span class="pre">get_kubernetes_pod_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.get_oscar_log"><code class="docutils literal notranslate"><span class="pre">get_oscar_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.get_scar_log"><code class="docutils literal notranslate"><span class="pre">get_scar_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.get_timed_jobs_list"><code class="docutils literal notranslate"><span class="pre">get_timed_jobs_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.pull_jmeter_logs"><code class="docutils literal notranslate"><span class="pre">pull_jmeter_logs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.pull_lambda_logs"><code class="docutils literal notranslate"><span class="pre">pull_lambda_logs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.pull_logs"><code class="docutils literal notranslate"><span class="pre">pull_logs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.retrieve_logs.save_timelist_to_file"><code class="docutils literal notranslate"><span class="pre">save_timelist_to_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.run_manager">oscarp.run_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.duplicate_bucket"><code class="docutils literal notranslate"><span class="pre">duplicate_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.duplicate_bucket_sync"><code class="docutils literal notranslate"><span class="pre">duplicate_bucket_sync()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.get_input_files_count"><code class="docutils literal notranslate"><span class="pre">get_input_files_count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.get_jobs_list"><code class="docutils literal notranslate"><span class="pre">get_jobs_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.increment_sleep"><code class="docutils literal notranslate"><span class="pre">increment_sleep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.move_file_between_buckets"><code class="docutils literal notranslate"><span class="pre">move_file_between_buckets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.move_from_storage"><code class="docutils literal notranslate"><span class="pre">move_from_storage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.move_input_files_to_input_bucket"><code class="docutils literal notranslate"><span class="pre">move_input_files_to_input_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.move_input_files_to_s3_bucket"><code class="docutils literal notranslate"><span class="pre">move_input_files_to_s3_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.use_jmeter"><code class="docutils literal notranslate"><span class="pre">use_jmeter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.wait_interval"><code class="docutils literal notranslate"><span class="pre">wait_interval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.wait_lambda_completion"><code class="docutils literal notranslate"><span class="pre">wait_lambda_completion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.wait_oscar_service_completion"><code class="docutils literal notranslate"><span class="pre">wait_oscar_service_completion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.run_manager.wait_services_completion"><code class="docutils literal notranslate"><span class="pre">wait_services_completion()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp.utils">oscarp.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils._get_command_output"><code class="docutils literal notranslate"><span class="pre">_get_command_output()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.append_string_to_file"><code class="docutils literal notranslate"><span class="pre">append_string_to_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.auto_mkdir"><code class="docutils literal notranslate"><span class="pre">auto_mkdir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.configure_ssh_client"><code class="docutils literal notranslate"><span class="pre">configure_ssh_client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.create_new_file"><code class="docutils literal notranslate"><span class="pre">create_new_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.delete_directory"><code class="docutils literal notranslate"><span class="pre">delete_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.delete_file"><code class="docutils literal notranslate"><span class="pre">delete_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.dict_to_string"><code class="docutils literal notranslate"><span class="pre">dict_to_string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.ensure_slash_end"><code class="docutils literal notranslate"><span class="pre">ensure_slash_end()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.get_command_output_wrapped"><code class="docutils literal notranslate"><span class="pre">get_command_output_wrapped()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.get_private_key"><code class="docutils literal notranslate"><span class="pre">get_private_key()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.get_ssh_output"><code class="docutils literal notranslate"><span class="pre">get_ssh_output()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.get_valid_input"><code class="docutils literal notranslate"><span class="pre">get_valid_input()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.read_json"><code class="docutils literal notranslate"><span class="pre">read_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.read_yaml"><code class="docutils literal notranslate"><span class="pre">read_yaml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.show_debug_info"><code class="docutils literal notranslate"><span class="pre">show_debug_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.show_error"><code class="docutils literal notranslate"><span class="pre">show_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.show_external_error"><code class="docutils literal notranslate"><span class="pre">show_external_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.show_fatal_error"><code class="docutils literal notranslate"><span class="pre">show_fatal_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.show_warning"><code class="docutils literal notranslate"><span class="pre">show_warning()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.strip_ansi_from_string"><code class="docutils literal notranslate"><span class="pre">strip_ansi_from_string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.write_json"><code class="docutils literal notranslate"><span class="pre">write_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.write_list_of_strings_to_file"><code class="docutils literal notranslate"><span class="pre">write_list_of_strings_to_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="oscarp.html#oscarp.utils.write_yaml"><code class="docutils literal notranslate"><span class="pre">write_yaml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscarp.html#module-oscarp">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-coordinator">
+<span id="coordinator-module"></span><h2>coordinator module<a class="headerlink" href="#module-coordinator" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="coordinator.main">
+<span class="sig-prename descclassname"><span class="pre">coordinator.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_dry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coordinator.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coordinator.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-deployment_generator">
+<span id="deployment-generator-module"></span><h2>deployment_generator module<a class="headerlink" href="#module-deployment_generator" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="deployment_generator.check_match_combined_used_resources">
+<span class="sig-prename descclassname"><span class="pre">deployment_generator.</span></span><span class="sig-name descname"><span class="pre">check_match_combined_used_resources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">combined_resources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_resources</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deployment_generator.html#check_match_combined_used_resources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deployment_generator.check_match_combined_used_resources" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deployment_generator.get_deployments">
+<span class="sig-prename descclassname"><span class="pre">deployment_generator.</span></span><span class="sig-name descname"><span class="pre">get_deployments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/deployment_generator.html#get_deployments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deployment_generator.get_deployments" title="Permalink to this definition"></a></dt>
+<dd><p>From the testing units, generates all the possible combinations of them; these are the possible deployments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deployment_generator.get_resources_combinations">
+<span class="sig-prename descclassname"><span class="pre">deployment_generator.</span></span><span class="sig-name descname"><span class="pre">get_resources_combinations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resources</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deployment_generator.html#get_resources_combinations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deployment_generator.get_resources_combinations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deployment_generator.get_services_to_test">
+<span class="sig-prename descclassname"><span class="pre">deployment_generator.</span></span><span class="sig-name descname"><span class="pre">get_services_to_test</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/deployment_generator.html#get_services_to_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deployment_generator.get_services_to_test" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of services to test given the current deployment, skipping the ones already tested in previous      deployments, and adding in the alternative versions, if any.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of services (Service class)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deployment_generator.get_testing_units">
+<span class="sig-prename descclassname"><span class="pre">deployment_generator.</span></span><span class="sig-name descname"><span class="pre">get_testing_units</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/deployment_generator.html#get_testing_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deployment_generator.get_testing_units" title="Permalink to this definition"></a></dt>
+<dd><p>This function lists all the available containers, divided in groups, BUT partitions are grouped together.
+Component_groups contains a list for each group (component1, component2, …), and each list contains all the      testing_units for that group; a testing_unit is just a way to keep together all the correlated partitions.
+An example of testing unit for a base component is [<a class="reference external" href="mailto:'C1&#37;&#52;&#48;VM1">‘C1<span>&#64;</span>VM1</a>’], an example for a partitioned component      is [<a class="reference external" href="mailto:'C1P1&#46;1&#37;&#52;&#48;VM1">‘C1P1<span>&#46;</span>1<span>&#64;</span>VM1</a>’, <a class="reference external" href="mailto:'C1P1&#46;2&#37;&#52;&#48;VM1">‘C1P1<span>&#46;</span>2<span>&#64;</span>VM1</a>’]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>container_groups, list of lists</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deployment_generator.has_completes_results">
+<span class="sig-prename descclassname"><span class="pre">deployment_generator.</span></span><span class="sig-name descname"><span class="pre">has_completes_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deployment_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deployment_generator.html#has_completes_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deployment_generator.has_completes_results" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deployment_generator.make_deployments_summary">
+<span class="sig-prename descclassname"><span class="pre">deployment_generator.</span></span><span class="sig-name descname"><span class="pre">make_deployments_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/deployment_generator.html#make_deployments_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deployment_generator.make_deployments_summary" title="Permalink to this definition"></a></dt>
+<dd><p>Prints the list of the deployments, and also writes it to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deployment_generator.make_resources_requirements">
+<span class="sig-prename descclassname"><span class="pre">deployment_generator.</span></span><span class="sig-name descname"><span class="pre">make_resources_requirements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/deployment_generator.html#make_resources_requirements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deployment_generator.make_resources_requirements" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the requirements of each resource in terms of nodes, given the hardware of the resource, the      requirements of the containers, and the number of parallel instances to be supported.
+The calculations are done taking into account a 10% headroom for the OS in terms of both CPU and RAM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deployment_generator.reorder_deployments">
+<span class="sig-prename descclassname"><span class="pre">deployment_generator.</span></span><span class="sig-name descname"><span class="pre">reorder_deployments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deployments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deployment_generator.html#reorder_deployments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deployment_generator.reorder_deployments" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-global_parameters">
+<span id="global-parameters-module"></span><h2>global_parameters module<a class="headerlink" href="#module-global_parameters" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="global_parameters.make_campaign_dir">
+<span class="sig-prename descclassname"><span class="pre">global_parameters.</span></span><span class="sig-name descname"><span class="pre">make_campaign_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/global_parameters.html#make_campaign_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#global_parameters.make_campaign_dir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="global_parameters.set_application_dir">
+<span class="sig-prename descclassname"><span class="pre">global_parameters.</span></span><span class="sig-name descname"><span class="pre">set_application_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/global_parameters.html#set_application_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#global_parameters.set_application_dir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="global_parameters.set_current_deployment">
+<span class="sig-prename descclassname"><span class="pre">global_parameters.</span></span><span class="sig-name descname"><span class="pre">set_current_deployment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deployment_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/global_parameters.html#set_current_deployment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#global_parameters.set_current_deployment" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="global_parameters.set_current_work_dir">
+<span class="sig-prename descclassname"><span class="pre">global_parameters.</span></span><span class="sig-name descname"><span class="pre">set_current_work_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/global_parameters.html#set_current_work_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#global_parameters.set_current_work_dir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-infrastructure_manager">
+<span id="infrastructure-manager-module"></span><h2>infrastructure_manager module<a class="headerlink" href="#module-infrastructure_manager" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager._generate_modified_candidate_files">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">_generate_modified_candidate_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_deploy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#_generate_modified_candidate_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager._generate_modified_candidate_files" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a modified version of candidate_deployments, containing (only) the components that are needed for the      current test; this file is needed by the Toscarizer to generate the correct TOSCA files.
+Additionally, it returns the names of the components that need to be deployed.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager._generate_modified_dag">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">_generate_modified_dag</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#_generate_modified_dag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager._generate_modified_dag" title="Permalink to this definition"></a></dt>
+<dd><p>Similar to the previous function, it creates a customized version of the application_dag containing whatever needs      to be tested; the file is used by the Toscarizer.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.adjust_physical_infrastructures_configuration">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">adjust_physical_infrastructures_configuration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#adjust_physical_infrastructures_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.adjust_physical_infrastructures_configuration" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.clean_and_rename_tosca">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">clean_and_rename_tosca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tosca_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_requirements</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#clean_and_rename_tosca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.clean_and_rename_tosca" title="Permalink to this definition"></a></dt>
+<dd><p>This function “cleans” the Tosca file by removing the section related to OSCAR and its services, since those will      be deployed by OSCAR-P instead.
+It also selects the correct number of nodes, sets the domain name, and renames the file as its associated resource      (e.g. VM1.yaml).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.clean_and_rename_tosca_files">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">clean_and_rename_tosca_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_deploy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tosca_files</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#clean_and_rename_tosca_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.clean_and_rename_tosca_files" title="Permalink to this definition"></a></dt>
+<dd><p>Calls clean_and_rename_tosca() for each tosca_files.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.configure_executables">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">configure_executables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#configure_executables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.configure_executables" title="Permalink to this definition"></a></dt>
+<dd><p>This function configures the executables (MC and oscar_cli) used by OSCAR-P according to the credentials      retrieved from IM.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.configure_jmeter_cluster">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">configure_jmeter_cluster</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#configure_jmeter_cluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.configure_jmeter_cluster" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.create_virtual_infrastructures">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">create_virtual_infrastructures</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#create_virtual_infrastructures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.create_virtual_infrastructures" title="Permalink to this definition"></a></dt>
+<dd><p>Scenario 1: starting from zero, assumes “virtual_infrastructures.json” not present, or present but the      infrastructures no longer exist on IM; in both cases, reset virtual_infrastructures as {}, then delete all on IM      with delete_unused_virtual_infrastructures.
+Scenario 2: resuming interrupted, checks that “virtual_infrastructures.json” is present and its infrastructures      are still on IM: if yes, delete_unused_virtual_infrastructures anyway, nothing bad should happen, if not, proceed      as for scenario 1.
+Scenario 3: changing deployment, “virtual_infrastructures.json” will be loaded but it won’t change anything,      proceed as usual.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.delete_all_virtual_infrastructures">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">delete_all_virtual_infrastructures</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#delete_all_virtual_infrastructures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.delete_all_virtual_infrastructures" title="Permalink to this definition"></a></dt>
+<dd><p>This function deletes ALL virtual infrastructures, without checks.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.delete_unused_virtual_infrastructures">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">delete_unused_virtual_infrastructures</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#delete_unused_virtual_infrastructures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.delete_unused_virtual_infrastructures" title="Permalink to this definition"></a></dt>
+<dd><p>This function deletes unused virtual infrastructures; first it checks if there are infrastructures deployed on      IM but not tracked by gp.virtual_infrastructures, then checks if there are non-existing infrastructures still      tracked in gp.virtual_infrastructures, and finally checks if there are deployed and tracked infrastructures      that are no longer needed.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.delete_virtual_infrastructure">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">delete_virtual_infrastructure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inf_url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#delete_virtual_infrastructure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.delete_virtual_infrastructure" title="Permalink to this definition"></a></dt>
+<dd><p>This function deletes a virtual infrastructure.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.deploy_virtual_infrastructure">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">deploy_virtual_infrastructure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tosca_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inf_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#deploy_virtual_infrastructure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.deploy_virtual_infrastructure" title="Permalink to this definition"></a></dt>
+<dd><p>This function calls the IM API to deploy (or update) all the virtual infrastructure.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.generate_tosca">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">generate_tosca</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#generate_tosca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.generate_tosca" title="Permalink to this definition"></a></dt>
+<dd><p>Given the original of modified files, this function uses the Toscarizer to generate the required Tosca files.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.get_all_infrastructures">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">get_all_infrastructures</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#get_all_infrastructures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.get_all_infrastructures" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns a list of all infrastructures deployed on IM.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.get_infrastructures_outputs">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">get_infrastructures_outputs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#get_infrastructures_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.get_infrastructures_outputs" title="Permalink to this definition"></a></dt>
+<dd><p>This function retrieves the outputs (endpoints and credentials) from IM for every virtual resource and      stores them in the virtual_infrastructures.json file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.get_node_list">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">get_node_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#get_node_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.get_node_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.get_outputs">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">get_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inf_url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#get_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.get_outputs" title="Permalink to this definition"></a></dt>
+<dd><p>This function retrieves the outputs (endpoints and credentials) from IM for a single virtual resource.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.get_state">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">get_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inf_url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#get_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.get_state" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns the state of the deployment of a virtual infrastructure.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.update_tosca">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">update_tosca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tosca_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_requirements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_base_run_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#update_tosca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.update_tosca" title="Permalink to this definition"></a></dt>
+<dd><p>This function updates the Tosca file of a virtual infrastructure by setting the correct number of nodes.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.update_virtual_infrastructures">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">update_virtual_infrastructures</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#update_virtual_infrastructures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.update_virtual_infrastructures" title="Permalink to this definition"></a></dt>
+<dd><p>This function updates the virtual infrastructures, usually by reducing its nodes.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="infrastructure_manager.wait_for_infrastructure_deployment">
+<span class="sig-prename descclassname"><span class="pre">infrastructure_manager.</span></span><span class="sig-name descname"><span class="pre">wait_for_infrastructure_deployment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/infrastructure_manager.html#wait_for_infrastructure_deployment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#infrastructure_manager.wait_for_infrastructure_deployment" title="Permalink to this definition"></a></dt>
+<dd><p>This function waits for the deployment of the virtual infrastructure, checking on their status periodically.
+If an error is detected, the execution stops.</p>
+</dd></dl>
+
+</section>
+<section id="module-input_files_parser">
+<span id="input-files-parser-module"></span><h2>input_files_parser module<a class="headerlink" href="#module-input_files_parser" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser._check_device_constraints">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">_check_device_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_component_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu_requirement</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#_check_device_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser._check_device_constraints" title="Permalink to this definition"></a></dt>
+<dd><p>Ensures that the memory and GPU constraints between the annotations.yaml and the candidate_deployments.yaml are      consistent.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser._get_actual_partitions">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">_get_actual_partitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#_get_actual_partitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser._get_actual_partitions" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns an array containing the partition groups that match the component name, which  is needed to      turn “partitionX_1” into “partition1_1”.
+The candidate_deployments.yaml file has no knowledge about the actual generated partitions, so we need to get this      information from the component_partitions.yaml file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser._get_bucket_name_for_lambda">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">_get_bucket_name_for_lambda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#_get_bucket_name_for_lambda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser._get_bucket_name_for_lambda" title="Permalink to this definition"></a></dt>
+<dd><p>Reads the name of the bucket of the AWS resource from the physical_nodes.yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>resource_name</strong> (<em>str</em>) – name of the AWS resource</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser._get_physical_nodes">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">_get_physical_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#_get_physical_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser._get_physical_nodes" title="Permalink to this definition"></a></dt>
+<dd><p>Parses the physical_nodes.yaml file and extracts the info related to the SSH front node access, so IP, port and      user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary with the parsed information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser._set_containers">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">_set_containers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">containers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#_set_containers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser._set_containers" title="Permalink to this definition"></a></dt>
+<dd><p>Given a component, it adds a Container class to it for each of the containers listed under that component in      candidate_deployments.yaml.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parent_component</strong> (<a class="reference internal" href="classes.html#classes.Component.Component" title="classes.Component.Component"><em>Component</em></a>) – component to add containers to</p></li>
+<li><p><strong>component_key</strong> (<em>str</em>) – component key (e.g. component1)</p></li>
+<li><p><strong>containers</strong> (<em>dict</em>) – containers dictionary as extracted from candidate_deployments.yaml</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser.check_parallelism_is_in_decreasing_order">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">check_parallelism_is_in_decreasing_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parallelism</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#check_parallelism_is_in_decreasing_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser.check_parallelism_is_in_decreasing_order" title="Permalink to this definition"></a></dt>
+<dd><p>Ensures that the parallelism array is listed in decreasing order, if not it interrupts the execution and shows      an error.
+If the parallelism is listed in increasing order, the testing takes more time because the VMs need to be created      as needed, and that takes 15 minutes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parallelism</strong> (<em>list</em>) – parallelism array</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser.get_components">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">get_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#get_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser.get_components" title="Permalink to this definition"></a></dt>
+<dd><p>TLDR: get all the components and their docker images from candidate_deployments.yaml.
+This functions reads the components from candidate_deployments.yaml, saves them in Component objects, and then     saves them as dictionary indexed by group and by name.
+As an example, components_groups is organized as follows: [ component1 -&gt; blurry-faces-onnx -&gt;      blurry-faces-onnx.containers -&gt; <a class="reference external" href="mailto:C1&#37;&#52;&#48;VM1">C1<span>&#64;</span>VM1</a> -&gt; image: blurry-faces-onnx_base_amd641_amd64:latest ].
+Basically it’s groups -&gt; ACTUAL components -&gt; containers -&gt; appropriate (single) docker image.
+Component_names instead skips a step and indexes them directly by name (e.g. blurry-faces-onnx,      blurry-faces-onnx_partition1_1, …)
+Finally, containers is a dictionary indexed by unit (e.g. <a class="reference external" href="mailto:C1&#37;&#52;&#48;VM2">C1<span>&#64;</span>VM2</a>, <a class="reference external" href="mailto:C1PX&#46;1&#37;&#52;&#48;VM2">C1PX<span>&#46;</span>1<span>&#64;</span>VM2</a>, …).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser.get_resources">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">get_resources</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#get_resources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser.get_resources" title="Permalink to this definition"></a></dt>
+<dd><p>Reads the resources from the candidate_resources.yaml file and reorganizes them as Resource classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser.get_run_parameters">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">get_run_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#get_run_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser.get_run_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>Reads the run_parameters.yaml file and sets the run_parameters and component_parallelism global variables.
+Additionally it makes sure that the parallelism lists are of the same length and in decreasing order.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser.set_testing_parameters">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">set_testing_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#set_testing_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser.set_testing_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>Adds the parallelism field and the time distribution (the latter needed for single service testing) to the      Component classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_files_parser.shorten_key">
+<span class="sig-prename descclassname"><span class="pre">input_files_parser.</span></span><span class="sig-name descname"><span class="pre">shorten_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/input_files_parser.html#shorten_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#input_files_parser.shorten_key" title="Permalink to this definition"></a></dt>
+<dd><p>Receives a component key and returns a shortened version (e.g. component1 -&gt; C1, component1_partitionX_1 -&gt; C1P1.1).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>component_key</strong> (<em>str</em>) – component key</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>shortened component key</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-lambda_manager">
+<span id="lambda-manager-module"></span><h2>lambda_manager module<a class="headerlink" href="#module-lambda_manager" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="lambda_manager._apply_fdl_configuration_scar">
+<span class="sig-prename descclassname"><span class="pre">lambda_manager.</span></span><span class="sig-name descname"><span class="pre">_apply_fdl_configuration_scar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lambda_manager.html#_apply_fdl_configuration_scar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lambda_manager._apply_fdl_configuration_scar" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lambda_manager.generate_scar_fdl_configuration">
+<span class="sig-prename descclassname"><span class="pre">lambda_manager.</span></span><span class="sig-name descname"><span class="pre">generate_scar_fdl_configuration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lambda_manager.html#generate_scar_fdl_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lambda_manager.generate_scar_fdl_configuration" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lambda_manager.generate_script_lambda">
+<span class="sig-prename descclassname"><span class="pre">lambda_manager.</span></span><span class="sig-name descname"><span class="pre">generate_script_lambda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lambda_manager.html#generate_script_lambda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lambda_manager.generate_script_lambda" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lambda_manager.remove_all_lambdas">
+<span class="sig-prename descclassname"><span class="pre">lambda_manager.</span></span><span class="sig-name descname"><span class="pre">remove_all_lambdas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lambda_manager.html#remove_all_lambdas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lambda_manager.remove_all_lambdas" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lambda_manager.remove_s3_buckets">
+<span class="sig-prename descclassname"><span class="pre">lambda_manager.</span></span><span class="sig-name descname"><span class="pre">remove_s3_buckets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lambda_manager.html#remove_s3_buckets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lambda_manager.remove_s3_buckets" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lambda_manager.setup_scar">
+<span class="sig-prename descclassname"><span class="pre">lambda_manager.</span></span><span class="sig-name descname"><span class="pre">setup_scar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lambda_manager.html#setup_scar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lambda_manager.setup_scar" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lambda_manager.verify_correct_scar_deployment">
+<span class="sig-prename descclassname"><span class="pre">lambda_manager.</span></span><span class="sig-name descname"><span class="pre">verify_correct_scar_deployment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lambda_manager.html#verify_correct_scar_deployment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lambda_manager.verify_correct_scar_deployment" title="Permalink to this definition"></a></dt>
+<dd><p>after applying the FDL file, makes sure that all the required services are deployed</p>
+</dd></dl>
+
+</section>
+<section id="module-results_maker">
+<span id="results-maker-module"></span><h2>results_maker module<a class="headerlink" href="#module-results_maker" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.find_actual_parallelism_run">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">find_actual_parallelism_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#find_actual_parallelism_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.find_actual_parallelism_run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.fix_time_table_interval">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">fix_time_table_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#fix_time_table_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.fix_time_table_interval" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.generate_response_throughput_graphs">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">generate_response_throughput_graphs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#generate_response_throughput_graphs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.generate_response_throughput_graphs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.get_actual_parallelism_list">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">get_actual_parallelism_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#get_actual_parallelism_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.get_actual_parallelism_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.get_first_job">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">get_first_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timelist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#get_first_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.get_first_job" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.get_last_job">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">get_last_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timelist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#get_last_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.get_last_job" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.get_run_runtime">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">get_run_runtime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#get_run_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.get_run_runtime" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.get_run_runtime_full">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">get_run_runtime_full</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#get_run_runtime_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.get_run_runtime_full" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.get_runtime_of_job">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">get_runtime_of_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#get_runtime_of_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.get_runtime_of_job" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_dataframe_async">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_dataframe_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_dataframe_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_dataframe_async" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_dataframe_async_run">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_dataframe_async_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_dataframe_async_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_dataframe_async_run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_dataframe_sync">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_dataframe_sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_dataframe_sync"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_dataframe_sync" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_dataframe_sync_run">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_dataframe_sync_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_dataframe_sync_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_dataframe_sync_run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_gantts">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_gantts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_gantts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_gantts" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_loads">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_loads</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_loads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_loads" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_results">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_results" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_results_for_full">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_results_for_full</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_results_for_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_results_for_full" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_results_for_jmeter">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_results_for_jmeter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_results_for_jmeter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_results_for_jmeter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_results_for_unit">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_results_for_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_results_for_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_results_for_unit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_runtime_runs_parallelism_graph">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_runtime_runs_parallelism_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_runtime_runs_parallelism_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_runtime_runs_parallelism_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.make_runtime_runs_parallelism_graph_full">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">make_runtime_runs_parallelism_graph_full</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#make_runtime_runs_parallelism_graph_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.make_runtime_runs_parallelism_graph_full" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.ready_data_for_gantt">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">ready_data_for_gantt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#ready_data_for_gantt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.ready_data_for_gantt" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.ready_data_for_histogram">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">ready_data_for_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_runs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#ready_data_for_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.ready_data_for_histogram" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.ready_dataframes_of_component">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">ready_dataframes_of_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parallelism</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetitions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#ready_dataframes_of_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.ready_dataframes_of_component" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.ready_dataframes_of_full_workflow">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">ready_dataframes_of_full_workflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parallelism</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetitions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#ready_dataframes_of_full_workflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.ready_dataframes_of_full_workflow" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="results_maker.remove_outliers_iqr">
+<span class="sig-prename descclassname"><span class="pre">results_maker.</span></span><span class="sig-name descname"><span class="pre">remove_outliers_iqr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/results_maker.html#remove_outliers_iqr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#results_maker.remove_outliers_iqr" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-run_coordinator">
+<span id="run-coordinator-module"></span><h2>run_coordinator module<a class="headerlink" href="#module-run_coordinator" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="run_coordinator.make_current_services">
+<span class="sig-prename descclassname"><span class="pre">run_coordinator.</span></span><span class="sig-name descname"><span class="pre">make_current_services</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_coordinator.html#make_current_services"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_coordinator.make_current_services" title="Permalink to this definition"></a></dt>
+<dd><p>transforms the unit into sequential services, by adding aptly named buckets and other useful info</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_coordinator.make_oscar_p_input_file">
+<span class="sig-prename descclassname"><span class="pre">run_coordinator.</span></span><span class="sig-name descname"><span class="pre">make_oscar_p_input_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_coordinator.html#make_oscar_p_input_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_coordinator.make_oscar_p_input_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_coordinator.make_oscar_p_input_file_single">
+<span class="sig-prename descclassname"><span class="pre">run_coordinator.</span></span><span class="sig-name descname"><span class="pre">make_oscar_p_input_file_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_coordinator.html#make_oscar_p_input_file_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_coordinator.make_oscar_p_input_file_single" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_coordinator.run_scheduler">
+<span class="sig-prename descclassname"><span class="pre">run_coordinator.</span></span><span class="sig-name descname"><span class="pre">run_scheduler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_coordinator.html#run_scheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_coordinator.run_scheduler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to OSCAR-P’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classes.html" class="btn btn-neutral float-right" title="classes package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

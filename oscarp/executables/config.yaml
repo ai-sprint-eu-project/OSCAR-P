@@ -1,0 +1,30 @@
+oscar:
+  oscar-RasPi:
+    endpoint: https://graspi.im.grycap.net/
+    auth_user: oscar
+    auth_password: oscar-aisprint-2021
+    ssl_verify: false
+    memory: 256Mi
+    log_level: INFO
+  oscar-VM1:
+    endpoint: https://quirky-kowalevski6.im.grycap.net/
+    auth_user: oscar
+    auth_password: oscar-aisprint-2022
+    ssl_verify: false
+    memory: 256Mi
+    log_level: INFO
+  oscar-VM3:
+    endpoint: https://oscar-cluster-v0s8x4nx.polimi-aisprint.click/
+    auth_user: oscar
+    auth_password: ndn5hi6k7nmkvkhq
+    ssl_verify: true
+    memory: 256Mi
+    log_level: INFO
+  oscar-VM4:
+    endpoint: https://oscar-cluster-m8h8uott.polimi-aisprint.click/
+    auth_user: oscar
+    auth_password: 8dythnltc2djdg7e
+    ssl_verify: true
+    memory: 256Mi
+    log_level: INFO
+default: oscar-VM4

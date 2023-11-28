@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>run_coordinator &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">run_coordinator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for run_coordinator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+<span class="kn">from</span> <span class="nn">classes.Component</span> <span class="kn">import</span> <span class="n">generalize_unit_id</span>
+<span class="kn">from</span> <span class="nn">classes.Service</span> <span class="kn">import</span> <span class="n">Service</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">def old_make_oscar_p_input_file(deployment, service_number=0, is_single_service=False):</span>
+
+<span class="sd">    services = []</span>
+<span class="sd">    clusters = []</span>
+<span class="sd">    clusters_dict = {}</span>
+
+<span class="sd">    run_parameters = copy.deepcopy(gp.run_parameters)</span>
+
+<span class="sd">    i = service_number</span>
+
+<span class="sd">    if is_single_service:</span>
+<span class="sd">        run_parameters[&quot;run&quot;][&quot;final_processing&quot;] = True</span>
+<span class="sd">    else:</span>
+<span class="sd">        run_parameters[&quot;run&quot;][&quot;final_processing&quot;] = False</span>
+
+<span class="sd">    run_parameters[&quot;run&quot;][&quot;stop_at_run&quot;] = gp.current_base_index + 1</span>
+
+<span class="sd">    if is_single_service:</span>
+<span class="sd">        run_parameters[&quot;input_files&quot;][&quot;storage_bucket&quot;] = &quot;bucket&quot; + str(i)</span>
+<span class="sd">        run_parameters[&quot;input_files&quot;][&quot;filename&quot;] = None</span>
+<span class="sd">    else:  # if it&#39;s full workflow</span>
+<span class="sd">        # run_parameters[&quot;run&quot;][&quot;repetitions&quot;] = 1  # todo keep?</span>
+<span class="sd">        pass</span>
+
+<span class="sd">    for s in deployment:  # single components in deployments</span>
+<span class="sd">        name = gp.testing_components[s][&quot;name&quot;].replace(&#39;_&#39;, &#39;-&#39;)</span>
+<span class="sd">        r = s.split(&quot;@&quot;)[1]</span>
+
+<span class="sd">        is_lambda = (r == &quot;AWS Lambda&quot;)</span>
+
+<span class="sd">        if is_single_service:  # lambdas are never tested as single services</span>
+<span class="sd">            input_bucket = &quot;temp&quot; + str(i)</span>
+<span class="sd">            output_bucket = &quot;trash&quot; + str(i)</span>
+<span class="sd">        else:</span>
+<span class="sd">            input_bucket = &quot;bucket&quot; + str(i)</span>
+<span class="sd">            output_bucket = &quot;bucket&quot; + str(i + 1)</span>
+
+<span class="sd">        services.append({name: {</span>
+<span class="sd">            &quot;cluster&quot;: r,</span>
+<span class="sd">            &quot;image&quot;: gp.images[s][&quot;image&quot;],</span>
+<span class="sd">            &quot;input_bucket&quot;: input_bucket,</span>
+<span class="sd">            &quot;output_bucket&quot;: output_bucket,</span>
+<span class="sd">            &quot;cpu&quot;: gp.images[s][&quot;cpu&quot;],</span>
+<span class="sd">            &quot;memory&quot;: gp.images[s][&quot;memory&quot;],</span>
+<span class="sd">            &quot;parallelism&quot;: gp.testing_components[s][&quot;parallelism&quot;],</span>
+<span class="sd">            &quot;is_lambda&quot;: is_lambda</span>
+<span class="sd">        }})</span>
+
+<span class="sd">        # easier to use a dict here to avoid duplications</span>
+<span class="sd">        if r not in clusters_dict.keys():</span>
+<span class="sd">            clusters_dict[r] = gp.resources[r]</span>
+
+<span class="sd">        i += 1</span>
+
+<span class="sd">    # converts the dict to a list</span>
+<span class="sd">    for c in clusters_dict.keys():</span>
+<span class="sd">        clusters_dict[c][&quot;nodes&quot;] = gp.clusters_node_requirements[c][&quot;nodes&quot;]</span>
+<span class="sd">        clusters.append({c: clusters_dict[c]})</span>
+
+<span class="sd">    oscar_p_input_file = {</span>
+<span class="sd">        &quot;services&quot;: services,</span>
+<span class="sd">        &quot;clusters&quot;: clusters</span>
+<span class="sd">    }</span>
+
+<span class="sd">    # oscar_p_input_file = oscar_p_input_file | run_parameters</span>
+<span class="sd">    oscar_p_input_file.update(run_parameters)</span>
+
+<span class="sd">    oscar_p_input_file = {&quot;configuration&quot;: oscar_p_input_file}</span>
+
+<span class="sd">    with open(&quot;input.yaml&quot;, &quot;w&quot;) as file:</span>
+<span class="sd">        yaml.dump(oscar_p_input_file, file, sort_keys=False)</span>
+
+<span class="sd">    # input(&quot;&gt;_&quot;)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="make_oscar_p_input_file"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#run_coordinator.make_oscar_p_input_file">[docs]</a><span class="k">def</span> <span class="nf">make_oscar_p_input_file</span><span class="p">():</span>
+
+    <span class="n">run_parameters</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">)</span>
+    <span class="c1"># run_parameters[&quot;run&quot;][&quot;final_processing&quot;] = is_last_run</span>
+    <span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;stop_at_run&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_base_index</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">clusters_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">unit</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># easier to use a dict here to avoid duplications</span>
+
+        <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">clusters_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">temp_resource</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+
+            <span class="n">clusters_dict</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;is_physical&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">is_physical</span><span class="p">(),</span>
+                <span class="s2">&quot;oscarcli_alias&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">oscarcli_alias</span><span class="p">,</span>
+                <span class="s2">&quot;storage_provider&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">storage_provider</span><span class="p">,</span>
+                <span class="s2">&quot;storage_provider_alias&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">storage_provider_alias</span><span class="p">,</span>
+                <span class="s2">&quot;ssh&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">ssh</span><span class="p">,</span>
+                <span class="s2">&quot;total_nodes&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;max_cpu_cores&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">max_cpu_cores</span><span class="p">,</span>
+                <span class="s2">&quot;max_memory_mb&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">max_memory_mb</span>
+            <span class="p">}</span>
+
+    <span class="c1"># converts the dict to a list</span>
+    <span class="n">clusters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clusters_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">clusters_dict</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">clusters</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">c</span><span class="p">:</span> <span class="n">clusters_dict</span><span class="p">[</span><span class="n">c</span><span class="p">]})</span>
+
+    <span class="c1"># converts the services list to the correct format</span>
+    <span class="n">services</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">:</span>
+        <span class="n">services</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">):</span> <span class="n">s</span><span class="p">})</span>
+
+    <span class="n">oscar_p_input_file</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;services&quot;</span><span class="p">:</span> <span class="n">services</span><span class="p">,</span>
+        <span class="s2">&quot;clusters&quot;</span><span class="p">:</span> <span class="n">clusters</span>
+    <span class="p">}</span>
+
+    <span class="c1"># oscar_p_input_file = oscar_p_input_file | run_parameters</span>
+    <span class="n">oscar_p_input_file</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">run_parameters</span><span class="p">)</span>
+
+    <span class="n">oscar_p_input_file</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;configuration&quot;</span><span class="p">:</span> <span class="n">oscar_p_input_file</span><span class="p">}</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>  <span class="c1"># todo this will have to be written inside current_deployment_dir instead</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">oscar_p_input_file</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_oscar_p_input_file_single"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#run_coordinator.make_oscar_p_input_file_single">[docs]</a><span class="k">def</span> <span class="nf">make_oscar_p_input_file_single</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">service_number</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="n">services</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">clusters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">clusters_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">run_parameters</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">)</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="n">service_number</span>
+
+    <span class="c1"># run_parameters[&quot;run&quot;][&quot;final_processing&quot;] = is_last_run</span>
+    <span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;stop_at_run&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_base_index</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;input_files&quot;</span><span class="p">][</span><span class="s2">&quot;storage_bucket&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;bucket&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;input_files&quot;</span><span class="p">][</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">container_id</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">component</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">service</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">is_lambda</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span> <span class="o">==</span> <span class="s2">&quot;AWS Lambda&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_lambda</span><span class="p">:</span>
+        <span class="n">input_bucket</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">[</span><span class="n">service_number</span><span class="p">][</span><span class="s2">&quot;input_bucket&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">input_bucket</span> <span class="o">=</span> <span class="s2">&quot;temp&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">output_bucket</span> <span class="o">=</span> <span class="s2">&quot;trash&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">container</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">service</span><span class="p">]</span>
+
+    <span class="n">services</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;cluster&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span>
+        <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">container</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+        <span class="s2">&quot;input_bucket&quot;</span><span class="p">:</span> <span class="n">input_bucket</span><span class="p">,</span>
+        <span class="s2">&quot;output_bucket&quot;</span><span class="p">:</span> <span class="n">output_bucket</span><span class="p">,</span>
+        <span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="n">container</span><span class="o">.</span><span class="n">cpu</span><span class="p">,</span>
+        <span class="s2">&quot;memory&quot;</span><span class="p">:</span> <span class="n">container</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span>
+        <span class="s2">&quot;parallelism&quot;</span><span class="p">:</span> <span class="n">container</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parallelism</span><span class="p">,</span>
+        <span class="s2">&quot;is_lambda&quot;</span><span class="p">:</span> <span class="n">is_lambda</span>
+    <span class="p">}})</span>
+
+    <span class="c1"># easier to use a dict here to avoid duplications</span>
+    <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">clusters_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">temp_resource</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+
+        <span class="n">clusters_dict</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;is_physical&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">is_physical</span><span class="p">(),</span>
+            <span class="s2">&quot;oscarcli_alias&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">oscarcli_alias</span><span class="p">,</span>
+            <span class="s2">&quot;storage_provider&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">storage_provider</span><span class="p">,</span>
+            <span class="s2">&quot;storage_provider_alias&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">storage_provider_alias</span><span class="p">,</span>
+            <span class="s2">&quot;ssh&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">ssh</span><span class="p">,</span>
+            <span class="s2">&quot;total_nodes&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;max_cpu_cores&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">max_cpu_cores</span><span class="p">,</span>
+            <span class="s2">&quot;max_memory_mb&quot;</span><span class="p">:</span> <span class="n">temp_resource</span><span class="o">.</span><span class="n">max_memory_mb</span>
+        <span class="p">}</span>
+
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># converts the dict to a list</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clusters_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">clusters_dict</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">clusters</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">c</span><span class="p">:</span> <span class="n">clusters_dict</span><span class="p">[</span><span class="n">c</span><span class="p">]})</span>
+
+    <span class="n">oscar_p_input_file</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;services&quot;</span><span class="p">:</span> <span class="n">services</span><span class="p">,</span>
+        <span class="s2">&quot;clusters&quot;</span><span class="p">:</span> <span class="n">clusters</span>
+    <span class="p">}</span>
+
+    <span class="c1"># oscar_p_input_file = oscar_p_input_file | run_parameters</span>
+    <span class="n">oscar_p_input_file</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">run_parameters</span><span class="p">)</span>
+
+    <span class="n">oscar_p_input_file</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;configuration&quot;</span><span class="p">:</span> <span class="n">oscar_p_input_file</span><span class="p">}</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">oscar_p_input_file</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_current_services"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#run_coordinator.make_current_services">[docs]</a><span class="k">def</span> <span class="nf">make_current_services</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    transforms the unit into sequential services, by adding aptly named buckets and other useful info</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">current_services_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">has_lambdas</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">:</span>  <span class="c1"># single components in deployments</span>
+
+        <span class="n">container</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">generalize_unit_id</span><span class="p">(</span><span class="n">unit</span><span class="p">)]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        r = unit.split(&quot;@&quot;)[1]</span>
+<span class="sd">        is_lambda = gp.resources[r].is_lambda()</span>
+
+<span class="sd">        input_bucket = &quot;bucket&quot; + str(i)</span>
+<span class="sd">        output_bucket = &quot;bucket&quot; + str(i + 1)</span>
+
+<span class="sd">        if is_lambda:</span>
+<span class="sd">            s3_main_bucket_name = gp.resources[r].bucket_name</span>
+<span class="sd">            input_bucket = s3_main_bucket_name + &quot;/&quot;</span>
+<span class="sd">            output_bucket = s3_main_bucket_name + &quot;/&quot;</span>
+<span class="sd">            gp.has_lambdas = True</span>
+
+<span class="sd">        current_service = {</span>
+<span class="sd">            &quot;unit&quot;: unit,</span>
+<span class="sd">            &quot;name&quot;: name,</span>
+<span class="sd">            &quot;cluster&quot;: r,</span>
+<span class="sd">            &quot;image&quot;: gp.containers[generalize_key(unit)].image,</span>
+<span class="sd">            &quot;input_bucket_index&quot;: i,</span>
+<span class="sd">            &quot;input_bucket&quot;: input_bucket,</span>
+<span class="sd">            &quot;output_bucket&quot;: output_bucket,</span>
+<span class="sd">            &quot;storage_provider_alias&quot;: gp.resources[r].storage_provider_alias,</span>
+<span class="sd">            &quot;oscarcli_alias&quot;: gp.resources[r].oscarcli_alias,</span>
+<span class="sd">            &quot;cpu&quot;: gp.containers[generalize_key(unit)].cpu,</span>
+<span class="sd">            &quot;memory&quot;: gp.containers[generalize_key(unit)].memory,</span>
+<span class="sd">            &quot;parallelism&quot;: gp.containers[generalize_key(unit)].parent.parallelism,</span>
+<span class="sd">            &quot;is_lambda&quot;: is_lambda</span>
+<span class="sd">        }</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">current_service</span> <span class="o">=</span> <span class="n">Service</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+        <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_service</span><span class="p">)</span>
+        <span class="n">gp</span><span class="o">.</span><span class="n">current_services_dict</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_service</span>
+
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># now needs to cycle over the services and connect the buckets in the right way between OSCAR and lambdas</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">)):</span>
+        <span class="n">current_service</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">):</span>
+            <span class="n">next_service</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">next_service</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">:</span>
+            <span class="n">current_service</span><span class="o">.</span><span class="n">output_bucket</span> <span class="o">=</span> <span class="n">next_service</span><span class="o">.</span><span class="n">output_bucket</span> <span class="o">+</span> <span class="n">current_service</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;/output&quot;</span>
+            <span class="n">next_service</span><span class="o">.</span><span class="n">output_bucket</span> <span class="o">=</span> <span class="n">next_service</span><span class="o">.</span><span class="n">input_bucket</span> <span class="o">+</span> <span class="n">next_service</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;/output&quot;</span>
+            <span class="n">next_service</span><span class="o">.</span><span class="n">input_bucket</span> <span class="o">=</span> <span class="n">current_service</span><span class="o">.</span><span class="n">output_bucket</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="run_scheduler"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#run_coordinator.run_scheduler">[docs]</a><span class="k">def</span> <span class="nf">run_scheduler</span><span class="p">():</span>
+    <span class="n">repetitions</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;repetitions&quot;</span><span class="p">]</span>
+
+    <span class="c1"># create empty skeletons for runs</span>
+    <span class="n">run_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">base_length</span> <span class="o">*</span> <span class="n">repetitions</span><span class="p">)]</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">run_names</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">:</span>
+        <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;services&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="p">{}}</span>
+
+    <span class="c1"># add in services</span>
+    <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">:</span>
+        <span class="n">expanded_parallelism</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">service</span><span class="o">.</span><span class="n">parallelism</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repetitions</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">expanded_parallelism</span><span class="p">):</span>
+            <span class="n">run_name</span> <span class="o">=</span> <span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">run_name</span><span class="p">][</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">service</span><span class="o">.</span><span class="n">unit</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;parallelism&quot;</span><span class="p">:</span> <span class="n">element</span><span class="p">}</span>
+
+    <span class="c1"># add in resources</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">expanded_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repetitions</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">expanded_nodes</span><span class="p">):</span>
+            <span class="n">run_name</span> <span class="o">=</span> <span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">run_name</span><span class="p">][</span><span class="s2">&quot;resources&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;nodes&quot;</span><span class="p">:</span> <span class="n">element</span><span class="p">}</span></div>
+
+    <span class="c1"># print(&quot;\nRuns&quot;)</span>
+    <span class="c1"># print(gp.scheduled_runs)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

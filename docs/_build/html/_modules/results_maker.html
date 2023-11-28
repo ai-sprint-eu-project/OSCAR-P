@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>results_maker &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">results_maker</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for results_maker</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objs</span> <span class="k">as</span> <span class="nn">go</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+<span class="kn">from</span> <span class="nn">classes.Component</span> <span class="kn">import</span> <span class="n">generalize_unit_id</span>
+<span class="kn">from</span> <span class="nn">oscarp.utils</span> <span class="kn">import</span> <span class="n">auto_mkdir</span>
+
+<span class="k">global</span> <span class="n">runs_folder</span><span class="p">,</span> <span class="n">results_folder</span><span class="p">,</span> <span class="n">graphs_folder</span><span class="p">,</span> <span class="n">dataframes_folder</span>
+
+
+<div class="viewcode-block" id="make_results"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_results">[docs]</a><span class="k">def</span> <span class="nf">make_results</span><span class="p">():</span>
+
+    <span class="n">make_results_for_full</span><span class="p">()</span>
+    <span class="c1"># make_results_for_jmeter()</span>
+    <span class="k">return</span>
+
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">:</span>
+        <span class="n">make_results_for_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_dataframe_sync"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_dataframe_sync">[docs]</a><span class="k">def</span> <span class="nf">make_dataframe_sync</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+    <span class="n">dataframes_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">run_name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">runs_folder</span><span class="p">):</span>
+        <span class="n">fix_time_table_interval</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">make_dataframe_sync_run</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="n">dataframes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dataframes_list</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dataframes_folder</span> <span class="o">+</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_dataframe.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="fix_time_table_interval"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.fix_time_table_interval">[docs]</a><span class="k">def</span> <span class="nf">fix_time_table_interval</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="p">):</span>
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">runs_folder</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/time_table_</span><span class="si">%s</span><span class="s2">.json&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">time_table</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;interval&quot;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">time_table</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">return</span>
+
+    <span class="n">date_format</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+    <span class="n">first_job_create</span> <span class="o">=</span> <span class="n">get_first_job</span><span class="p">(</span><span class="n">time_table</span><span class="p">)</span>
+    <span class="n">interval_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">first_job_create</span><span class="p">,</span> <span class="n">date_format</span><span class="p">)</span>
+
+    <span class="n">intervals</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;intervals&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">intervals</span><span class="p">)):</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="n">intervals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">interval_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">interval</span><span class="p">[</span><span class="s2">&quot;duration_seconds&quot;</span><span class="p">]</span>
+        <span class="n">interval_end</span> <span class="o">=</span> <span class="n">interval_start</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">job_name</span> <span class="ow">in</span> <span class="n">time_table</span><span class="p">:</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="n">time_table</span><span class="p">[</span><span class="n">job_name</span><span class="p">]</span>
+            <span class="n">job_create</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;job_create&quot;</span><span class="p">]</span>
+            <span class="n">job_create</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">job_create</span><span class="p">,</span> <span class="n">date_format</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">job_create</span> <span class="o">&lt;</span> <span class="n">interval_end</span> <span class="ow">and</span> <span class="s2">&quot;interval&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">job</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">job</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">interval_index</span><span class="p">)</span>
+
+        <span class="n">interval_start</span> <span class="o">=</span> <span class="n">interval_end</span>
+
+    <span class="k">for</span> <span class="n">job_name</span> <span class="ow">in</span> <span class="n">time_table</span><span class="p">:</span>
+        <span class="n">job</span> <span class="o">=</span> <span class="n">time_table</span><span class="p">[</span><span class="n">job_name</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;interval&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">job</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">job</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">interval_index</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">time_table</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_dataframe_sync_run"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_dataframe_sync_run">[docs]</a><span class="k">def</span> <span class="nf">make_dataframe_sync_run</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+    <span class="n">response_times</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">real_throughput</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># prepare dict, keys are intervals, values are array of response times</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;intervals&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">response_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">runs_folder</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/time_table_</span><span class="si">%s</span><span class="s2">.json&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">time_table</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="c1"># for each job calculate response time and adds it in the right array</span>
+    <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">time_table</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">job</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">])</span>
+        <span class="n">job_create</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;job_create&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">job_finish</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;job_finish&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">job_create</span><span class="p">,</span> <span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">job_finish</span><span class="p">,</span> <span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+
+        <span class="c1"># if response time is higher than 90% the timeout it is discarded</span>
+        <span class="c1"># if delta &lt; 0.9 * gp.run_parameters[&quot;synchronous&quot;][&quot;request_timeout_seconds&quot;]:</span>
+        <span class="n">response_times</span><span class="p">[</span><span class="n">interval</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">interval</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">real_throughput</span><span class="p">:</span>
+            <span class="n">real_throughput</span><span class="p">[</span><span class="n">interval</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">t1</span><span class="p">,</span>
+                <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">t2</span><span class="p">,</span>
+                <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="mi">1</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">t1</span> <span class="o">&lt;</span> <span class="n">real_throughput</span><span class="p">[</span><span class="n">interval</span><span class="p">][</span><span class="s2">&quot;start&quot;</span><span class="p">]:</span>
+                <span class="n">real_throughput</span><span class="p">[</span><span class="n">interval</span><span class="p">][</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t1</span>
+            <span class="k">if</span> <span class="n">t2</span> <span class="o">&gt;</span> <span class="n">real_throughput</span><span class="p">[</span><span class="n">interval</span><span class="p">][</span><span class="s2">&quot;end&quot;</span><span class="p">]:</span>
+                <span class="n">real_throughput</span><span class="p">[</span><span class="n">interval</span><span class="p">][</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t2</span>
+            <span class="n">real_throughput</span><span class="p">[</span><span class="n">interval</span><span class="p">][</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># makes a list with the requested throughput values</span>
+    <span class="n">requested_throughput_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;intervals&quot;</span><span class="p">]:</span>
+        <span class="n">requested_throughput_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="s2">&quot;throughput&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">intervals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">response_times</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">intervals</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+    <span class="c1"># calculate the actual throughput</span>
+    <span class="n">observed_throughput_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="n">intervals</span><span class="p">:</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">real_throughput</span><span class="p">[</span><span class="n">interval</span><span class="p">][</span><span class="s2">&quot;start&quot;</span><span class="p">]</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">real_throughput</span><span class="p">[</span><span class="n">interval</span><span class="p">][</span><span class="s2">&quot;end&quot;</span><span class="p">]</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">real_throughput</span><span class="p">[</span><span class="n">interval</span><span class="p">][</span><span class="s2">&quot;count&quot;</span><span class="p">]</span>
+        <span class="n">observed_throughput_value</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">count</span> <span class="o">/</span> <span class="n">delta</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">observed_throughput_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">observed_throughput_value</span><span class="p">)</span>
+
+    <span class="c1"># calculate average response time for each interval</span>
+    <span class="n">avg_response_times_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="n">intervals</span><span class="p">:</span>
+        <span class="n">average</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">response_times_array</span> <span class="o">=</span> <span class="n">response_times</span><span class="p">[</span><span class="n">interval</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">response_time</span> <span class="ow">in</span> <span class="n">response_times_array</span><span class="p">:</span>
+            <span class="n">average</span> <span class="o">+=</span> <span class="n">response_time</span>
+        <span class="n">average</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">response_times_array</span><span class="p">)</span>
+        <span class="n">average</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">average</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">avg_response_times_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">average</span><span class="p">)</span>
+
+    <span class="c1"># fill remaining columns</span>
+    <span class="n">number_of_intervals</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;intervals&quot;</span><span class="p">])</span>
+    <span class="n">warm_pods</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;number_of_pre_allocated_pods&quot;</span><span class="p">]</span>
+    <span class="n">parallelism</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">run_name</span><span class="p">][</span><span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;parallelism&quot;</span><span class="p">]</span>
+    <span class="n">cpu_per_container</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span>
+    <span class="n">cores</span> <span class="o">=</span> <span class="n">parallelism</span> <span class="o">*</span> <span class="n">cpu_per_container</span>
+    <span class="n">warm_cores</span> <span class="o">=</span> <span class="n">warm_pods</span> <span class="o">*</span> <span class="n">cpu_per_container</span>
+
+    <span class="n">parallelism_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">parallelism</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_of_intervals</span>
+    <span class="n">warm_pods_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">warm_pods</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_of_intervals</span>
+    <span class="n">cores_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">cores</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_of_intervals</span>
+    <span class="n">warm_cores_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">warm_cores</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_of_intervals</span>
+
+    <span class="c1"># generate dataframe</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">requested_throughput</span><span class="o">=</span><span class="n">requested_throughput_list</span><span class="p">,</span>
+                           <span class="n">observed_throughput</span><span class="o">=</span><span class="n">observed_throughput_list</span><span class="p">,</span>
+                           <span class="n">avg_response_time</span><span class="o">=</span><span class="n">avg_response_times_list</span><span class="p">,</span>
+                           <span class="n">requested_parallelism</span><span class="o">=</span><span class="n">parallelism_list</span><span class="p">,</span>
+                           <span class="n">warm_pods</span><span class="o">=</span><span class="n">warm_pods_list</span><span class="p">,</span>
+                           <span class="n">cores</span><span class="o">=</span><span class="n">cores_list</span><span class="p">,</span>
+                           <span class="n">warm_cores</span><span class="o">=</span><span class="n">warm_cores_list</span>
+                           <span class="p">))</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="make_dataframe_async"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_dataframe_async">[docs]</a><span class="k">def</span> <span class="nf">make_dataframe_async</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+    <span class="n">dataframes_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">run_name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">runs_folder</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">make_dataframe_async_run</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="n">dataframes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dataframes_list</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dataframes_folder</span> <span class="o">+</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_dataframe.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_dataframe_async_run"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_dataframe_async_run">[docs]</a><span class="k">def</span> <span class="nf">make_dataframe_async_run</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">runs_folder</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/time_table_</span><span class="si">%s</span><span class="s2">.json&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">time_table</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="c1"># calculate observed throughput</span>
+    <span class="n">date_format</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">get_first_job</span><span class="p">(</span><span class="n">time_table</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">get_last_job</span><span class="p">(</span><span class="n">time_table</span><span class="p">)</span>
+
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">date_format</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">t2</span><span class="p">,</span> <span class="n">date_format</span><span class="p">)</span>
+
+    <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_table</span><span class="p">)</span>
+    <span class="n">observed_throughput</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">count</span> <span class="o">/</span> <span class="n">delta</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># calculate average response time of all jobs</span>
+    <span class="n">average</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">time_table</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">average</span> <span class="o">+=</span> <span class="n">get_runtime_of_job</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+
+    <span class="n">average</span> <span class="o">/=</span> <span class="n">count</span>
+    <span class="n">avg_response_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">average</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># fill remaining values</span>
+    <span class="n">parallelism</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">run_name</span><span class="p">][</span><span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;parallelism&quot;</span><span class="p">]</span>
+    <span class="n">cpu_per_container</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">generalize_unit_id</span><span class="p">(</span><span class="n">unit</span><span class="p">)]</span><span class="o">.</span><span class="n">cpu</span>
+
+    <span class="c1"># generate dataframe</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">observed_throughput</span><span class="o">=</span><span class="p">[</span><span class="n">observed_throughput</span><span class="p">],</span>
+                           <span class="n">avg_response_time</span><span class="o">=</span><span class="p">[</span><span class="n">avg_response_time</span><span class="p">],</span>
+                           <span class="n">requested_parallelism</span><span class="o">=</span><span class="p">[</span><span class="n">parallelism</span><span class="p">],</span>
+                           <span class="n">cores</span><span class="o">=</span><span class="p">[</span><span class="n">parallelism</span> <span class="o">*</span> <span class="n">cpu_per_container</span><span class="p">],</span>
+                           <span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="make_results_for_unit"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_results_for_unit">[docs]</a><span class="k">def</span> <span class="nf">make_results_for_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">runs_folder</span><span class="p">,</span> <span class="n">results_folder</span><span class="p">,</span> <span class="n">graphs_folder</span><span class="p">,</span> <span class="n">dataframes_folder</span>
+
+    <span class="n">runs_folder</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="n">unit</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;runs/&quot;</span>
+    <span class="n">results_folder</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="n">unit</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;results/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">results_folder</span><span class="p">)</span>
+
+    <span class="n">graphs_folder</span> <span class="o">=</span> <span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Graphs/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">graphs_folder</span><span class="p">)</span>
+
+    <span class="n">component</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">parallelism</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">parallelism</span>
+    <span class="n">repetitions</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;repetitions&quot;</span><span class="p">]</span>
+    <span class="c1"># component = (unit, component.name)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">ready_dataframes_of_component</span><span class="p">(</span><span class="n">parallelism</span><span class="p">,</span> <span class="n">repetitions</span><span class="p">)</span>
+    <span class="n">make_loads</span><span class="p">()</span>
+    <span class="n">make_gantts</span><span class="p">()</span>
+    <span class="n">make_runtime_runs_parallelism_graph</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_results_for_full"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_results_for_full">[docs]</a><span class="k">def</span> <span class="nf">make_results_for_full</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">runs_folder</span><span class="p">,</span> <span class="n">results_folder</span><span class="p">,</span> <span class="n">graphs_folder</span><span class="p">,</span> <span class="n">dataframes_folder</span>
+
+    <span class="n">runs_folder</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="s2">&quot;Full_workflow/runs/&quot;</span>
+    <span class="n">results_folder</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="s2">&quot;Full_workflow/results/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">results_folder</span><span class="p">)</span>
+
+    <span class="n">graphs_folder</span> <span class="o">=</span> <span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Graphs/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">graphs_folder</span><span class="p">)</span>
+    <span class="n">dataframes_folder</span> <span class="o">=</span> <span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Dataframes/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">dataframes_folder</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">:</span>
+        <span class="n">component</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">generalize_unit_id</span><span class="p">(</span><span class="n">unit</span><span class="p">)]</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">parallelism</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">parallelism</span>
+        <span class="n">repetitions</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;repetitions&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_sync</span><span class="p">:</span>
+            <span class="n">make_dataframe_sync</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+            <span class="n">make_gantts</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+            <span class="n">generate_response_throughput_graphs</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">make_dataframe_async</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+            <span class="n">make_gantts</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+
+    <span class="c1"># df = ready_dataframes_of_full_workflow(parallelism, repetitions)</span>
+    <span class="c1"># make_runtime_runs_parallelism_graph_full(df)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_results_for_jmeter"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_results_for_jmeter">[docs]</a><span class="k">def</span> <span class="nf">make_results_for_jmeter</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_sync</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">global</span> <span class="n">runs_folder</span><span class="p">,</span> <span class="n">results_folder</span>
+
+    <span class="n">first_unit</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">first_component</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">first_unit</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+
+    <span class="c1"># single services</span>
+
+    <span class="n">runs_folder</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="n">first_unit</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;runs/&quot;</span>
+    <span class="n">results_folder</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="n">first_unit</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;results/&quot;</span>
+
+    <span class="n">runs_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">runs_folder</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">run_name</span> <span class="ow">in</span> <span class="n">runs_list</span><span class="p">:</span>
+        <span class="n">generate_throughput_graph</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">first_component</span><span class="p">)</span>
+
+    <span class="c1"># full workflow</span>
+
+    <span class="n">runs_folder</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="s2">&quot;Full_workflow/runs/&quot;</span>
+    <span class="n">results_folder</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="s2">&quot;Full_workflow/results/&quot;</span>
+
+    <span class="n">runs_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">runs_folder</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">run_name</span> <span class="ow">in</span> <span class="n">runs_list</span><span class="p">:</span>
+        <span class="n">generate_throughput_graph</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">first_component</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="generate_response_throughput_graphs"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.generate_response_throughput_graphs">[docs]</a><span class="k">def</span> <span class="nf">generate_response_throughput_graphs</span><span class="p">(</span><span class="n">component</span><span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">dataframes_folder</span> <span class="o">+</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_dataframe.csv&quot;</span><span class="p">)</span>
+
+    <span class="c1"># generate graphs</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;observed_throughput&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;avg_response_time&quot;</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
+                     <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;avg_response_time&quot;</span><span class="p">:</span> <span class="s2">&quot;Average response time (seconds)&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;observed_throughput&quot;</span><span class="p">:</span> <span class="s2">&quot;Observed throughput (req/min)&quot;</span><span class="p">})</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Graphs/</span><span class="si">%s</span><span class="s2">_real_throughput_avg_response.png&quot;</span> <span class="o">%</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;requested_throughput&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;observed_throughput&quot;</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
+                     <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;requested_throughput&quot;</span><span class="p">:</span> <span class="s2">&quot;Requested throughput (req/min)&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;observed_throughput&quot;</span><span class="p">:</span> <span class="s2">&quot;Observed throughput (req/min)&quot;</span><span class="p">})</span>
+
+    <span class="n">min_range</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;requested_throughput&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;observed_throughput&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">min_range</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="n">min_range</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">min_range</span><span class="p">)</span>
+
+    <span class="n">max_range</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;requested_throughput&quot;</span><span class="p">])[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;observed_throughput&quot;</span><span class="p">])[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">max_range</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">max_range</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">max_range</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="n">min_range</span><span class="p">,</span> <span class="n">max_range</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="n">min_range</span><span class="p">,</span> <span class="n">max_range</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+                             <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Requested throughput&quot;</span><span class="p">))</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="n">min_range</span><span class="p">,</span> <span class="n">max_range</span><span class="p">])</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="n">min_range</span><span class="p">,</span> <span class="n">max_range</span><span class="p">])</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Graphs/</span><span class="si">%s</span><span class="s2">_real_expected_throughput.png&quot;</span> <span class="o">%</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="ready_dataframes_of_component"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.ready_dataframes_of_component">[docs]</a><span class="k">def</span> <span class="nf">ready_dataframes_of_component</span><span class="p">(</span><span class="n">parallelism</span><span class="p">,</span> <span class="n">repetitions</span><span class="p">):</span>
+    <span class="n">run_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">runtime_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">actual_parallelism_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">number_of_runs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">runs_folder</span><span class="p">))</span>
+
+    <span class="n">target_parallelism_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parallelism</span><span class="p">:</span>
+        <span class="n">target_parallelism_list</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">*</span> <span class="n">repetitions</span>
+
+    <span class="k">for</span> <span class="n">run_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_runs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">run_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">run_index</span><span class="p">)</span>
+        <span class="n">runtime_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_run_runtime</span><span class="p">(</span><span class="n">run_index</span><span class="p">))</span>
+        <span class="n">actual_parallelism_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">find_actual_parallelism_run</span><span class="p">(</span><span class="n">run_index</span><span class="p">))</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">runs</span><span class="o">=</span><span class="n">run_list</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="n">runtime_list</span><span class="p">,</span>
+                           <span class="n">actual_parallelism</span><span class="o">=</span><span class="n">actual_parallelism_list</span><span class="p">,</span>
+                           <span class="n">target_parallelism</span><span class="o">=</span><span class="n">target_parallelism_list</span><span class="p">))</span>
+
+    <span class="n">dataframes_folder</span> <span class="o">=</span> <span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Dataframes/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">dataframes_folder</span><span class="p">)</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dataframes_folder</span> <span class="o">+</span> <span class="s2">&quot;dataframe.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="ready_dataframes_of_full_workflow"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.ready_dataframes_of_full_workflow">[docs]</a><span class="k">def</span> <span class="nf">ready_dataframes_of_full_workflow</span><span class="p">(</span><span class="n">parallelism</span><span class="p">,</span> <span class="n">repetitions</span><span class="p">):</span>
+    <span class="n">run_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">runtime_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">configurations_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">number_of_runs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">runs_folder</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_runs</span><span class="p">):</span>
+        <span class="n">configuration_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repetitions</span><span class="p">):</span>
+            <span class="n">configurations_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Configuration #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">configuration_index</span><span class="p">)</span>
+
+    <span class="n">target_parallelism_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parallelism</span><span class="p">:</span>
+        <span class="n">target_parallelism_list</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">*</span> <span class="n">repetitions</span>
+
+    <span class="k">for</span> <span class="n">run_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_runs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">run_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">run_index</span><span class="p">)</span>
+        <span class="n">runtime_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_run_runtime_full</span><span class="p">(</span><span class="n">run_index</span><span class="p">))</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">runs</span><span class="o">=</span><span class="n">run_list</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="n">runtime_list</span><span class="p">,</span>
+                           <span class="n">configurations</span><span class="o">=</span><span class="n">configurations_list</span><span class="p">))</span>
+
+    <span class="n">dataframes_folder</span> <span class="o">=</span> <span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Dataframes/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">dataframes_folder</span><span class="p">)</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dataframes_folder</span> <span class="o">+</span> <span class="s2">&quot;dataframe.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="make_loads"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_loads">[docs]</a><span class="k">def</span> <span class="nf">make_loads</span><span class="p">():</span>
+    <span class="n">load_directory</span> <span class="o">=</span> <span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Graphs/Loads/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">load_directory</span><span class="p">)</span>
+
+    <span class="n">runs_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">runs_folder</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">runs_list</span><span class="p">)):</span>
+        <span class="n">run_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">run_name</span> <span class="o">=</span> <span class="n">runs_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">get_actual_parallelism_list</span><span class="p">(</span><span class="n">run_index</span><span class="p">)</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;Marker&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;Load&quot;</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
+                      <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Load&quot;</span><span class="p">:</span> <span class="s2">&quot;Parallel Instances&quot;</span><span class="p">,</span> <span class="s2">&quot;Marker&quot;</span><span class="p">:</span> <span class="s2">&quot;Timestamp&quot;</span><span class="p">})</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">load_directory</span> <span class="o">+</span> <span class="n">component</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_runtime_runs_parallelism_graph"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_runtime_runs_parallelism_graph">[docs]</a><span class="k">def</span> <span class="nf">make_runtime_runs_parallelism_graph</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;runs&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;runtime&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;target_parallelism&quot;</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
+                     <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Runtime&quot;</span><span class="p">:</span> <span class="s2">&quot;Runtime (seconds)&quot;</span><span class="p">})</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Graphs/runtime_runs_parallelism.png&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_runtime_runs_parallelism_graph_full"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_runtime_runs_parallelism_graph_full">[docs]</a><span class="k">def</span> <span class="nf">make_runtime_runs_parallelism_graph_full</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;runs&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;runtime&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;configurations&quot;</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
+                     <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Runtime&quot;</span><span class="p">:</span> <span class="s2">&quot;Runtime (seconds)&quot;</span><span class="p">})</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Graphs/runtime_runs_parallelism.png&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_gantts"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.make_gantts">[docs]</a><span class="k">def</span> <span class="nf">make_gantts</span><span class="p">(</span><span class="n">component</span><span class="p">):</span>
+    <span class="n">df_list</span> <span class="o">=</span> <span class="n">ready_data_for_gantt</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+    <span class="n">gantt_directory</span> <span class="o">=</span> <span class="n">results_folder</span> <span class="o">+</span> <span class="s2">&quot;Graphs/Gantts/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">gantt_directory</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_list</span><span class="p">)):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;Start&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">run_name</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">timeline</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x_start</span><span class="o">=</span><span class="s2">&quot;Start&quot;</span><span class="p">,</span> <span class="n">x_end</span><span class="o">=</span><span class="s2">&quot;Finish&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;Job&quot;</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">autorange</span><span class="o">=</span><span class="s2">&quot;reversed&quot;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">gantt_directory</span> <span class="o">+</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="n">autosize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">width</span><span class="o">=</span><span class="mi">3840</span><span class="p">,</span>
+            <span class="n">height</span><span class="o">=</span><span class="mi">2160</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">gantt_directory</span> <span class="o">+</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;_big.png&quot;</span><span class="p">)</span></div>
+
+
+<span class="c1"># Secondary functions #</span>
+
+
+<div class="viewcode-block" id="get_first_job"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.get_first_job">[docs]</a><span class="k">def</span> <span class="nf">get_first_job</span><span class="p">(</span><span class="n">timelist</span><span class="p">):</span>
+    <span class="n">start_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">timelist</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">start_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timelist</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s2">&quot;job_create&quot;</span><span class="p">])</span>
+
+    <span class="n">first</span> <span class="o">=</span> <span class="n">start_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">start_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">&lt;</span> <span class="n">first</span><span class="p">:</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="n">s</span>
+    <span class="k">return</span> <span class="n">first</span></div>
+
+
+<div class="viewcode-block" id="get_last_job"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.get_last_job">[docs]</a><span class="k">def</span> <span class="nf">get_last_job</span><span class="p">(</span><span class="n">timelist</span><span class="p">):</span>
+    <span class="n">finish_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">timelist</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">finish_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timelist</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s2">&quot;job_finish&quot;</span><span class="p">])</span>
+
+    <span class="n">last</span> <span class="o">=</span> <span class="n">finish_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">finish_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">f</span> <span class="o">&gt;</span> <span class="n">last</span><span class="p">:</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">f</span>
+    <span class="k">return</span> <span class="n">last</span></div>
+
+
+<div class="viewcode-block" id="get_run_runtime"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.get_run_runtime">[docs]</a><span class="k">def</span> <span class="nf">get_run_runtime</span><span class="p">(</span><span class="n">run_index</span><span class="p">):</span>
+    <span class="n">run_name</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">run_index</span><span class="p">)</span>
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">runs_folder</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/time_table_</span><span class="si">%s</span><span class="s2">.json&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">time_table</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">get_first_job</span><span class="p">(</span><span class="n">time_table</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">get_last_job</span><span class="p">(</span><span class="n">time_table</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">delta</span></div>
+
+
+<div class="viewcode-block" id="get_run_runtime_full"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.get_run_runtime_full">[docs]</a><span class="k">def</span> <span class="nf">get_run_runtime_full</span><span class="p">(</span><span class="n">run_index</span><span class="p">):</span>
+    <span class="n">run_name</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">run_index</span><span class="p">)</span>
+
+    <span class="n">first_unit</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">first_component</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">first_unit</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">runs_folder</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/time_table_</span><span class="si">%s</span><span class="s2">.json&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">first_component</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">time_table</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">get_first_job</span><span class="p">(</span><span class="n">time_table</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">last_unit</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">last_component</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">last_unit</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">runs_folder</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/time_table_</span><span class="si">%s</span><span class="s2">.json&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">last_component</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">time_table</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">get_last_job</span><span class="p">(</span><span class="n">time_table</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">delta</span></div>
+
+
+<div class="viewcode-block" id="get_actual_parallelism_list"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.get_actual_parallelism_list">[docs]</a><span class="k">def</span> <span class="nf">get_actual_parallelism_list</span><span class="p">(</span><span class="n">run_index</span><span class="p">):</span>
+    <span class="n">run_name</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">run_index</span><span class="p">)</span>
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">runs_folder</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/time_table_</span><span class="si">%s</span><span class="s2">.json&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">time_table</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="n">intervals_markers</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">job_name</span> <span class="ow">in</span> <span class="n">time_table</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">job</span> <span class="o">=</span> <span class="n">time_table</span><span class="p">[</span><span class="n">job_name</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;job_start&quot;</span> <span class="ow">in</span> <span class="n">job</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">job_start</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;job_start&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">job_start</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;job_create&quot;</span><span class="p">]</span>
+
+        <span class="n">intervals_markers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">job_start</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">))</span>
+        <span class="n">intervals_markers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">job</span><span class="p">[</span><span class="s2">&quot;job_finish&quot;</span><span class="p">],</span> <span class="s2">&quot;end&quot;</span><span class="p">))</span>
+
+    <span class="n">ordered_markers</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">intervals_markers</span><span class="p">)</span>
+
+    <span class="n">parallelism_counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">parallelism_counter_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">plain_markers</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">ordered_markers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">))]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ordered_markers</span><span class="p">)):</span>
+        <span class="n">marker_type</span> <span class="o">=</span> <span class="n">ordered_markers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">marker_type</span> <span class="o">==</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span>
+            <span class="n">parallelism_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">marker_type</span> <span class="o">==</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span>
+            <span class="n">parallelism_counter</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">parallelism_counter_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parallelism_counter</span><span class="p">)</span>
+        <span class="n">plain_markers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ordered_markers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">Load</span><span class="o">=</span><span class="n">parallelism_counter_list</span><span class="p">,</span> <span class="n">Marker</span><span class="o">=</span><span class="n">plain_markers</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="find_actual_parallelism_run"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.find_actual_parallelism_run">[docs]</a><span class="k">def</span> <span class="nf">find_actual_parallelism_run</span><span class="p">(</span><span class="n">run_index</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">get_actual_parallelism_list</span><span class="p">(</span><span class="n">run_index</span><span class="p">)[</span><span class="s2">&quot;Load&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="remove_outliers_iqr"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.remove_outliers_iqr">[docs]</a><span class="k">def</span> <span class="nf">remove_outliers_iqr</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">q1</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
+    <span class="n">q3</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
+
+    <span class="n">iqr</span> <span class="o">=</span> <span class="n">q3</span> <span class="o">-</span> <span class="n">q1</span>
+
+    <span class="n">not_outliers</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="p">((</span><span class="n">df</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">q1</span> <span class="o">-</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">iqr</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">df</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">q3</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">iqr</span><span class="p">)))]</span>
+
+    <span class="n">cleaned_df</span> <span class="o">=</span> <span class="n">not_outliers</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">cleaned_df</span></div>
+
+
+<div class="viewcode-block" id="get_runtime_of_job"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.get_runtime_of_job">[docs]</a><span class="k">def</span> <span class="nf">get_runtime_of_job</span><span class="p">(</span><span class="n">job</span><span class="p">):</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;job_create&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;job_finish&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">delta</span></div>
+
+
+<div class="viewcode-block" id="ready_data_for_gantt"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.ready_data_for_gantt">[docs]</a><span class="k">def</span> <span class="nf">ready_data_for_gantt</span><span class="p">(</span><span class="n">component</span><span class="p">):</span>
+    <span class="n">dataframe_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">runs_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">runs_folder</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">runs_list</span><span class="p">)):</span>
+        <span class="n">run_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">run_name</span> <span class="o">=</span> <span class="n">runs_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">json_path</span> <span class="o">=</span> <span class="n">runs_folder</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/time_table_</span><span class="si">%s</span><span class="s2">.json&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">time_table</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="n">jobs_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">job_name</span> <span class="ow">in</span> <span class="n">time_table</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="n">time_table</span><span class="p">[</span><span class="n">job_name</span><span class="p">]</span>
+
+            <span class="n">target_start</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;job_create&quot;</span><span class="p">]</span>
+            <span class="n">target_end</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;job_finish&quot;</span><span class="p">]</span>
+            <span class="n">jobs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">Job</span><span class="o">=</span><span class="n">job_name</span><span class="p">[:</span><span class="mi">5</span><span class="p">],</span> <span class="n">Start</span><span class="o">=</span><span class="n">target_start</span><span class="p">,</span> <span class="n">Finish</span><span class="o">=</span><span class="n">target_end</span><span class="p">))</span>
+
+        <span class="n">dataframe_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">jobs_list</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">dataframe_list</span></div>
+
+
+<div class="viewcode-block" id="ready_data_for_histogram"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#results_maker.ready_data_for_histogram">[docs]</a><span class="k">def</span> <span class="nf">ready_data_for_histogram</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">number_of_runs</span><span class="p">):</span>
+    <span class="n">all_runtimes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">parallelism</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">run_letter</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">component</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_runs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">runs_folder</span> <span class="o">=</span> <span class="n">component</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">run_name</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">find_actual_parallelism_run</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">run_letter</span><span class="p">)</span>
+            <span class="n">json_path</span> <span class="o">=</span> <span class="n">runs_folder</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;/</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">/time_table_</span><span class="si">%s</span><span class="s2">.json&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_letter</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">component</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                <span class="n">time_table</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">job_name</span> <span class="ow">in</span> <span class="n">time_table</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">job</span> <span class="o">=</span> <span class="n">time_table</span><span class="p">[</span><span class="n">job_name</span><span class="p">]</span>
+                <span class="n">all_runtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_runtime_of_job</span><span class="p">(</span><span class="n">job</span><span class="p">))</span>
+                <span class="n">runs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Run #</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_letter</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+                <span class="n">parallelism</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">Runtime</span><span class="o">=</span><span class="n">all_runtimes</span><span class="p">,</span> <span class="n">Run</span><span class="o">=</span><span class="n">runs</span><span class="p">,</span> <span class="n">Parallelism</span><span class="o">=</span><span class="n">parallelism</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

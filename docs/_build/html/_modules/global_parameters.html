@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>global_parameters &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">global_parameters</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for global_parameters</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+
+<span class="kn">from</span> <span class="nn">oscarp.utils</span> <span class="kn">import</span> <span class="n">auto_mkdir</span><span class="p">,</span> <span class="n">ensure_slash_end</span><span class="p">,</span> <span class="n">get_command_output_wrapped</span>
+
+<span class="k">global</span> <span class="n">application_dir</span><span class="p">,</span> <span class="n">oscarp_dir</span><span class="p">,</span> <span class="n">campaign_dir</span><span class="p">,</span> <span class="n">current_deployment_dir</span><span class="p">,</span> <span class="n">current_work_dir</span><span class="p">,</span> <span class="n">runs_dir</span><span class="p">,</span> <span class="n">results_dir</span><span class="p">,</span> <span class="n">run_name</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">* application_dir: directory of the whole project</span>
+<span class="sd">* oscarp_dir: directory reserved for oscarp (eg. Project/oscarp/)</span>
+<span class="sd">* campaign_dir: directory containing the directories of the deployments (eg. oscarp/Test/)</span>
+<span class="sd">* current_deployment_dir: directory of the current deployment (eg. deployment_0/)</span>
+<span class="sd">* current_work_dir: directory containing runs/ and results/ (eg. full_workflow/, C1@VM1/)</span>
+<span class="sd">* has_lambdas: True if in general the deployment includes a Lambda</span>
+<span class="sd">* has_active_lambdas: True if a Lambda is being tested, either in the full workflow or alone</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">global</span> <span class="n">resources</span><span class="p">,</span> <span class="n">components_groups</span><span class="p">,</span> <span class="n">components_names</span><span class="p">,</span> <span class="n">containers</span><span class="p">,</span> <span class="n">run_parameters</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">* resources: dictionary with all the resources as parsed from candidate_resources.yaml</span>
+<span class="sd">* components_groups: dictionary with all the components groups i.e. component1, component2, alternatives...</span>
+<span class="sd">* components_names: dictionary with all the components by their names i.e. blurry_faces, mask_detector...</span>
+<span class="sd">* containers: dictionary with all the containers by their unit i.e. C1@VM1, C1P1.1@VM1...</span>
+<span class="sd">* run_parameters: dictionary version of the run_parameters.yaml file</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">global</span> <span class="n">deployments</span>
+<span class="k">global</span> <span class="n">scheduled_runs</span>
+<span class="k">global</span> <span class="n">current_deployment</span><span class="p">,</span> <span class="n">virtual_infrastructures</span>
+<span class="k">global</span> <span class="n">current_deployment_index</span><span class="p">,</span> <span class="n">current_run_index</span><span class="p">,</span> <span class="n">current_run_id</span>
+<span class="k">global</span> <span class="n">current_services_list</span><span class="p">,</span> <span class="n">current_services_dict</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">* current_services_list: a list of the services currently being tested, it&#39;s updated for every deployment or during </span>
+<span class="sd">    single service testing, it contains all the information necessary to deploy on OSCAR i.e. buckets, endpoints... </span>
+<span class="sd">* current_services_dict: same as above but the services are in a dictionary with the unit as key</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">global</span> <span class="n">current_resources</span><span class="p">,</span> <span class="n">resources_node_requirements</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">* current_resources: resources in use for the current deployment, and the nodes required for the current run</span>
+<span class="sd">* current_node_requirements: nodes required for resources in use for all runs</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">global</span> <span class="n">scar_logs_end_indexes</span><span class="p">,</span> <span class="n">real_throughput</span><span class="p">,</span> <span class="n">input_files_count</span><span class="p">,</span> <span class="n">is_first</span>
+<span class="k">global</span> <span class="n">is_single_service_test</span><span class="p">,</span> <span class="n">has_lambdas</span><span class="p">,</span> <span class="n">has_active_lambdas</span><span class="p">,</span> <span class="n">is_last_run</span><span class="p">,</span> <span class="n">is_first_launch</span><span class="p">,</span> <span class="n">is_sync</span>
+<span class="k">global</span> <span class="n">is_debug</span><span class="p">,</span> <span class="n">is_dry</span><span class="p">,</span> <span class="n">is_development</span>
+
+<span class="k">global</span> <span class="n">base_length</span>
+
+
+<div class="viewcode-block" id="set_application_dir"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#global_parameters.set_application_dir">[docs]</a><span class="k">def</span> <span class="nf">set_application_dir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">application_dir</span><span class="p">,</span> <span class="n">oscarp_dir</span>
+    <span class="n">application_dir</span> <span class="o">=</span> <span class="n">ensure_slash_end</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+    <span class="n">oscarp_dir</span> <span class="o">=</span> <span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;oscarp/&quot;</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_campaign_dir"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#global_parameters.make_campaign_dir">[docs]</a><span class="k">def</span> <span class="nf">make_campaign_dir</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">campaign_dir</span>
+    <span class="n">campaign_dir</span> <span class="o">=</span> <span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;oscarp/&quot;</span> <span class="o">+</span> <span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;campaign_dir&quot;</span><span class="p">]</span>
+    <span class="n">campaign_dir</span> <span class="o">=</span> <span class="n">ensure_slash_end</span><span class="p">(</span><span class="n">campaign_dir</span><span class="p">)</span>
+    <span class="c1">#if os.path.exists(campaign_dir):</span>
+    <span class="c1">#    input(colored(&quot;\nWarning: Folder %s already exists, press any key to proceed anyway and overwrite the results&quot; % campaign_dir, &quot;yellow&quot;))</span>
+    <span class="c1">#    get_command_output_wrapped(&quot;rm -rf %s&quot; % campaign_dir)</span>
+
+    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="s2">&quot;rm -rf </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">campaign_dir</span><span class="p">)</span>  <span class="c1"># todo rbf</span>
+
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">campaign_dir</span><span class="p">)</span>
+    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="s2">&quot;cp </span><span class="si">%s</span><span class="s2">/oscarp/run_parameters.yaml </span><span class="si">%s</span><span class="s2">run_parameters.yaml&quot;</span> <span class="o">%</span>
+                               <span class="p">(</span><span class="n">application_dir</span><span class="p">,</span> <span class="n">campaign_dir</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="set_current_deployment"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#global_parameters.set_current_deployment">[docs]</a><span class="k">def</span> <span class="nf">set_current_deployment</span><span class="p">(</span><span class="n">deployment_index</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">current_deployment</span><span class="p">,</span> <span class="n">current_deployment_dir</span><span class="p">,</span> <span class="n">current_deployment_index</span>
+    <span class="n">current_deployment</span> <span class="o">=</span> <span class="n">deployments</span><span class="p">[</span><span class="n">deployment_index</span><span class="p">]</span>
+    <span class="n">current_deployment_index</span> <span class="o">=</span> <span class="n">deployment_index</span>
+    <span class="n">current_deployment_dir</span> <span class="o">=</span> <span class="n">campaign_dir</span> <span class="o">+</span> <span class="s2">&quot;deployment_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">deployment_index</span><span class="p">)</span>
+    <span class="n">current_deployment_dir</span> <span class="o">=</span> <span class="n">ensure_slash_end</span><span class="p">(</span><span class="n">current_deployment_dir</span><span class="p">)</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">current_deployment_dir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="set_current_work_dir"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#global_parameters.set_current_work_dir">[docs]</a><span class="k">def</span> <span class="nf">set_current_work_dir</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">current_deployment_dir</span><span class="p">,</span> <span class="n">current_work_dir</span><span class="p">,</span> <span class="n">runs_dir</span><span class="p">,</span> <span class="n">results_dir</span><span class="p">,</span> <span class="n">run_name</span>
+    <span class="n">run_name</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="n">current_work_dir</span> <span class="o">=</span> <span class="n">ensure_slash_end</span><span class="p">(</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="n">run_name</span><span class="p">)</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">current_work_dir</span><span class="p">)</span>
+    <span class="n">runs_dir</span> <span class="o">=</span> <span class="n">current_work_dir</span> <span class="o">+</span> <span class="s2">&quot;runs/&quot;</span>
+    <span class="n">results_dir</span> <span class="o">=</span> <span class="n">current_work_dir</span> <span class="o">+</span> <span class="s2">&quot;results/&quot;</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

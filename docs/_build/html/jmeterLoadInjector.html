@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jmeterLoadInjector package &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="oscarp package" href="oscarp.html" />
+    <link rel="prev" title="classes package" href="classes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">classes package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">jmeterLoadInjector package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-jmeterLoadInjector.main">jmeterLoadInjector.main module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.main.encode_input_file"><code class="docutils literal notranslate"><span class="pre">encode_input_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.main.execute_command"><code class="docutils literal notranslate"><span class="pre">execute_command()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.main.load_configuration"><code class="docutils literal notranslate"><span class="pre">load_configuration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.main.pull_image"><code class="docutils literal notranslate"><span class="pre">pull_image()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.main.start_test"><code class="docutils literal notranslate"><span class="pre">start_test()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-jmeterLoadInjector.make_test_file">jmeterLoadInjector.make_test_file module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.make_test_file.get_end"><code class="docutils literal notranslate"><span class="pre">get_end()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.make_test_file.get_start"><code class="docutils literal notranslate"><span class="pre">get_start()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.make_test_file.make_test_file"><code class="docutils literal notranslate"><span class="pre">make_test_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.make_test_file.set_generic_variables"><code class="docutils literal notranslate"><span class="pre">set_generic_variables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.make_test_file.set_samplers"><code class="docutils literal notranslate"><span class="pre">set_samplers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.make_test_file.set_thread_group"><code class="docutils literal notranslate"><span class="pre">set_thread_group()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.make_test_file.set_thread_variables"><code class="docutils literal notranslate"><span class="pre">set_thread_variables()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-jmeterLoadInjector.process_results">jmeterLoadInjector.process_results module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.process_results.calculate_throughput"><code class="docutils literal notranslate"><span class="pre">calculate_throughput()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jmeterLoadInjector.process_results.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-jmeterLoadInjector">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+      <li class="breadcrumb-item active">jmeterLoadInjector package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/jmeterLoadInjector.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jmeterloadinjector-package">
+<h1>jmeterLoadInjector package<a class="headerlink" href="#jmeterloadinjector-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-jmeterLoadInjector.main">
+<span id="jmeterloadinjector-main-module"></span><h2>jmeterLoadInjector.main module<a class="headerlink" href="#module-jmeterLoadInjector.main" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.main.encode_input_file">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.main.</span></span><span class="sig-name descname"><span class="pre">encode_input_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/main.html#encode_input_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.main.encode_input_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.main.execute_command">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.main.</span></span><span class="sig-name descname"><span class="pre">execute_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/main.html#execute_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.main.execute_command" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.main.load_configuration">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.main.</span></span><span class="sig-name descname"><span class="pre">load_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/main.html#load_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.main.load_configuration" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.main.main">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.main.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">work_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'configuration.yaml'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/main.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.main.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.main.pull_image">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.main.</span></span><span class="sig-name descname"><span class="pre">pull_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/main.html#pull_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.main.pull_image" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.main.start_test">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.main.</span></span><span class="sig-name descname"><span class="pre">start_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">work_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/main.html#start_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.main.start_test" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-jmeterLoadInjector.make_test_file">
+<span id="jmeterloadinjector-make-test-file-module"></span><h2>jmeterLoadInjector.make_test_file module<a class="headerlink" href="#module-jmeterLoadInjector.make_test_file" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.make_test_file.get_end">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.make_test_file.</span></span><span class="sig-name descname"><span class="pre">get_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/make_test_file.html#get_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.make_test_file.get_end" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.make_test_file.get_start">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.make_test_file.</span></span><span class="sig-name descname"><span class="pre">get_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/make_test_file.html#get_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.make_test_file.get_start" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.make_test_file.make_test_file">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.make_test_file.</span></span><span class="sig-name descname"><span class="pre">make_test_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/make_test_file.html#make_test_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.make_test_file.make_test_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.make_test_file.set_generic_variables">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.make_test_file.</span></span><span class="sig-name descname"><span class="pre">set_generic_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cluster_endpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oscar_service</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_timeout_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_timeout_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/make_test_file.html#set_generic_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.make_test_file.set_generic_variables" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.make_test_file.set_samplers">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.make_test_file.</span></span><span class="sig-name descname"><span class="pre">set_samplers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/make_test_file.html#set_samplers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.make_test_file.set_samplers" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.make_test_file.set_thread_group">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.make_test_file.</span></span><span class="sig-name descname"><span class="pre">set_thread_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/make_test_file.html#set_thread_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.make_test_file.set_thread_group" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.make_test_file.set_thread_variables">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.make_test_file.</span></span><span class="sig-name descname"><span class="pre">set_thread_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throughput</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">users</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ramp_up</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/make_test_file.html#set_thread_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.make_test_file.set_thread_variables" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-jmeterLoadInjector.process_results">
+<span id="jmeterloadinjector-process-results-module"></span><h2>jmeterLoadInjector.process_results module<a class="headerlink" href="#module-jmeterLoadInjector.process_results" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.process_results.calculate_throughput">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.process_results.</span></span><span class="sig-name descname"><span class="pre">calculate_throughput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timed_job_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/process_results.html#calculate_throughput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.process_results.calculate_throughput" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="jmeterLoadInjector.process_results.main">
+<span class="sig-prename descclassname"><span class="pre">jmeterLoadInjector.process_results.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jmeterLoadInjector/process_results.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jmeterLoadInjector.process_results.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-jmeterLoadInjector">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-jmeterLoadInjector" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classes.html" class="btn btn-neutral float-left" title="classes package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="oscarp.html" class="btn btn-neutral float-right" title="oscarp package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

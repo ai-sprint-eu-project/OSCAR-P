@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>oscarp.cluster_manager &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">oscarp.cluster_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for oscarp.cluster_manager</h1><div class="highlight"><pre>
+<span></span><span class="c1"># all methods related to the initial cluster configuration (before run start)</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">import</span> <span class="nn">executables</span>
+
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">get_ssh_output</span><span class="p">,</span> <span class="n">get_command_output_wrapped</span><span class="p">,</span> <span class="n">show_debug_info</span><span class="p">,</span> <span class="n">show_warning</span><span class="p">,</span> <span class="n">show_fatal_error</span><span class="p">,</span> <span class="n">read_json</span><span class="p">,</span> <span class="n">auto_mkdir</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+
+<span class="c1"># todo should all this functions be moved elsewhere?</span>
+
+
+<div class="viewcode-block" id="remove_all_services"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.remove_all_services">[docs]</a><span class="k">def</span> <span class="nf">remove_all_services</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes all the services from all resources that are not lambdas.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Removing services...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_resources</span><span class="p">:</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resource</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">():</span>
+
+            <span class="n">set_default_oscar_cluster</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">oscarcli_alias</span><span class="p">)</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;service ls&quot;</span><span class="p">)</span>
+            <span class="n">services</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="n">services</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+                <span class="n">service</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;service remove &quot;</span> <span class="o">+</span> <span class="n">service</span><span class="p">)</span>
+                <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Removed service &quot;</span> <span class="o">+</span> <span class="n">service</span> <span class="o">+</span> <span class="s2">&quot; from resource &quot;</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="remove_all_buckets"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.remove_all_buckets">[docs]</a><span class="k">def</span> <span class="nf">remove_all_buckets</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes all the buckets (aside from the storage bucket) for all resources that are not lambdas.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Removing buckets...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_resources</span><span class="p">:</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resource</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">():</span>
+            <span class="n">minio_alias</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">storage_provider_alias</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;ls &quot;</span> <span class="o">+</span> <span class="n">minio_alias</span><span class="p">)</span>
+            <span class="n">buckets</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">bucket</span> <span class="ow">in</span> <span class="n">buckets</span><span class="p">:</span>
+                <span class="n">bucket</span> <span class="o">=</span> <span class="n">bucket</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">bucket</span> <span class="o">!=</span> <span class="s2">&quot;storage/&quot;</span><span class="p">:</span>  <span class="c1"># todo read name of storage bucket from config file</span>
+                    <span class="n">bucket</span> <span class="o">=</span> <span class="n">minio_alias</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">bucket</span>
+                    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;rb &quot;</span> <span class="o">+</span> <span class="n">bucket</span> <span class="o">+</span> <span class="s2">&quot; --force&quot;</span><span class="p">)</span>
+                    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Removed bucket &quot;</span> <span class="o">+</span> <span class="n">bucket</span> <span class="o">+</span> <span class="s2">&quot; from resource &quot;</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="clean_s3_buckets"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.clean_s3_buckets">[docs]</a><span class="k">def</span> <span class="nf">clean_s3_buckets</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cleans the S3 buckets used by the lambda functions, if any are present.</span>
+<span class="sd">    Updated 17/07/2023 after moving from SCAR to IM deployment.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">has_active_lambdas</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Cleaning S3 buckets...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">resource</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_resources</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">resource</span><span class="p">]</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">():</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">resource</span><span class="p">]</span><span class="o">.</span><span class="n">bucket_name</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws s3 ls s3://</span><span class="si">%s</span><span class="s2">/&quot;</span> <span class="o">%</span> <span class="n">b</span>
+            <span class="n">folders</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws s3 ls s3://</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">output/&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws s3 rm s3://</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">output/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cleaned bucket &quot;</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="generate_fdl_configuration"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.generate_fdl_configuration">[docs]</a><span class="k">def</span> <span class="nf">generate_fdl_configuration</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates the FDL configuration file containing all the OSCAR services needed for the current test Lambda \</span>
+<span class="sd">     functions (old SCAR) are no longer included as they are deployed together with the infrastructures by IM.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;FDL_configuration.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+
+        <span class="n">fdl_services</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">is_first_service</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">for</span> <span class="n">current_service</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">:</span>
+
+            <span class="n">current_parallelism</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">gp</span><span class="o">.</span><span class="n">current_run_id</span><span class="p">][</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">current_service</span><span class="o">.</span><span class="n">unit</span><span class="p">][</span><span class="s2">&quot;parallelism&quot;</span><span class="p">]</span>
+            <span class="n">script_path</span> <span class="o">=</span> <span class="n">generate_service_script</span><span class="p">(</span><span class="n">current_service</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="c1"># script_path = &quot;/opt/script.sh&quot;</span>
+
+            <span class="n">fdl_service</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">current_service</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;storage_provider&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}],</span>
+                <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;storage_provider&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}]</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">is_first_service</span> <span class="ow">and</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;test_synchronously&quot;</span><span class="p">]:</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">pods</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;number_of_pre_allocated_pods&quot;</span><span class="p">]</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;min_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pods</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">current_service</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">:</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;storage_provider&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;minio.default&quot;</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_service</span><span class="o">.</span><span class="n">input_bucket</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;storage_provider&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_service</span><span class="o">.</span><span class="n">storage_provider_alias</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_service</span><span class="o">.</span><span class="n">output_bucket</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;cpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">current_service</span><span class="o">.</span><span class="n">cpu</span><span class="p">)</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;memory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">Mi&quot;</span> <span class="o">%</span> <span class="n">current_service</span><span class="o">.</span><span class="n">memory</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;total_cpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_service</span><span class="o">.</span><span class="n">cpu</span> <span class="o">*</span> <span class="n">current_parallelism</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;total_memory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">Mi&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">current_service</span><span class="o">.</span><span class="n">memory</span> <span class="o">*</span> <span class="n">current_parallelism</span><span class="p">)</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_service</span><span class="o">.</span><span class="n">image</span>
+                <span class="n">fdl_service</span><span class="p">[</span><span class="s2">&quot;script&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">script_path</span>
+                <span class="n">oscarcli_alias</span> <span class="o">=</span> <span class="n">current_service</span><span class="o">.</span><span class="n">oscarcli_alias</span>
+                <span class="n">fdl_service</span> <span class="o">=</span> <span class="p">{</span><span class="n">oscarcli_alias</span><span class="p">:</span> <span class="n">fdl_service</span><span class="p">}</span>
+                <span class="n">fdl_services</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fdl_service</span><span class="p">)</span>
+
+            <span class="n">is_first_service</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">fdl_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;functions&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                      <span class="s2">&quot;storage_providers&quot;</span><span class="p">:</span> <span class="n">generate_fdl_storage_providers</span><span class="p">()}</span>
+
+        <span class="n">fdl_config</span><span class="p">[</span><span class="s2">&quot;functions&quot;</span><span class="p">][</span><span class="s2">&quot;oscar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdl_services</span>
+
+        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">fdl_config</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="generate_fdl_storage_providers"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.generate_fdl_storage_providers">[docs]</a><span class="k">def</span> <span class="nf">generate_fdl_storage_providers</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Services deployed on different resources need to know the location of input bucket of the next service; \</span>
+<span class="sd">     this is done by including the used storage providers in the FDL configuration file.</span>
+<span class="sd">    This info is extracted by the MinIO configuration file, which is filled after the resources are created.</span>
+
+<span class="sd">    :return: a dictionary containing the providers, ready to be added in the FDL file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">region</span> <span class="o">=</span> <span class="s2">&quot;us-east-1&quot;</span>  <span class="c1"># todo should this be hardcoded like this?</span>
+
+    <span class="n">providers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;minio&quot;</span><span class="p">:</span> <span class="p">{}</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_development</span><span class="p">:</span>
+        <span class="n">minio_aliases</span> <span class="o">=</span> <span class="n">read_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;/home/scrapjack/.mc/&quot;</span><span class="p">,</span> <span class="s2">&quot;config.json&quot;</span><span class="p">))[</span><span class="s2">&quot;aliases&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">minio_aliases</span> <span class="o">=</span> <span class="n">read_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;/root/.mc/&quot;</span><span class="p">,</span> <span class="s2">&quot;config.json&quot;</span><span class="p">))[</span><span class="s2">&quot;aliases&quot;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">minio_aliases</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;minio&quot;</span> <span class="ow">in</span> <span class="n">alias</span><span class="p">:</span>
+            <span class="n">providers</span><span class="p">[</span><span class="s2">&quot;minio&quot;</span><span class="p">][</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;access_key&quot;</span><span class="p">:</span> <span class="n">minio_aliases</span><span class="p">[</span><span class="n">alias</span><span class="p">][</span><span class="s2">&quot;accessKey&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="n">minio_aliases</span><span class="p">[</span><span class="n">alias</span><span class="p">][</span><span class="s2">&quot;url&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;secret_key&quot;</span><span class="p">:</span> <span class="n">minio_aliases</span><span class="p">[</span><span class="n">alias</span><span class="p">][</span><span class="s2">&quot;secretKey&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;region&quot;</span><span class="p">:</span> <span class="n">region</span>
+            <span class="p">}</span>
+
+    <span class="n">auth_file</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;aisprint/deployments/base/im/auth.dat&quot;</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">auth_file</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">auth_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;id = ec2&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;; &quot;</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="s2">&quot;username&quot;</span> <span class="ow">in</span> <span class="n">segment</span><span class="p">:</span>
+                            <span class="n">access_key</span> <span class="o">=</span> <span class="n">segment</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;username = &quot;</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="s2">&quot;password&quot;</span> <span class="ow">in</span> <span class="n">segment</span><span class="p">:</span>
+                            <span class="n">secret_key</span> <span class="o">=</span> <span class="n">segment</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;password = &quot;</span><span class="p">)</span>
+
+        <span class="n">providers</span><span class="p">[</span><span class="s2">&quot;s3&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">providers</span><span class="p">[</span><span class="s2">&quot;s3&quot;</span><span class="p">][</span><span class="s2">&quot;aws&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;access_key&quot;</span><span class="p">:</span> <span class="n">access_key</span><span class="p">,</span>
+            <span class="s2">&quot;region&quot;</span><span class="p">:</span> <span class="n">region</span><span class="p">,</span>
+            <span class="s2">&quot;secret_key&quot;</span><span class="p">:</span> <span class="n">secret_key</span>
+        <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">providers</span></div>
+
+
+<div class="viewcode-block" id="generate_service_script"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.generate_service_script">[docs]</a><span class="k">def</span> <span class="nf">generate_service_script</span><span class="p">(</span><span class="n">component_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The bash script of the services is included inside their docker image (01/03/2023). The bash script supplied to \</span>
+<span class="sd">     OSCAR just needs to call said &quot;real&quot; script.</span>
+<span class="sd">    These simple scripts are generated locally in an hidden folder called &quot;.scripts&quot;, and their path is added to the \</span>
+<span class="sd">     FDL file.</span>
+
+<span class="sd">    :return: path to the service script</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">scripts_folder</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="s2">&quot;.scripts/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">scripts_folder</span><span class="p">)</span>
+    <span class="n">service_script_path</span> <span class="o">=</span> <span class="n">scripts_folder</span> <span class="o">+</span> <span class="n">component_name</span> <span class="o">+</span> <span class="s2">&quot;_script.sh&quot;</span>
+
+    <span class="k">if</span> <span class="s2">&quot;-partition&quot;</span> <span class="ow">in</span> <span class="n">component_name</span><span class="p">:</span>
+        <span class="n">component_name</span> <span class="o">=</span> <span class="n">component_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-partition&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">service_script_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#!/bin/bash</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;sh /opt/</span><span class="si">%s</span><span class="s2">/script.sh</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">component_name</span><span class="p">]</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">service_script_path</span></div>
+
+
+<div class="viewcode-block" id="apply_fdl_configuration_wrapped"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.apply_fdl_configuration_wrapped">[docs]</a><span class="k">def</span> <span class="nf">apply_fdl_configuration_wrapped</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies the FDL configuration file, then verifies that all the required services have actually been deployed.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Adjusting OSCAR configuration...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="n">_apply_fdl_configuration_oscar</span><span class="p">()</span>
+    <span class="n">verify_correct_oscar_deployment</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="_apply_fdl_configuration_oscar"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager._apply_fdl_configuration_oscar">[docs]</a><span class="k">def</span> <span class="nf">_apply_fdl_configuration_oscar</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies the FDL configuration file through the OSCAR cli binary</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;apply &quot;</span> <span class="o">+</span> <span class="s2">&quot;FDL_configuration.yaml&quot;</span><span class="p">)</span>
+    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="verify_correct_oscar_deployment"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.verify_correct_oscar_deployment">[docs]</a><span class="k">def</span> <span class="nf">verify_correct_oscar_deployment</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Starting from the list of active services, it makes sure that all of them are deployed.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Checking correct OSCAR deployment...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">:</span>
+            <span class="n">deployed_services</span> <span class="o">=</span> <span class="n">get_deployed_services</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">oscarcli_alias</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">deployed_services</span><span class="p">:</span>
+                <span class="n">show_fatal_error</span><span class="p">(</span><span class="s2">&quot;Service &quot;</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; not deployed&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Service &quot;</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; deployed on resource &quot;</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">resource</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="get_deployed_services"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.get_deployed_services">[docs]</a><span class="k">def</span> <span class="nf">get_deployed_services</span><span class="p">(</span><span class="n">oscarcli_alias</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the OSCAR services deployed on a certain resource.</span>
+
+<span class="sd">    :return: list of deployed services</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">set_default_oscar_cluster_from_alias</span><span class="p">(</span><span class="n">oscarcli_alias</span><span class="p">)</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;service list&quot;</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="n">deployed_services</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">output</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+        <span class="n">deployed_services</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">deployed_services</span></div>
+
+
+<div class="viewcode-block" id="set_default_oscar_cluster_from_alias"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.set_default_oscar_cluster_from_alias">[docs]</a><span class="k">def</span> <span class="nf">set_default_oscar_cluster_from_alias</span><span class="p">(</span><span class="n">oscarcli_alias</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sets a cluster as default for the OSCAR CLI binary; in this way the commands don&#39;t need to specify on which \</span>
+<span class="sd">     cluster they need to be executed.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;cluster default -s &quot;</span> <span class="o">+</span> <span class="n">oscarcli_alias</span><span class="p">)</span>
+    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="upload_input_files_to_storage"><a class="viewcode-back" href="../../oscarp.html#oscarp.cluster_manager.upload_input_files_to_storage">[docs]</a><span class="k">def</span> <span class="nf">upload_input_files_to_storage</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Uploads the input files to the MinIO storage bucket on the resource of the first service.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">storage_bucket</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_workflow_input_async</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">cluster</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;cluster&quot;</span><span class="p">]</span>
+
+    <span class="n">storage_bucket_found</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;ls minio-</span><span class="si">%s</span><span class="s2">/&quot;</span> <span class="o">%</span> <span class="n">cluster</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">storage_bucket</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">storage_bucket_found</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">storage_bucket_found</span><span class="p">:</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;mb minio-</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">storage_bucket</span><span class="p">))</span>
+        <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;ls minio-</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">storage_bucket</span><span class="p">))</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">return</span>
+
+    <span class="n">input_file_path</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;oscarp/input_files/&quot;</span> <span class="o">+</span> <span class="n">filename</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;cp </span><span class="si">%s</span><span class="s2"> minio-</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">input_file_path</span><span class="p">,</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">storage_bucket</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Uploading input file to </span><span class="si">%s</span><span class="s2"> storage bucket&quot;</span> <span class="o">%</span> <span class="n">cluster</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

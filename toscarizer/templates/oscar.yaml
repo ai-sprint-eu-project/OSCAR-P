@@ -1,0 +1,219 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: Template for launching an OSCAR Virtual Cluster
+
+topology_template:
+  inputs:
+    layer_num:
+      type: integer
+      default: 0
+    fe_cpus:
+      type: integer
+      default: 4
+    fe_mem:
+      type: scalar-unit.size
+      default: 4 GB
+    fe_disk:
+      type: scalar-unit.size
+      default: 40 GB
+    storage_size:
+      type: string
+      default: 100 GB
+  
+    fe_os_image:
+      type: string
+      default: ""
+
+    admin_token:
+      type: string
+      default: not_very_secret_token
+    oscar_password:
+      type: string
+      default: oscar123
+    minio_password:
+      type: string
+      default: minio123
+    cert_user_email:
+      type: string
+      default: "jhondoe@server.com"
+
+    cluster_name:
+      type: string
+      default: oscar
+    domain_name:
+      type: string
+      default: im.grycap.net
+  
+    max_wn_num:
+      type: integer
+      description: Maximum Number of WNs in the OSCAR cluster
+      default: 1
+      required: yes
+
+    top_influx_url:
+      type: string
+      description: URL of the Top level InfluxDB instance
+      default: 'https://influx.oncloudandheat.com'
+    top_influx_token:
+      type: string
+      description: Token to access the Top level InfluxDB API
+      default: ''
+    top_influx_org:
+      type: string
+      description: Organization configured in the Top level InfluxDB
+      default: 'aisprint'
+    top_influx_bucket:
+      type: string
+      description: Bucket to store the data in the Top level InfluxDB
+      default: 'bucket'
+    qos_constraints:
+      type: string
+      description: App QoS Constraints
+      default: ''
+    app_name:
+      type: string
+      description: App name
+      default: ''
+    local_influx_token:
+      default: aisprintTOKEN
+      description: API TOKEN for the local influx endpoint
+      type: string
+    local_influx_pass:
+      default: aisprintPASS
+      description: Admin pass for the local influx endpoint
+      type: string
+
+  node_templates:
+
+    oscar:
+      type: tosca.nodes.indigo.OSCAR
+      properties:
+        minio_secretkey: { get_input: minio_password }
+        password: { get_input: oscar_password }
+        dns_host: { concat: [ get_input: cluster_name, '.', get_input: domain_name ] }
+        minio_dns_host: { concat: [ "minio.", get_input: cluster_name, '.', get_input: domain_name ] }
+        minio_dns_host_console: { concat: [ "console.minio.", get_input: cluster_name, '.', get_input: domain_name ] }
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              http_port:
+                protocol: tcp
+                source: 80
+              https_port:
+                protocol: tcp
+                source: 443
+              minio_port:
+                protocol: tcp
+                source: 30300
+      requirements:
+        - host: lrms_front_end
+
+    monitoring:
+      type: tosca.nodes.SoftwareComponent
+      requirements:
+        - host: lrms_front_end 
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/ai-monitoring/ai-sprint-monit-site.yaml
+            inputs:
+              REMOTE_INFLUX_URL: { get_input: top_influx_url }
+              REMOTE_INFLUX_TOKEN: { get_input: top_influx_token }
+              REMOTE_INFLUX_BUCKET: { get_input: top_influx_bucket }
+              REMOTE_INFLUX_ORG: { get_input: top_influx_org }
+              QOS_CONSTRAINTS: { get_input: qos_constraints }
+              APP_NAME: { get_input: app_name }
+              LOCAL_INFLUX_PASS: { get_input: local_influx_pass }
+              LOCAL_INFLUX_TOKEN: { get_input: local_influx_token }
+              LOCAL_INFLUX_HOSTNAME: { concat: [ "influx.", get_input: cluster_name, '.', get_input: domain_name ] }
+
+    lrms_front_end:
+      type: tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes
+      artifacts:
+        kube_role:
+          file: grycap.kubernetes,ai-sprint
+          type: tosca.artifacts.AnsibleGalaxy.role
+      capabilities:
+        endpoint:
+          properties:
+            port: 30443
+            protocol: tcp
+      properties:
+        admin_username:  kubeuser
+        admin_token: { get_input: admin_token }
+        install_kubeapps:  false
+        install_metrics: true
+        install_nfs_client: true
+        install_ingress: true
+        version: 1.23.6
+        cert_manager: true
+        cert_user_email: { get_input: cert_user_email }
+        public_dns_name: { concat: [ get_input: cluster_name, '.', get_input: domain_name ] }
+      requirements:
+        - host: front
+
+    front:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        endpoint:
+          properties:
+            dns_name: kubeserver
+            additional_dns_names:
+            - { concat: [ get_input: cluster_name, '@', get_input: domain_name ] }
+            - { concat: [ "minio.", get_input: cluster_name, '@', get_input: domain_name ] }
+            - { concat: [ "console.minio.", get_input: cluster_name, '@', get_input: domain_name ] }
+            - { concat: [ "influx.", get_input: cluster_name, '@', get_input: domain_name ] }
+            network_name: PUBLIC
+        host:
+          properties:
+            num_cpus: { get_input: fe_cpus }
+            mem_size: { get_input: fe_mem }
+            disk_size: { get_input: fe_disk }
+        os:
+          properties:
+            type: linux
+            image: { get_input: fe_os_image }
+      requirements:
+        - local_storage:
+            node: my_block_storage
+            capability: tosca.capabilities.Attachment
+            relationship:
+              type: tosca.relationships.AttachesTo
+              properties:
+                location: /pv
+                device: hdb
+
+    my_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: storage_size }
+
+  outputs:
+    dashboard_endpoint:
+      value: { concat: [ 'https://', get_input: cluster_name, '.', get_input: domain_name , '/dashboard/' ] }
+    oscarui_endpoint:
+      value: { concat: [ 'https://', get_input: cluster_name, '.', get_input: domain_name , '/' ] }
+    minio_endpoint:
+      value: { concat: [ 'https://minio.', get_input: cluster_name, '.', get_input: domain_name, '/' ] }
+    console_minio_endpoint:
+      value: { concat: [ 'https://console.minio.', get_input: cluster_name, '.', get_input: domain_name, '/' ] }
+    admin_token:
+      value: { get_input: admin_token }
+    oscar_password:
+      value: { get_input: oscar_password }
+    minio_password:
+      value: { get_input: minio_password }
+    influx_endpoint:
+      value: { concat: [ "https://influx.", get_input: cluster_name, '.', get_input: domain_name ] }
+    influx_password:
+      value: { get_input: local_influx_pass }
+    influx_token:
+      value: { get_input: local_influx_token }
+    fe_node_ip:
+      value: { get_attribute: [ front, public_address, 0 ] }
+    fe_node_creds:
+      value: { get_attribute: [ front, endpoint, credential, 0 ] }

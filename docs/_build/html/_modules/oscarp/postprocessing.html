@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>oscarp.postprocessing &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">oscarp.postprocessing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for oscarp.postprocessing</h1><div class="highlight"><pre>
+<span></span><span class="c1"># processing that take place after the run are done</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">show_error</span><span class="p">,</span> <span class="n">write_list_of_strings_to_file</span><span class="p">,</span> <span class="n">auto_mkdir</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+
+
+<div class="viewcode-block" id="get_first_job"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.get_first_job">[docs]</a><span class="k">def</span> <span class="nf">get_first_job</span><span class="p">(</span><span class="n">timelist</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns the time of the creation of the first job in a given timelist</span>
+
+<span class="sd">    :param timelist: dictionary containing a list of jobs, each job itself a dictionary containing the following info:</span>
+<span class="sd">        service, node, job_create, pod_create, job_start, bash_script_start, bash_script_end, job_finish;</span>
+<span class="sd">        timelists are created by function &quot;get_timed_jobs_list&quot; in file &quot;retrieve_logs.py&quot;</span>
+<span class="sd">    :return: the time of the creation (job_create) of the first job as datetime</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">start_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">timelist</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">start_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timelist</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s2">&quot;job_create&quot;</span><span class="p">])</span>
+
+    <span class="n">first</span> <span class="o">=</span> <span class="n">start_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">start_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">&lt;</span> <span class="n">first</span><span class="p">:</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="n">s</span>
+    <span class="k">return</span> <span class="n">first</span></div>
+
+
+<div class="viewcode-block" id="get_last_job"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.get_last_job">[docs]</a><span class="k">def</span> <span class="nf">get_last_job</span><span class="p">(</span><span class="n">timelist</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns the time of the completion of the last job in a given timelist</span>
+
+<span class="sd">    :param timelist: dictionary containing a list of jobs, each job itself a dictionary containing the following info:</span>
+<span class="sd">        service, node, job_create, pod_create, job_start, bash_script_start, bash_script_end, job_finish;</span>
+<span class="sd">        timelists are created by function &quot;get_timed_jobs_list&quot; in file &quot;retrieve_logs.py&quot;</span>
+<span class="sd">    :return: the time of the completion (job_finish) of the last job as datetime</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">finish_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">timelist</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">finish_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timelist</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s2">&quot;job_finish&quot;</span><span class="p">])</span>
+
+    <span class="n">last</span> <span class="o">=</span> <span class="n">finish_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">finish_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">f</span> <span class="o">&gt;</span> <span class="n">last</span><span class="p">:</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">f</span>
+    <span class="k">return</span> <span class="n">last</span></div>
+
+
+<div class="viewcode-block" id="calculate_runtime"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.calculate_runtime">[docs]</a><span class="k">def</span> <span class="nf">calculate_runtime</span><span class="p">(</span><span class="n">working_dir</span><span class="p">,</span> <span class="n">services</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    given the directory of a specific run (i.e. &quot;Run #1/&quot;) and the list of services, it returns the runtime of that run;</span>
+<span class="sd">    the list of services is ordered, so it doesn&#39;t need too many checks</span>
+
+<span class="sd">    :param working_dir: directory of a specific run (i.e. &quot;Run #1/&quot;)</span>
+<span class="sd">    :param services: ordered list of services, each a dictionary containing name of the service (as string),</span>
+<span class="sd">        input bucket (as string) and output buckets (list of strings)</span>
+<span class="sd">    :return: runtime of the run in seconds</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">first</span><span class="p">,</span> <span class="n">last</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+        <span class="n">service_name</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">working_dir</span> <span class="o">+</span> <span class="s2">&quot;/time_table_&quot;</span> <span class="o">+</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot;.pkl&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>  <span class="c1"># todo move this to utils</span>
+            <span class="n">timelist</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timelist</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">first</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">first</span> <span class="o">=</span> <span class="n">get_first_job</span><span class="p">(</span><span class="n">timelist</span><span class="p">)</span>
+                <span class="n">last</span> <span class="o">=</span> <span class="n">get_last_job</span><span class="p">(</span><span class="n">timelist</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">last</span> <span class="o">=</span> <span class="n">get_last_job</span><span class="p">(</span><span class="n">timelist</span><span class="p">)</span>
+
+    <span class="n">runtime</span> <span class="o">=</span> <span class="p">(</span><span class="n">last</span> <span class="o">-</span> <span class="n">first</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<div class="viewcode-block" id="calculate_average"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.calculate_average">[docs]</a><span class="k">def</span> <span class="nf">calculate_average</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    receives a list of values, returns the average</span>
+<span class="sd">    :param values: list of values</span>
+<span class="sd">    :return: average</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">average</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+        <span class="n">average</span> <span class="o">+=</span> <span class="n">v</span>
+
+    <span class="k">return</span> <span class="n">average</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="calculate_parallelism"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.calculate_parallelism">[docs]</a><span class="k">def</span> <span class="nf">calculate_parallelism</span><span class="p">(</span><span class="n">cores</span><span class="p">,</span> <span class="n">max_cores</span><span class="p">,</span> <span class="n">memory</span><span class="p">,</span> <span class="n">max_memory</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    given the number of nodes, the maximum number of cores and the used number of core, it returns the parallelism level, that is the maximum possible number of containers that can run together at the same time</span>
+<span class="sd">    :param cores: number of active cores (i.e. 0.9, 1.9, 3.9)</span>
+<span class="sd">    :param max_cores: total number of cores on a node (i.e. 4)</span>
+<span class="sd">    :param nodes: number of active nodes</span>
+<span class="sd">    :return: the maximum possible number of containers that can run together at the same time</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cores</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">cores</span><span class="p">)</span>
+    <span class="n">parallelism</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_cores</span> <span class="o">/</span> <span class="n">cores</span><span class="p">)</span> <span class="o">*</span> <span class="n">nodes</span>
+    <span class="k">return</span> <span class="n">parallelism</span></div>
+
+
+<div class="viewcode-block" id="calculate_maximum_parallelism"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.calculate_maximum_parallelism">[docs]</a><span class="k">def</span> <span class="nf">calculate_maximum_parallelism</span><span class="p">(</span><span class="n">run</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    checks the resources of every service in a run and returns the parallelism level of the &quot;most parallel&quot; service</span>
+<span class="sd">    :param run: dictionary containing info on a specific run, such as the number of nodes, the list and configuration of services</span>
+<span class="sd">    :return: the parallelism level of the &quot;most parallel&quot; service</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">input_file_processing</span> <span class="kn">import</span> <span class="n">get_worker_nodes_info</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">max_cores</span><span class="p">,</span> <span class="n">max_memory</span> <span class="o">=</span> <span class="n">get_worker_nodes_info</span><span class="p">()</span>
+
+    <span class="n">smallest_core</span> <span class="o">=</span> <span class="mi">9999</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">]:</span>
+        <span class="n">service_cores</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;cpu&quot;</span><span class="p">])</span>
+        <span class="c1"># the smaller the number of cores used by service, the greater the parallelism level</span>
+        <span class="k">if</span> <span class="n">service_cores</span> <span class="o">&lt;</span> <span class="n">smallest_core</span><span class="p">:</span>
+            <span class="n">smallest_core</span> <span class="o">=</span> <span class="n">service_cores</span>
+
+    <span class="k">return</span> <span class="n">calculate_parallelism</span><span class="p">(</span><span class="n">smallest_core</span><span class="p">,</span> <span class="n">max_cores</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;nodes&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="prepare_runtime_data"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.prepare_runtime_data">[docs]</a><span class="k">def</span> <span class="nf">prepare_runtime_data</span><span class="p">(</span><span class="n">repetitions</span><span class="p">,</span> <span class="n">runs</span><span class="p">,</span> <span class="n">services</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    outputs two runtime/parallelism dataframes:</span>
+<span class="sd">    * the first contains every run (including repetitions)</span>
+<span class="sd">    * the second one instead averages the repeated runs</span>
+
+<span class="sd">    :param repetitions: number of times each run is repeated</span>
+<span class="sd">    :param runs: list of runs, each run being a dictionary containing info such as the number of nodes, the list and configuration of services</span>
+<span class="sd">    :param services: ordered list of services, each a dictionary containing name of the service (as string), input bucket (as string) and output buckets (list of strings)</span>
+<span class="sd">    :return: two runtime/parallelism dataframes, complete and averaged</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># print(runs[0])</span>
+
+    <span class="n">runtimes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">parallelism</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">run</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">averaged_runtimes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">averaged_parallelism</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">base_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="o">/</span> <span class="n">repetitions</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">base_length</span><span class="p">):</span>
+        <span class="n">runtimes_to_average</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repetitions</span><span class="p">):</span>
+            <span class="n">current_index</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="n">repetitions</span> <span class="o">+</span> <span class="n">j</span>
+            <span class="n">current_run</span> <span class="o">=</span> <span class="n">runs</span><span class="p">[</span><span class="n">current_index</span><span class="p">]</span>
+            <span class="n">working_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span><span class="p">,</span> <span class="n">current_run</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+            <span class="n">runtime</span> <span class="o">=</span> <span class="n">calculate_runtime</span><span class="p">(</span><span class="n">working_dir</span><span class="p">,</span> <span class="n">services</span><span class="p">)</span>
+            <span class="n">runtimes_to_average</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
+            <span class="n">runtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
+            <span class="n">parallelism</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_run</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;parallelism&quot;</span><span class="p">])</span>
+            <span class="n">run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Run #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">average_runtime</span> <span class="o">=</span> <span class="n">calculate_average</span><span class="p">(</span><span class="n">runtimes_to_average</span><span class="p">)</span>
+        <span class="n">average_runtime</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">average_runtime</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">averaged_runtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">average_runtime</span><span class="p">)</span>
+        <span class="n">averaged_parallelism</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_run</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;parallelism&quot;</span><span class="p">])</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;runtime&quot;</span><span class="p">:</span> <span class="n">runtimes</span><span class="p">,</span>
+        <span class="s2">&quot;parallelism&quot;</span><span class="p">:</span> <span class="n">parallelism</span><span class="p">,</span>
+        <span class="s2">&quot;runs&quot;</span><span class="p">:</span> <span class="n">run</span>
+    <span class="p">}</span>
+
+    <span class="n">averaged_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;runtime&quot;</span><span class="p">:</span> <span class="n">averaged_runtimes</span><span class="p">,</span>
+        <span class="s2">&quot;parallelism&quot;</span><span class="p">:</span> <span class="n">averaged_parallelism</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># dataframe</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;parallelism&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># averaged_dataframe</span>
+    <span class="n">adf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">averaged_data</span><span class="p">)</span>
+    <span class="n">adf</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;parallelism&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># print(df)</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">adf</span></div>
+
+
+<div class="viewcode-block" id="plot_runtime_core_graphs"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.plot_runtime_core_graphs">[docs]</a><span class="k">def</span> <span class="nf">plot_runtime_core_graphs</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">adf</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    plots a graph with all the runs and a line for the average</span>
+<span class="sd">    :param results_dir: path to the &quot;Results&quot; folder of the considered campaign</span>
+<span class="sd">    :param subfolder: specifies whether we&#39;re considering the full workflow (&quot;full&quot;) or a service</span>
+<span class="sd">    :param df: dataframe containing the runtime/parallelism data for every run (including repetitions)</span>
+<span class="sd">    :param adf: dataframe containing the runtime/parallelism data for every run (repeated runs are averaged)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">graphs_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/Graphs/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">graphs_dir</span><span class="p">)</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">run_name</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;parallelism&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;runtime&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;runs&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">run_name</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
+                     <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;parallelism&quot;</span><span class="p">:</span> <span class="s2">&quot;Parallelism&quot;</span><span class="p">,</span> <span class="s2">&quot;runtime&quot;</span><span class="p">:</span> <span class="s2">&quot;Runtime (seconds)&quot;</span><span class="p">,</span> <span class="s2">&quot;runs&quot;</span><span class="p">:</span> <span class="s2">&quot;Runs&quot;</span><span class="p">})</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">adf</span><span class="p">[</span><span class="s2">&quot;parallelism&quot;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">adf</span><span class="p">[</span><span class="s2">&quot;runtime&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Average&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">graphs_dir</span> <span class="o">+</span> <span class="s2">&quot;runtime_core_&quot;</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="make_runtime_core_csv"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.make_runtime_core_csv">[docs]</a><span class="k">def</span> <span class="nf">make_runtime_core_csv</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    writes the dataframe as CSV that can be fed to the ML library</span>
+
+<span class="sd">    :param results_dir: path to the &quot;Results&quot; folder of the considered campaign</span>
+<span class="sd">    :param subfolder: specifies whether we&#39;re considering the full workflow (&quot;full&quot;) or a service</span>
+<span class="sd">    :param df: dataframe containing the runtime/parallelism data for every run (including repetitions)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">csvs_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/CSVs/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">csvs_dir</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">csvs_dir</span> <span class="o">+</span> <span class="s2">&quot;runtime_core_&quot;</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;runtime,cores,log(cores)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)):</span>
+            <span class="n">core</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;parallelism&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">log_core</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">core</span><span class="p">)),</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">runtime</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;runtime&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">core</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_core</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_ml_predictions_graphs"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.plot_ml_predictions_graphs">[docs]</a><span class="k">def</span> <span class="nf">plot_ml_predictions_graphs</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    collects the required data needed to plot the ml graphs, such as test values, dataframes and predictions</span>
+<span class="sd">    :param results_dir: path to the &quot;Results&quot; folder of the considered campaign</span>
+<span class="sd">    :param run_name:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">graphs_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/Graphs/&quot;</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # first let&#39;s make a list of the &quot;subfolders&quot; we&#39;ll need to process</span>
+<span class="sd">    subfolders_list = [&quot;full&quot;]</span>
+<span class="sd">    </span>
+<span class="sd">    # if test_single_components is true, add them to the list</span>
+<span class="sd">    if get_test_single_components():</span>
+<span class="sd">        for s in services:</span>
+<span class="sd">            subfolders_list.append(s[&quot;name&quot;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">interpolation_test_values</span> <span class="o">=</span> <span class="n">get_interpolation_values</span><span class="p">()</span>
+    <span class="c1"># extrapolation_test_values = get_extrapolation_values()</span>
+
+    <span class="c1"># load the required dataframes</span>
+    <span class="n">df</span><span class="p">,</span> <span class="n">adf</span> <span class="o">=</span> <span class="n">load_dataframes</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">)</span>
+
+    <span class="c1"># gets required info for current subfolder</span>
+    <span class="n">interpolation</span> <span class="o">=</span> <span class="n">find_best_predictions</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">)</span>
+
+    <span class="c1"># plots interpolation and extrapolation graphs</span>
+    <span class="n">plot_ml_predictions_graph</span><span class="p">(</span><span class="n">graphs_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">interpolation_test_values</span><span class="p">,</span> <span class="n">interpolation</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">adf</span><span class="p">,</span> <span class="s2">&quot;interpolation&quot;</span><span class="p">)</span></div>
+    <span class="c1"># plot_ml_predictions_graph(graphs_dir, s, extrapolation_test_values, extrapolation, df, adf, &quot;extrapolation&quot;)</span>
+
+
+<div class="viewcode-block" id="plot_ml_predictions_graph"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.plot_ml_predictions_graph">[docs]</a><span class="k">def</span> <span class="nf">plot_ml_predictions_graph</span><span class="p">(</span><span class="n">graphs_dir</span><span class="p">,</span> <span class="n">subfolder</span><span class="p">,</span> <span class="n">test_values</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">adf</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    plots a graph with all the runs, a line for the average and red marks for the predictions</span>
+<span class="sd">    :param graphs_dir: directory containing the graphs of the considered campaign (i.e. &quot;Results/Graphs&quot;)</span>
+<span class="sd">    :param subfolder: specifies whether we&#39;re considering the full workflow (&quot;full&quot;) or a service</span>
+<span class="sd">    :param test_values: array with the &quot;parallelism&quot; values used to make the predictions on</span>
+<span class="sd">    :param dictionary: contains info on the prediction, such as the best model, its mape, and the predicted values</span>
+<span class="sd">    :param df: dataframe containing the runtime/parallelism data for every run (including repetitions)</span>
+<span class="sd">    :param adf: dataframe containing the runtime/parallelism data for every run (repeated runs are averaged)</span>
+<span class="sd">    :param operation: string, is either &quot;interpolation&quot; or &quot;extrapolation&quot;, only needed to save the image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">subfolder</span> <span class="o">==</span> <span class="s2">&quot;full&quot;</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Full workflow - &quot;</span> <span class="o">+</span> <span class="n">dictionary</span><span class="p">[</span><span class="s2">&quot;best_model&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; - MAPE &quot;</span> <span class="o">+</span> <span class="n">dictionary</span><span class="p">[</span><span class="s2">&quot;mape&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">subfolder</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">dictionary</span><span class="p">[</span><span class="s2">&quot;best_model&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; - MAPE &quot;</span> <span class="o">+</span> <span class="n">dictionary</span><span class="p">[</span><span class="s2">&quot;mape&quot;</span><span class="p">]</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;parallelism&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;runtime&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;runs&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
+                     <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;parallelism&quot;</span><span class="p">:</span> <span class="s2">&quot;Parallelism&quot;</span><span class="p">,</span> <span class="s2">&quot;runtime&quot;</span><span class="p">:</span> <span class="s2">&quot;Runtime (seconds)&quot;</span><span class="p">,</span> <span class="s2">&quot;runs&quot;</span><span class="p">:</span> <span class="s2">&quot;Runs&quot;</span><span class="p">})</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">adf</span><span class="p">[</span><span class="s2">&quot;parallelism&quot;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">adf</span><span class="p">[</span><span class="s2">&quot;runtime&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Average&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">test_values</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">dictionary</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Prediction&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">))</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">graphs_dir</span> <span class="o">+</span> <span class="s2">&quot;ml_&quot;</span> <span class="o">+</span> <span class="n">operation</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">subfolder</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span></div>
+
+
+<span class="c1"># todo move this to utils</span>
+<div class="viewcode-block" id="load_dataframes"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.load_dataframes">[docs]</a><span class="k">def</span> <span class="nf">load_dataframes</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">subfolder</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    loads the dataframe and averaged_dataframe for a specific subfolder of a specific campaign</span>
+<span class="sd">    :param results_dir: path to the &quot;Results&quot; folder of the considered campaign</span>
+<span class="sd">    :param subfolder: specifies whether we&#39;re considering the full workflow (&quot;full&quot;) or a service</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dataframe_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/Dataframes/&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="n">dataframe_dir</span> <span class="o">+</span> <span class="n">subfolder</span> <span class="o">+</span> <span class="s2">&quot;_data.pickle&quot;</span><span class="p">)</span>
+    <span class="n">adf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="n">dataframe_dir</span> <span class="o">+</span> <span class="n">subfolder</span> <span class="o">+</span> <span class="s2">&quot;_average_data.pickle&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">adf</span></div>
+
+
+<div class="viewcode-block" id="find_best_predictions"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.find_best_predictions">[docs]</a><span class="k">def</span> <span class="nf">find_best_predictions</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    called by plot_ml_predictions_graphs, returns two dictionaries containing the predictions made with the best models</span>
+<span class="sd">    :param results_dir: path to the &quot;Results&quot; folder of the considered campaign</span>
+<span class="sd">    :param run_name:</span>
+<span class="sd">    :returns: two dictionary, one for interpolation and one for extrapolation, each containing info on predictions such as the name of the best model, its mape and the predicted values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># dir definition</span>
+    <span class="n">models_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/Models/&quot;</span>
+    <span class="n">summaries_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/Summaries/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">summaries_dir</span><span class="p">)</span>
+    <span class="n">interpolation_dir</span> <span class="o">=</span> <span class="n">models_dir</span> <span class="o">+</span> <span class="s2">&quot;Interpolation/&quot;</span>
+    <span class="c1"># extrapolation_dir = models_dir + &quot;Extrapolation/&quot;</span>
+    <span class="n">sfs_model</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;_model_SFS/&quot;</span>
+    <span class="n">no_sfs_model</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;_model_noSFS/&quot;</span>
+
+    <span class="c1"># interpolation</span>
+    <span class="n">workdir</span> <span class="o">=</span> <span class="p">[</span><span class="n">interpolation_dir</span> <span class="o">+</span> <span class="n">sfs_model</span><span class="p">,</span> <span class="n">interpolation_dir</span> <span class="o">+</span> <span class="n">no_sfs_model</span><span class="p">]</span>
+    <span class="n">interpolation</span> <span class="o">=</span> <span class="n">find_best_prediction</span><span class="p">(</span><span class="n">workdir</span><span class="p">,</span> <span class="n">summaries_dir</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;_interpolation.txt&quot;</span><span class="p">)</span>
+
+    <span class="c1"># extrapolation</span>
+    <span class="c1"># workdir = [extrapolation_dir + sfs_model, extrapolation_dir + no_sfs_model]</span>
+    <span class="c1"># extrapolation = find_best_prediction(workdir, summaries_dir + subfolder + &quot;_extrapolation.txt&quot;)</span>
+
+    <span class="k">return</span> <span class="n">interpolation</span></div>
+
+
+<div class="viewcode-block" id="find_best_prediction"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.find_best_prediction">[docs]</a><span class="k">def</span> <span class="nf">find_best_prediction</span><span class="p">(</span><span class="n">workdir</span><span class="p">,</span> <span class="n">summary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    called by find_best_predictions, given two model directories (each contains 4 regressors) returns the predictions of the best model</span>
+<span class="sd">    :param workdir: path to two directories of the currently considered models (with and without SFS)</span>
+<span class="sd">    :param summary_path: path to the summary text file</span>
+<span class="sd">    :return: a dictionary containing info on predictions such as the name of the best model, its mape and the predicted values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">best_model_path</span><span class="p">,</span> <span class="n">min_mape</span><span class="p">,</span> <span class="n">summary</span> <span class="o">=</span> <span class="n">find_best_model</span><span class="p">(</span><span class="n">workdir</span><span class="p">)</span>
+
+    <span class="c1"># saves the summary to file</span>
+    <span class="n">write_list_of_strings_to_file</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="n">summary_path</span><span class="p">)</span>
+
+    <span class="n">prediction_csv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">best_model_path</span> <span class="o">+</span> <span class="s2">&quot;/prediction.csv&quot;</span><span class="p">)</span>
+    <span class="n">prediction_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prediction_csv</span><span class="p">[</span><span class="s2">&quot;pred&quot;</span><span class="p">]:</span>
+        <span class="n">prediction_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">best_model</span> <span class="o">=</span> <span class="n">best_model_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;noSFS&quot;</span> <span class="ow">in</span> <span class="n">best_model_path</span><span class="p">:</span>
+        <span class="n">best_model</span> <span class="o">+=</span> <span class="s2">&quot; (no SFS)&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">best_model</span> <span class="o">+=</span> <span class="s2">&quot; (SFS)&quot;</span>
+
+    <span class="n">dictionary</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;best_model&quot;</span><span class="p">:</span> <span class="n">best_model</span><span class="p">,</span>
+        <span class="s2">&quot;mape&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_mape</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; %&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">prediction_values</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">dictionary</span></div>
+
+
+<div class="viewcode-block" id="find_best_model"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.find_best_model">[docs]</a><span class="k">def</span> <span class="nf">find_best_model</span><span class="p">(</span><span class="n">workdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    called by find_best_prediction, returns the name of the best model, its mape, and a summary (as list of string) containing the mape of all other models</span>
+<span class="sd">    :param workdir: path to two directories of the currently considered models (with and without SFS)</span>
+<span class="sd">    :returns: name of best model, best mape, summary of other models performance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">min_mape</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">best_model</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="n">summary</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;noSFS&quot;</span><span class="p">]</span>
+
+    <span class="c1"># the two workdir are of course the models obtained with SFS and the ones without</span>
+    <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workdir</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;output_predict&quot;</span> <span class="ow">in</span> <span class="n">r</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="n">r</span> <span class="o">+</span> <span class="s2">&quot;/mape.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                    <span class="n">mape</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+                    <span class="n">mape_h</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">mape</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># human readable</span>
+                    <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mape_h</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; %&quot;</span><span class="p">)</span>
+                    <span class="c1"># if current model is better updates values</span>
+                    <span class="k">if</span> <span class="n">mape</span> <span class="o">&lt;</span> <span class="n">min_mape</span><span class="p">:</span>
+                        <span class="n">min_mape</span> <span class="o">=</span> <span class="n">mape</span>
+                        <span class="n">best_model</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="n">r</span>
+        <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;SFS&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">best_model</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">min_mape</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">summary</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="make_runtime_core_csv_for_ml"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.make_runtime_core_csv_for_ml">[docs]</a><span class="k">def</span> <span class="nf">make_runtime_core_csv_for_ml</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">averaged_data</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    generates the training and test set for the interpolation (or extrapolation) tests of a campaign</span>
+<span class="sd">    :param results_dir: path to the &quot;Results&quot; folder of the considered campaign</span>
+<span class="sd">    :param data: complete dataframe with all values obtained in the campaign, used for the training set</span>
+<span class="sd">    :param averaged_data: reduced dataframe with averaged values, used for the test set</span>
+<span class="sd">    :param operation: specifies whether we are performing Interpolation or Extrapolation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">csvs_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/CSVs/&quot;</span>
+    <span class="n">workdir</span> <span class="o">=</span> <span class="n">csvs_dir</span> <span class="o">+</span> <span class="n">operation</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">workdir</span><span class="p">)</span>
+
+    <span class="n">filename_training</span> <span class="o">=</span> <span class="n">workdir</span> <span class="o">+</span> <span class="s2">&quot;training_set.csv&quot;</span>
+    <span class="n">filename_test</span> <span class="o">=</span> <span class="n">workdir</span> <span class="o">+</span> <span class="s2">&quot;test_set.csv&quot;</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;runtime,cores,log(cores)</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;Interpolation&quot;</span><span class="p">:</span>
+        <span class="n">test_set_values</span> <span class="o">=</span> <span class="n">get_interpolation_values</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;Extrapolation&quot;</span><span class="p">:</span>
+        <span class="n">test_set_values</span> <span class="o">=</span> <span class="n">get_extrapolation_values</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;Invalid operation specified, exiting&quot;</span><span class="p">)</span>
+        <span class="n">quit</span><span class="p">()</span>
+
+    <span class="c1"># makes training set file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename_training</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+            <span class="n">core</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;parallelism&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">log_core</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">core</span><span class="p">)),</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">runtime</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;runtime&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">core</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">test_set_values</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">core</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_core</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># makes test set file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename_test</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">averaged_data</span><span class="p">)):</span>
+            <span class="n">core</span> <span class="o">=</span> <span class="n">averaged_data</span><span class="p">[</span><span class="s2">&quot;parallelism&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">log_core</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">core</span><span class="p">)),</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">runtime</span> <span class="o">=</span> <span class="n">averaged_data</span><span class="p">[</span><span class="s2">&quot;runtime&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">core</span> <span class="ow">in</span> <span class="n">test_set_values</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">core</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_core</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<span class="c1"># todo belongs to utils</span>
+<div class="viewcode-block" id="save_dataframes"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.save_dataframes">[docs]</a><span class="k">def</span> <span class="nf">save_dataframes</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">adf</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    saves the two dataframes to file so that they can be reused (when making the prediction graphs for example)</span>
+<span class="sd">    :param results_dir: path to the &quot;Results&quot; folder of the considered campaign</span>
+<span class="sd">    :param subfolder: specifies whether we&#39;re considering the full workflow (&quot;full&quot;) or a service</span>
+<span class="sd">    :param df: dataframe containing the runtime/parallelism data for every run (including repetitions)</span>
+<span class="sd">    :param adf: dataframe containing the runtime/parallelism data for every run (repeated runs are averaged)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dataframe_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/Dataframes/&quot;</span>
+
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">dataframe_dir</span><span class="p">)</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">dataframe_dir</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;_data.pickle&quot;</span><span class="p">)</span>
+    <span class="n">adf</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">dataframe_dir</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;_average_data.pickle&quot;</span><span class="p">)</span></div>
+
+
+<span class="c1"># todo move to utils / file utils</span>
+<div class="viewcode-block" id="read_csv_header"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.read_csv_header">[docs]</a><span class="k">def</span> <span class="nf">read_csv_header</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns the header of a csv file</span>
+<span class="sd">    :param filepath: path to the csv file</span>
+<span class="sd">    :returns: header of specified csv file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<span class="c1"># todo move to utils / file utils</span>
+<div class="viewcode-block" id="read_csv_content"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.read_csv_content">[docs]</a><span class="k">def</span> <span class="nf">read_csv_content</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns the content of a csv file</span>
+<span class="sd">    :param filepath: path to the csv file</span>
+<span class="sd">    :returns: content of specified csv file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="merge_csv_of_service"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.merge_csv_of_service">[docs]</a><span class="k">def</span> <span class="nf">merge_csv_of_service</span><span class="p">(</span><span class="n">campaign_dir</span><span class="p">,</span> <span class="n">service_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    for all the runs in a campaign, merges together the CSV files of a specified service</span>
+<span class="sd">    :param campaign_dir: path to the current campaign folder, containing all the &quot;Run #i&quot; folders as well as the &quot;Results&quot; folder</span>
+<span class="sd">    :param service_name: name of the considered service</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">runs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">campaign_dir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;Run #&quot;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+            <span class="n">runs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot;_jobs.csv&quot;</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">read_csv_header</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">campaign_dir</span><span class="p">,</span> <span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+
+    <span class="n">merged_csv</span> <span class="o">=</span> <span class="p">[</span><span class="n">header</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">:</span>
+        <span class="n">merged_csv</span> <span class="o">+=</span> <span class="n">read_csv_content</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">campaign_dir</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;Results/merged_&quot;</span> <span class="o">+</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">campaign_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">merged_csv</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_statistics"><a class="viewcode-back" href="../../oscarp.html#oscarp.postprocessing.make_statistics">[docs]</a><span class="k">def</span> <span class="nf">make_statistics</span><span class="p">(</span><span class="n">campaign_dir</span><span class="p">,</span> <span class="n">results_dir</span><span class="p">,</span> <span class="n">subfolder</span><span class="p">,</span> <span class="n">services</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    for every operation of a service (wait, overhead, compute etc.) calculates its mean, average, variance, population standard deviation and coefficient of variation, saved in a text file under &quot;Results/Statistics&quot;</span>
+
+<span class="sd">    :param campaign_dir: path to the current campaign folder, containing all the &quot;Run #i&quot; folders as well as the &quot;Results&quot; folder</span>
+<span class="sd">    :param results_dir: path to the &quot;Results&quot; folder of the considered campaign</span>
+<span class="sd">    :param subfolder: specifies whether we&#39;re considering the full workflow (&quot;full&quot;) or a service</span>
+<span class="sd">    :param services: ordered list of services, each a dictionary containing name of the service (as string), input bucket (as string) and output buckets (list of strings)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">statistics_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/Statistics/&quot;</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">statistics_dir</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">service_name</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">campaign_dir</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;Run&quot;</span> <span class="ow">in</span> <span class="n">run</span><span class="p">:</span>
+                <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">campaign_dir</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">subfolder</span><span class="p">,</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot;_jobs.csv&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">csv_to_list_of_dict</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;job_name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;wait&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;wait&quot;</span><span class="p">]),</span>
+                        <span class="s2">&quot;pod_creation&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;pod_creation&quot;</span><span class="p">]),</span>
+                        <span class="s2">&quot;overhead&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;overhead&quot;</span><span class="p">]),</span>
+                        <span class="s2">&quot;compute_time&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;compute_time&quot;</span><span class="p">]),</span>
+                        <span class="s2">&quot;write_back&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;write_back&quot;</span><span class="p">])</span>
+                    <span class="p">}</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">data_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+
+            <span class="n">data_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;wait&quot;</span><span class="p">]</span>
+            <span class="n">data_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;pod_creation&quot;</span><span class="p">]</span>
+            <span class="n">data_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;overhead&quot;</span><span class="p">]</span>
+            <span class="n">data_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;compute_time&quot;</span><span class="p">]</span>
+            <span class="n">data_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">+=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;write_back&quot;</span><span class="p">]</span>
+
+        <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data_matrix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">total</span> <span class="o">/</span> <span class="n">n</span>
+        <span class="n">mean</span> <span class="o">+=</span> <span class="mf">0.0000000001</span>
+        <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">data_matrix</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span>
+        <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">variance</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span>  <span class="c1"># population standard deviation</span>
+        <span class="n">coeff_of_variation</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">/</span> <span class="n">mean</span>
+
+        <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;wait&quot;</span><span class="p">,</span> <span class="s2">&quot;pod_creation&quot;</span><span class="p">,</span> <span class="s2">&quot;overhead&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_time&quot;</span><span class="p">,</span> <span class="s2">&quot;write_back&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">operations</span><span class="p">)):</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">operations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span><span class="p">)</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Total: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">total</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">2</span><span class="p">)))</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Mean: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">mean</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">2</span><span class="p">)))</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Variance: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">variance</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">2</span><span class="p">)))</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Population standard deviation: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">sigma</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">2</span><span class="p">)))</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Coefficient of variation: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">coeff_of_variation</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">2</span><span class="p">)))</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">subfolder</span> <span class="o">==</span> <span class="s2">&quot;full&quot;</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;full_workflow&quot;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot;_statistics.txt&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot;_only_statistics.txt&quot;</span>
+        <span class="n">write_list_of_strings_to_file</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">statistics_dir</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

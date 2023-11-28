@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>oscarp.oscarp &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">oscarp.oscarp</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for oscarp.oscarp</h1><div class="highlight"><pre>
+<span></span><span class="c1"># this file calls all methods needed for the whole campaign</span>
+<span class="c1"># tried to keep it as slim as possible for easier reading (failed miserably)</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">executables</span>
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+
+<span class="kn">from</span> <span class="nn">cluster_manager</span> <span class="kn">import</span> <span class="n">remove_all_buckets</span><span class="p">,</span> <span class="n">generate_fdl_configuration</span><span class="p">,</span> \
+    <span class="n">remove_all_services</span><span class="p">,</span> <span class="n">apply_fdl_configuration_wrapped</span><span class="p">,</span> <span class="n">clean_s3_buckets</span><span class="p">,</span> <span class="n">upload_input_files_to_storage</span>
+<span class="kn">from</span> <span class="nn">gui</span> <span class="kn">import</span> <span class="n">show_runs</span>
+<span class="kn">from</span> <span class="nn">input_file_processing</span> <span class="kn">import</span> <span class="n">show_workflow</span>
+<span class="kn">from</span> <span class="nn">postprocessing</span> <span class="kn">import</span> <span class="n">prepare_runtime_data</span><span class="p">,</span> <span class="n">plot_runtime_core_graphs</span><span class="p">,</span> <span class="n">make_runtime_core_csv</span><span class="p">,</span> <span class="n">save_dataframes</span>
+<span class="kn">from</span> <span class="nn">process_logs</span> <span class="kn">import</span> <span class="n">make_csv_table</span><span class="p">,</span> <span class="n">make_done_file</span>
+<span class="kn">from</span> <span class="nn">retrieve_logs</span> <span class="kn">import</span> <span class="n">pull_logs</span><span class="p">,</span> <span class="n">pull_lambda_logs</span><span class="p">,</span> <span class="n">get_data_size</span>
+<span class="kn">from</span> <span class="nn">run_manager</span> <span class="kn">import</span> <span class="n">move_input_files_to_input_bucket</span><span class="p">,</span> <span class="n">wait_services_completion</span><span class="p">,</span> <span class="n">move_input_files_to_s3_bucket</span>
+<span class="kn">from</span> <span class="nn">mllibrary_manager</span> <span class="kn">import</span> <span class="n">run_mllibrary</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">auto_mkdir</span><span class="p">,</span> <span class="n">show_warning</span><span class="p">,</span> <span class="n">delete_directory</span><span class="p">,</span> <span class="n">get_command_output_wrapped</span>
+
+<span class="k">global</span> <span class="n">runs</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">repetitions</span><span class="p">,</span> <span class="n">current_run_dir</span><span class="p">,</span> <span class="n">banner_name</span>
+
+
+<div class="viewcode-block" id="prepare_clusters"><a class="viewcode-back" href="../../oscarp.html#oscarp.oscarp.prepare_clusters">[docs]</a><span class="k">def</span> <span class="nf">prepare_clusters</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prepares the cluster for the new test by removing the leftover services and bucket, then generating and applying</span>
+<span class="sd">    the new FDL configuration. It also uploads the input files to the storage bucket on the resource of the first</span>
+<span class="sd">    service, if the test is asynchronous.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">remove_all_services</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_single_service_test</span><span class="p">:</span>
+        <span class="n">remove_all_buckets</span><span class="p">()</span>
+        <span class="n">clean_s3_buckets</span><span class="p">()</span>
+    <span class="n">generate_fdl_configuration</span><span class="p">()</span>
+    <span class="n">apply_fdl_configuration_wrapped</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_run_index</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_single_service_test</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_sync</span><span class="p">:</span>
+        <span class="n">upload_input_files_to_storage</span><span class="p">()</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="start_run_full"><a class="viewcode-back" href="../../oscarp.html#oscarp.oscarp.start_run_full">[docs]</a><span class="k">def</span> <span class="nf">start_run_full</span><span class="p">():</span>
+    <span class="n">move_input_files_to_input_bucket</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">wait_services_completion</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="end_run_full"><a class="viewcode-back" href="../../oscarp.html#oscarp.oscarp.end_run_full">[docs]</a><span class="k">def</span> <span class="nf">end_run_full</span><span class="p">(</span><span class="n">current_run_index</span><span class="p">):</span>
+    <span class="n">pull_logs</span><span class="p">(</span><span class="n">current_run_dir</span><span class="p">)</span>
+    <span class="n">pull_lambda_logs</span><span class="p">()</span>
+    <span class="c1"># make_csv_table(current_run_dir, run[&quot;services&quot;], current_run_index)</span>
+    <span class="c1"># download_bucket(campaign_dir + &quot;/Database&quot;, &quot;database&quot;)</span>
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_single_service_test</span> <span class="ow">and</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_base_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># first run and testing a single service</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">has_active_lambdas</span><span class="p">:</span>  <span class="c1"># if it&#39;s not currently testing a lambda</span>
+            <span class="c1"># urgent implement data_size calculation for lambda</span>
+            <span class="n">get_data_size</span><span class="p">()</span>
+    <span class="n">make_done_file</span><span class="p">(</span><span class="n">current_run_dir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_single_lambda"><a class="viewcode-back" href="../../oscarp.html#oscarp.oscarp.test_single_lambda">[docs]</a><span class="k">def</span> <span class="nf">test_single_lambda</span><span class="p">():</span>
+    <span class="k">return</span>  <span class="c1"># todo RBF</span>
+    <span class="n">services</span> <span class="o">=</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">]</span>
+    <span class="c1"># print(services[0][&quot;input_bucket&quot;])</span>
+    <span class="n">move_input_files_to_s3_bucket</span><span class="p">(</span><span class="n">services</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;input_bucket&quot;</span><span class="p">])</span>
+    <span class="n">wait_services_completion</span><span class="p">(</span><span class="n">services</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="final_processing"><a class="viewcode-back" href="../../oscarp.html#oscarp.oscarp.final_processing">[docs]</a><span class="k">def</span> <span class="nf">final_processing</span><span class="p">():</span>  <span class="c1"># TODO this needs to be moved/called elsewhere</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Final processing... &quot;</span> <span class="o">+</span> <span class="n">banner_name</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">))</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">results_dir</span><span class="p">)</span>
+
+    <span class="n">process_subfolder</span><span class="p">()</span>
+    <span class="n">make_done_file</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">results_dir</span><span class="p">)</span>
+
+    <span class="k">return</span>  <span class="c1"># todo RBF</span>
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_single_service_test</span><span class="p">:</span>
+        <span class="n">run_mllibrary</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="c1"># print(&quot;\n\n&quot;)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="process_subfolder"><a class="viewcode-back" href="../../oscarp.html#oscarp.oscarp.process_subfolder">[docs]</a><span class="k">def</span> <span class="nf">process_subfolder</span><span class="p">():</span>
+    <span class="n">df</span><span class="p">,</span> <span class="n">adf</span> <span class="o">=</span> <span class="n">prepare_runtime_data</span><span class="p">(</span><span class="n">repetitions</span><span class="p">,</span> <span class="n">runs</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">)</span>
+    <span class="c1"># make_statistics(campaign_dir, results_dir, subfolder, services)</span>
+    <span class="n">plot_runtime_core_graphs</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_name</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">adf</span><span class="p">)</span>
+    <span class="n">make_runtime_core_csv</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_name</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+
+    <span class="c1"># no longer needed, the full runtime_core is generated elsewhere and the models are no longer tested</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    if get_train_ml_models():</span>
+<span class="sd">        make_runtime_core_csv_for_ml(results_dir, df, adf, &quot;Interpolation&quot;)</span>
+<span class="sd">        make_runtime_core_csv_for_ml(results_dir, df, adf, &quot;Extrapolation&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">save_dataframes</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_name</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">adf</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="manage_campaign_dir"><a class="viewcode-back" href="../../oscarp.html#oscarp.oscarp.manage_campaign_dir">[docs]</a><span class="k">def</span> <span class="nf">manage_campaign_dir</span><span class="p">():</span>  <span class="c1"># todo update comment</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    if the campaign_dir already exists, and a &quot;Results&quot; folder is present, it exits, otherwise it finds the last</span>
+<span class="sd">        run (i.e. &quot;Run #11&quot;), it deletes it (it may have failed) and resumes from there if the run_dir doesn&#39;t exist</span>
+<span class="sd">        it creates it and starts as normal</span>
+
+<span class="sd">    :return: the index of the next run to execute; this is the index from the list &quot;runs&quot;, not the run id (i.e. run</span>
+<span class="sd">        with index 0 has id &quot;Run #1&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+                <span class="n">gp</span><span class="o">.</span><span class="n">results_dir</span><span class="p">):</span>  <span class="c1"># if there&#39;s a Result folder, the specific deployment has been completely tested</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;done&quot;</span><span class="p">):</span>
+                <span class="n">show_warning</span><span class="p">(</span><span class="s2">&quot;Run completed, skipping...&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># testing is completed but results are not</span>
+                <span class="n">delete_directory</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">results_dir</span><span class="p">)</span>
+                <span class="n">final_processing</span><span class="p">()</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="n">show_warning</span><span class="p">(</span><span class="s2">&quot;Resuming...&quot;</span><span class="p">)</span>
+
+        <span class="n">folder_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">folder_list</span><span class="p">)</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        if folder_list:  # if not empty</span>
+<span class="sd">            for i in range(1, len(folder_list) + 1):</span>
+<span class="sd">                if i &gt; gp.current_run_index:</span>
+<span class="sd">                    target_dir = gp.runs_dir + &quot;Run #&quot; + str(i)</span>
+<span class="sd">                    delete_directory(target_dir)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;cp input.yaml &#39;&quot;</span> <span class="o">+</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span> <span class="o">+</span> <span class="s2">&quot;input.yaml&#39;&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../oscarp.html#oscarp.oscarp.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">current_run_dir</span>
+    <span class="c1"># clusters = get_clusters_info()</span>
+    <span class="c1"># base, runs = run_scheduler()</span>
+    <span class="c1"># simple_services = get_simple_services(runs[0][&quot;services&quot;])</span>
+    <span class="c1"># repetitions, cooldown, stop_at_run = get_run_info()</span>
+    <span class="c1"># current_run_index = stop_at_run - 1</span>
+
+    <span class="k">global</span> <span class="n">banner_name</span>
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_name</span> <span class="o">==</span> <span class="s2">&quot;Full_workflow&quot;</span><span class="p">:</span>
+        <span class="n">banner_name</span> <span class="o">=</span> <span class="s2">&quot;(full workflow)&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">service_name</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">banner_name</span> <span class="o">=</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+
+    <span class="c1"># s = manage_campaign_dir()</span>
+    <span class="c1"># if s == -1:</span>
+    <span class="c1">#    return</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Starting </span><span class="si">%s</span><span class="s2"> of </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">current_run_id</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">),</span> <span class="n">banner_name</span><span class="p">),</span> <span class="s2">&quot;blue&quot;</span><span class="p">))</span>
+
+    <span class="n">show_workflow</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_dry</span><span class="p">:</span>
+        <span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">return</span>
+
+    <span class="n">current_run_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_run_id</span><span class="p">)</span>
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">current_run_dir</span><span class="p">)</span>
+
+    <span class="c1"># if not clean_buckets and len(run[&quot;services&quot;]) == 1 and run[&quot;services&quot;][0][&quot;cluster&quot;] == &quot;AWS Lambda&quot;:</span>
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_single_service_test</span> <span class="ow">and</span> <span class="n">gp</span><span class="o">.</span><span class="n">has_active_lambdas</span><span class="p">:</span>
+        <span class="n">test_single_lambda</span><span class="p">()</span>  <span class="c1"># todo rewrite</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">prepare_clusters</span><span class="p">()</span>
+        <span class="n">start_run_full</span><span class="p">()</span>
+
+    <span class="k">return</span>
+
+    <span class="n">end_run_full</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">current_run_index</span><span class="p">)</span>
+
+    <span class="k">return</span>
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_last_run</span><span class="p">:</span>
+        <span class="n">final_processing</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

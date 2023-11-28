@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>classes package &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="jmeterLoadInjector package" href="jmeterLoadInjector.html" />
+    <link rel="prev" title="OSCAR-P-Coordinator package" href="OSCAR-P-Coordinator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">classes package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-classes.Component">classes.Component module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#classes.Component.Component"><code class="docutils literal notranslate"><span class="pre">Component</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Component.Component._get_correct_image"><code class="docutils literal notranslate"><span class="pre">Component._get_correct_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Component.Component._update_name"><code class="docutils literal notranslate"><span class="pre">Component._update_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Component.Component.add_container"><code class="docutils literal notranslate"><span class="pre">Component.add_container()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Component.Component.is_partition"><code class="docutils literal notranslate"><span class="pre">Component.is_partition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Component.Component.set_following_partition"><code class="docutils literal notranslate"><span class="pre">Component.set_following_partition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Component.Component.set_parallelism"><code class="docutils literal notranslate"><span class="pre">Component.set_parallelism()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Component.Component.set_time_distribution"><code class="docutils literal notranslate"><span class="pre">Component.set_time_distribution()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#classes.Component.Container"><code class="docutils literal notranslate"><span class="pre">Container</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Component.Container._update_id"><code class="docutils literal notranslate"><span class="pre">Container._update_id()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#classes.Component.generalize_name"><code class="docutils literal notranslate"><span class="pre">generalize_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#classes.Component.generalize_unit_id"><code class="docutils literal notranslate"><span class="pre">generalize_unit_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#classes.Component.get_alternative_containers"><code class="docutils literal notranslate"><span class="pre">get_alternative_containers()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-classes.Resource">classes.Resource module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#classes.Resource.Resource"><code class="docutils literal notranslate"><span class="pre">Resource</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Resource.Resource._set_ssh"><code class="docutils literal notranslate"><span class="pre">Resource._set_ssh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Resource.Resource._set_type"><code class="docutils literal notranslate"><span class="pre">Resource._set_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Resource.Resource.is_lambda"><code class="docutils literal notranslate"><span class="pre">Resource.is_lambda()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Resource.Resource.is_physical"><code class="docutils literal notranslate"><span class="pre">Resource.is_physical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Resource.Resource.set_storage_provider_alias"><code class="docutils literal notranslate"><span class="pre">Resource.set_storage_provider_alias()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-classes.Service">classes.Service module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#classes.Service.Service"><code class="docutils literal notranslate"><span class="pre">Service</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Service.Service.set_buckets_full_workflow"><code class="docutils literal notranslate"><span class="pre">Service.set_buckets_full_workflow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes.Service.Service.set_buckets_single_testing"><code class="docutils literal notranslate"><span class="pre">Service.set_buckets_single_testing()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+      <li class="breadcrumb-item active">classes package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/classes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="classes-package">
+<h1>classes package<a class="headerlink" href="#classes-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-classes.Component">
+<span id="classes-component-module"></span><h2>classes.Component module<a class="headerlink" href="#module-classes.Component" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="classes.Component.Component">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">classes.Component.</span></span><span class="sig-name descname"><span class="pre">Component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#Component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.Component" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Component class, contains components parsed from candidate_deployments.yaml</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self.name</strong> (<em>str</em>) – name of the component (e.g. blurry-faces, blurry-faces-onnx_partition1_1, …)</p></li>
+<li><p><strong>self.component_key</strong> (<em>str</em>) – (e.g. component1, component1_partitionX_1, …)</p></li>
+<li><p><strong>self.containers</strong> (<em>[</em><a class="reference internal" href="#classes.Component.Container" title="classes.Component.Container"><em>Container</em></a><em>]</em>) – list of the Containers of the component</p></li>
+<li><p><strong>self.next</strong> (<em>str</em>) – if the component is partitioned, and there is a following partition, this will contain the
+name of the next component, otherwise is None</p></li>
+<li><p><strong>self.parallelism</strong> (<em>[</em><em>int</em><em>]</em>) – parallelism array as copied from run_parameters.yaml</p></li>
+<li><p><strong>self.time_distribution</strong> (<em>str</em>) – time distribution (deterministic or exponential), copied from run_parameters.yaml</p></li>
+<li><p><strong>self.partition_group</strong> (<em>int</em>) – the first value in the partition id, e.g. the X in X_1</p></li>
+<li><p><strong>self.partition_number</strong> (<em>int</em>) – inside a group, identify the position of the partition (first, second, …)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Component.Component._get_correct_image">
+<span class="sig-name descname"><span class="pre">_get_correct_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docker_image</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#Component._get_correct_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.Component._get_correct_image" title="Permalink to this definition"></a></dt>
+<dd><p>Selects the correct image for a given container, if there are multiple available</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>docker_image</strong> – this could be a str or a list of str</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the correct image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Component.Component._update_name">
+<span class="sig-name descname"><span class="pre">_update_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition_group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#Component._update_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.Component._update_name" title="Permalink to this definition"></a></dt>
+<dd><p>Transforms the name of a partitioned component from the general version (e.g. X_1), to a specific one (e.g. 1_1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Component.Component.add_container">
+<span class="sig-name descname"><span class="pre">add_container</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">computing_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">docker_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu_requirement</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#Component.add_container"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.Component.add_container" title="Permalink to this definition"></a></dt>
+<dd><p>Adds a Container to the component, see class Container for more details</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Component.Component.is_partition">
+<span class="sig-name descname"><span class="pre">is_partition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#Component.is_partition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.Component.is_partition" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the component is partitioned, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Component.Component.set_following_partition">
+<span class="sig-name descname"><span class="pre">set_following_partition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">components</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#Component.set_following_partition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.Component.set_following_partition" title="Permalink to this definition"></a></dt>
+<dd><p>This function looks for components that have the same partition group and partition number + 1; if found,         “self.next” is set to the name of that component</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>components</strong> – list of Components, only those in the same group of the one being called (e.g. only the one
+that fall under component1 and its partitions)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Component.Component.set_parallelism">
+<span class="sig-name descname"><span class="pre">set_parallelism</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parallelism</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#Component.set_parallelism"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.Component.set_parallelism" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the parallelism of the component to the value received</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Component.Component.set_time_distribution">
+<span class="sig-name descname"><span class="pre">set_time_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_distribution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#Component.set_time_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.Component.set_time_distribution" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the time distribution of the component to the value received</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="classes.Component.Container">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">classes.Component.</span></span><span class="sig-name descname"><span class="pre">Container</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">computing_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu_requirement</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#Container"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.Container" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container class, contains containers parsed from candidate_deployments.yaml</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self.parent</strong> (<em>str</em>) – parent Component, actual class not just the name</p></li>
+<li><p><strong>self.unit</strong> (<em>str</em>) – unit id of the container, e.g. <a class="reference external" href="mailto:C1&#37;&#52;&#48;VM2">C1<span>&#64;</span>VM2</a>, <a class="reference external" href="mailto:C1P1&#46;1&#37;&#52;&#48;VM2">C1P1<span>&#46;</span>1<span>&#64;</span>VM2</a>, …</p></li>
+<li><p><strong>self.image</strong> (<em>str</em>) – URL of the image of the container</p></li>
+<li><p><strong>self.computing_units</strong> (<em>float</em>) – number of computing units required by the container</p></li>
+<li><p><strong>self.memory_size</strong> (<em>int</em>) – memory size of the container, in MB</p></li>
+<li><p><strong>self.gpu_requirement</strong> (<em>bool</em>) – True if the container requires a GPU, False otherwise</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Component.Container._update_id">
+<span class="sig-name descname"><span class="pre">_update_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition_group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#Container._update_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.Container._update_id" title="Permalink to this definition"></a></dt>
+<dd><p>Transforms the unit ID of the container from the general version (e.g. X_1), to a specific one (e.g. 1_1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="classes.Component.generalize_name">
+<span class="sig-prename descclassname"><span class="pre">classes.Component.</span></span><span class="sig-name descname"><span class="pre">generalize_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#generalize_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.generalize_name" title="Permalink to this definition"></a></dt>
+<dd><p>Receives a specific component_name, and returns a generalized one     (e.g. blurry-faces-onnx_partitionX_1 -&gt; blurry-faces-onnx_partition1_1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return str<span class="colon">:</span></dt>
+<dd class="field-odd"><p>generalized component name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="classes.Component.generalize_unit_id">
+<span class="sig-prename descclassname"><span class="pre">classes.Component.</span></span><span class="sig-name descname"><span class="pre">generalize_unit_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#generalize_unit_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.generalize_unit_id" title="Permalink to this definition"></a></dt>
+<dd><p>Receives a specific unit ID and returns a generalized one (e.g. <a class="reference external" href="mailto:C1P1&#46;1&#37;&#52;&#48;VM1">C1P1<span>&#46;</span>1<span>&#64;</span>VM1</a> -&gt; <a class="reference external" href="mailto:C1PX&#46;1&#37;&#52;&#48;VM1">C1PX<span>&#46;</span>1<span>&#64;</span>VM1</a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return str<span class="colon">:</span></dt>
+<dd class="field-odd"><p>generalized unit ID</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="classes.Component.get_alternative_containers">
+<span class="sig-prename descclassname"><span class="pre">classes.Component.</span></span><span class="sig-name descname"><span class="pre">get_alternative_containers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Component.html#get_alternative_containers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Component.get_alternative_containers" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the list of alternative CONTAINERS keys of a base component, if the resource matches</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return [str]<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of alternative containers keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-classes.Resource">
+<span id="classes-resource-module"></span><h2>classes.Resource module<a class="headerlink" href="#module-classes.Resource" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="classes.Resource.Resource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">classes.Resource.</span></span><span class="sig-name descname"><span class="pre">Resource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Resource.html#Resource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Resource.Resource" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Resource class, contains resources parsed from candidate_resources.yaml</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self.name</strong> (<em>str</em>) – name of the resource (e.g. VM1, RasPi, …)</p></li>
+<li><p><strong>self.type</strong> (<em>str</em>) – type of resource, physical, virtual or lambda</p></li>
+<li><p><strong>self.oscarcli_alias</strong> (<em>str</em>) – oscarcli alias of the resource (e.g. oscar-VM1)</p></li>
+<li><p><strong>self.storage_provider</strong> (<em>str</em>) – storage provider of the resource, usually minio, s3 for lambdas</p></li>
+<li><p><strong>self.storage_provider_alias</strong> (<em>str</em>) – storage provider alias (e.g. minio-VM1), always “aws” for lambdas</p></li>
+<li><p><strong>self.ssh</strong> (<em>str</em>) – ssh address of the resource, if physical, saved as <a class="reference external" href="mailto:user&#37;&#52;&#48;host">user<span>&#64;</span>host</a>:port</p></li>
+<li><p><strong>self.total_nodes</strong> (<em>int</em>) – max number of nodes of the resource</p></li>
+<li><p><strong>self.max_cpu_cores</strong> (<em>float</em>) – max number of cpu cores of the resource (node resource times the number of nodes)</p></li>
+<li><p><strong>self.max_memory_mb</strong> (<em>int</em>) – max memory size in MB of the resource (node resource times the number of nodes)</p></li>
+<li><p><strong>self.bucket_name</strong> (<em>str</em>) – name of the s3 bucket of the resource (if lambda, None otherwise)</p></li>
+<li><p><strong>self.execution_layer</strong> (<em>int</em>) – execution layer of the resource</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Resource.Resource._set_ssh">
+<span class="sig-name descname"><span class="pre">_set_ssh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">physical_nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Resource.html#Resource._set_ssh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Resource.Resource._set_ssh" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the ssh address of the resource from the physical_nodes.yaml file if the resource is physical, otherwise         sets it to None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Resource.Resource._set_type">
+<span class="sig-name descname"><span class="pre">_set_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Resource.html#Resource._set_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Resource.Resource._set_type" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the type of the resource as physical, virtual or lambda</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Resource.Resource.is_lambda">
+<span class="sig-name descname"><span class="pre">is_lambda</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Resource.html#Resource.is_lambda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Resource.Resource.is_lambda" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the resource is on a lambda, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Resource.Resource.is_physical">
+<span class="sig-name descname"><span class="pre">is_physical</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Resource.html#Resource.is_physical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Resource.Resource.is_physical" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the resource is physical, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Resource.Resource.set_storage_provider_alias">
+<span class="sig-name descname"><span class="pre">set_storage_provider_alias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_provider</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Resource.html#Resource.set_storage_provider_alias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Resource.Resource.set_storage_provider_alias" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the storage provider alias of the resource</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>storage_provider</strong> (<em>str</em>) – either minio or s3</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-classes.Service">
+<span id="classes-service-module"></span><h2>classes.Service module<a class="headerlink" href="#module-classes.Service" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="classes.Service.Service">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">classes.Service.</span></span><span class="sig-name descname"><span class="pre">Service</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_bucket_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Service.html#Service"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Service.Service" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Service class, a service is the object that is actually deployed, this class contains the necessary information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self.unit</strong> (<em>str</em>) – unit id of the service (e.g. <a class="reference external" href="mailto:C1&#37;&#52;&#48;VM2">C1<span>&#64;</span>VM2</a>, <a class="reference external" href="mailto:C1P1&#46;1&#37;&#52;&#48;VM2">C1P1<span>&#46;</span>1<span>&#64;</span>VM2</a>, …)</p></li>
+<li><p><strong>self.name</strong> (<em>str</em>) – name of the service (e.g. blurry-faces, …)</p></li>
+<li><p><strong>self.resource</strong> (<em>str</em>) – resource of the service (e.g. VM1, RasPi, …)</p></li>
+<li><p><strong>self.image</strong> (<em>str</em>) – URL of the docker image of the service</p></li>
+<li><p><strong>self.input_bucket_index</strong> (<em>int</em>) – index of the input bucket, numbered in increasing order (e.g. 0 for the first     service, 1 for the second…)</p></li>
+<li><p><strong>self.input_bucket</strong> (<em>str</em>) – name of the input bucket, numbered in increasing order (e.g. bucket0 for the first     service, bucket1 for the second…)</p></li>
+<li><p><strong>self.output_bucket</strong> (<em>str</em>) – name of the output bucket</p></li>
+<li><p><strong>self.storage_provider_alias</strong> (<em>str</em>) – storage provider alias, the dash is replaced with a dot (e.g. minio-VM1     -&gt; minio.VM1) so that it be written in the correct format to the FDL file</p></li>
+<li><p><strong>self.oscarcli_alias</strong> (<em>str</em>) – oscarcli alias of the service, as copied by the correct resource</p></li>
+<li><p><strong>self.cpu</strong> (<em>float</em>) – number of cpu cores required by the service</p></li>
+<li><p><strong>self.memory</strong> (<em>int</em>) – memory size in MB required by the service</p></li>
+<li><p><strong>self.is_lambda</strong> (<em>bool</em>) – True if the service is a lambda, False otherwise</p></li>
+<li><p><strong>self.parallelism</strong> (<em>[</em><em>int</em><em>]</em>) – parallelism array as copied by the parent component</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Service.Service.set_buckets_full_workflow">
+<span class="sig-name descname"><span class="pre">set_buckets_full_workflow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Service.html#Service.set_buckets_full_workflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Service.Service.set_buckets_full_workflow" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the input and output buckets for the test in the full workflow, so the output buckets needs to match the         input bucket of the next service</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="classes.Service.Service.set_buckets_single_testing">
+<span class="sig-name descname"><span class="pre">set_buckets_single_testing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/classes/Service.html#Service.set_buckets_single_testing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#classes.Service.Service.set_buckets_single_testing" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the input and output buckets for the test in the single testing, the index is the same, the input bucket         is named “temp” and the output bucket is named “trash”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="OSCAR-P-Coordinator.html" class="btn btn-neutral float-left" title="OSCAR-P-Coordinator package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jmeterLoadInjector.html" class="btn btn-neutral float-right" title="jmeterLoadInjector package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

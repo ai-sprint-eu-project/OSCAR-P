@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>oscarp.retrieve_logs &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">oscarp.retrieve_logs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for oscarp.retrieve_logs</h1><div class="highlight"><pre>
+<span></span><span class="c1"># oscar and kubectl logs are saved as txts and processed in dictionaries saved as pickle files</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">import</span> <span class="nn">executables</span>
+
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="kn">import</span> <span class="nn">jmeterLoadInjector</span>
+<span class="kn">from</span> <span class="nn">cluster_manager</span> <span class="kn">import</span> <span class="n">set_default_oscar_cluster_from_alias</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">configure_ssh_client</span><span class="p">,</span> <span class="n">get_ssh_output</span><span class="p">,</span> <span class="n">get_command_output_wrapped</span><span class="p">,</span> <span class="n">show_debug_info</span><span class="p">,</span> <span class="n">read_yaml</span><span class="p">,</span> \
+    <span class="n">write_yaml</span><span class="p">,</span> <span class="n">show_error</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+
+<span class="k">global</span> <span class="n">run_name</span>
+
+
+<span class="c1"># todo must comment more everywhere</span>
+
+<div class="viewcode-block" id="pull_logs"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.pull_logs">[docs]</a><span class="k">def</span> <span class="nf">pull_logs</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Collecting OSCAR logs...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="k">global</span> <span class="n">run_name</span>  <span class="c1"># todo run_name is actually a path to the run dir, fix</span>
+    <span class="n">run_name</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;mkdir </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;/logs_kubectl</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;mkdir </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;/logs_oscar</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">has_active_lambdas</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;mkdir </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;/logs_lambda</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">is_first</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;is_lambda&quot;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+
+        <span class="n">service_name</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+        <span class="c1"># pull returns FALSE if jmeter_results ain&#39;t there</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_first</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">pull_jmeter_logs</span><span class="p">(</span><span class="n">service_name</span><span class="p">):</span>
+            <span class="n">timed_job_list</span> <span class="o">=</span> <span class="n">get_timed_jobs_list</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;oscarcli_alias&quot;</span><span class="p">],</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;cluster&quot;</span><span class="p">])</span>
+            <span class="n">save_timelist_to_file</span><span class="p">(</span><span class="n">timed_job_list</span><span class="p">,</span> <span class="n">service_name</span><span class="p">)</span>
+
+        <span class="n">is_first</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="calculate_throughput"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.calculate_throughput">[docs]</a><span class="k">def</span> <span class="nf">calculate_throughput</span><span class="p">(</span><span class="n">timed_job_list</span><span class="p">):</span>
+    <span class="n">date_format</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">timed_job_list</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;job_create&quot;</span><span class="p">]</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">timed_job_list</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;job_finish&quot;</span><span class="p">]</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">date_format</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">date_format</span><span class="p">)</span>
+
+    <span class="n">test_duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+    <span class="n">test_duration</span> <span class="o">=</span> <span class="n">test_duration</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+
+    <span class="n">requests_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timed_job_list</span><span class="p">)</span>
+
+    <span class="n">throughput_second</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">requests_count</span> <span class="o">/</span> <span class="n">test_duration</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">throughput_minute</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">requests_count</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">/</span> <span class="n">test_duration</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Throughput: &quot;</span><span class="p">,</span> <span class="n">throughput_second</span><span class="p">,</span> <span class="s2">&quot;req/s&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Throughput: &quot;</span><span class="p">,</span> <span class="n">throughput_minute</span><span class="p">,</span> <span class="s2">&quot;req/min&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">throughput_second</span></div>
+
+
+<div class="viewcode-block" id="pull_jmeter_logs"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.pull_jmeter_logs">[docs]</a><span class="k">def</span> <span class="nf">pull_jmeter_logs</span><span class="p">(</span><span class="n">service_name</span><span class="p">):</span>
+    <span class="n">date_format</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+
+    <span class="n">filepath</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">Run #</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_run_index</span><span class="p">,</span> <span class="s2">&quot;jmeter_results.csv&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+    <span class="n">timed_job_list</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">rejected_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">timestamp</span><span class="p">,</span> <span class="n">elapsed</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[:</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">thread_name</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="n">thread_name</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">response_code</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="c1"># print(response_code)</span>
+
+        <span class="k">if</span> <span class="n">response_code</span> <span class="o">!=</span> <span class="s2">&quot;200&quot;</span><span class="p">:</span>
+            <span class="n">rejected_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># if interval != &quot;1&quot;:  todo ?</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">timestamp</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span>
+
+        <span class="k">while</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">timed_job_list</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="n">timed_job_list</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">service_name</span>
+        <span class="p">}</span>
+
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]))</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">date_format</span><span class="p">)</span>
+
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">elapsed</span><span class="p">))</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]))</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">date_format</span><span class="p">)</span>
+
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+
+        <span class="c1"># if delta &lt; 0.9 * gp.run_parameters[&quot;synchronous&quot;][&quot;request_timeout_seconds&quot;]:</span>
+        <span class="n">timed_job_list</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;job_create&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_time</span>
+        <span class="n">timed_job_list</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;job_finish&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_time</span>
+        <span class="n">timed_job_list</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval</span>
+        <span class="n">timed_job_list</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;response_code&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response_code</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        else:</span>
+<span class="sd">            # urgent, write this to file</span>
+<span class="sd">            print(&quot;Warning: job in interval&quot;, interval, &quot;took&quot;, delta, &quot;seconds and was discarded&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_single_service_test</span><span class="p">:</span>
+        <span class="n">gp</span><span class="o">.</span><span class="n">input_files_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timed_job_list</span><span class="p">)</span>
+        <span class="c1"># gp.real_throughput = calculate_throughput(timed_job_list)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rejected requests: &quot;</span><span class="p">,</span> <span class="n">rejected_counter</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total requests: &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">timed_job_list</span><span class="p">))</span>
+    <span class="n">save_timelist_to_file</span><span class="p">(</span><span class="n">timed_job_list</span><span class="p">,</span> <span class="n">service_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<span class="c1"># for a given service, it saves as text file a copy of the logs from OSCAR and kubectl, and also returns a timelist</span>
+<span class="c1"># todo explain better in comment</span>
+<div class="viewcode-block" id="get_timed_jobs_list"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.get_timed_jobs_list">[docs]</a><span class="k">def</span> <span class="nf">get_timed_jobs_list</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">oscarcli_alias</span><span class="p">,</span> <span class="n">resource</span><span class="p">):</span>
+    <span class="n">date_format</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+
+    <span class="c1"># pod_list = get_kubernetes_pod_list(client)  # todo restore?</span>
+
+    <span class="n">set_default_oscar_cluster_from_alias</span><span class="p">(</span><span class="n">oscarcli_alias</span><span class="p">)</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;service logs list &quot;</span> <span class="o">+</span> <span class="n">service</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">))</span>
+    <span class="n">logs_list</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">logs_list</span><span class="p">:</span>
+        <span class="n">logs_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">timed_job_list</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">logs_list</span><span class="p">):</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">job_name</span> <span class="o">=</span> <span class="n">segments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">job_status</span> <span class="o">=</span> <span class="n">segments</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">job_status</span> <span class="o">!=</span> <span class="s2">&quot;Succeeded&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">job_status</span> <span class="o">==</span> <span class="s2">&quot;Failed&quot;</span><span class="p">:</span>
+                <span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;Job &quot;</span> <span class="o">+</span> <span class="n">job_name</span> <span class="o">+</span> <span class="s2">&quot; failed&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">job_status</span> <span class="o">==</span> <span class="s2">&quot;Pending&quot;</span><span class="p">:</span>
+                <span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;Job &quot;</span> <span class="o">+</span> <span class="n">job_name</span> <span class="o">+</span> <span class="s2">&quot; is stuck&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;Job &quot;</span> <span class="o">+</span> <span class="n">job_name</span> <span class="o">+</span> <span class="s2">&quot; is in status &quot;</span> <span class="o">+</span> <span class="n">job_status</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">job_create</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">segments</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">date_format</span><span class="p">)</span>
+        <span class="n">job_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">segments</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">date_format</span><span class="p">)</span>
+        <span class="n">job_finish</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">segments</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">date_format</span><span class="p">)</span>
+
+        <span class="n">pod_node</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">pod_creation</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># todo restore? tricky, physical and virtual nodes are accessed in different ways (for now)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        for pod in pod_list:</span>
+<span class="sd">            if job_name in pod:</span>
+<span class="sd">                pod_name = pod.split()[1]</span>
+<span class="sd">                pod_creation, pod_node = get_kubectl_log(client, pod_name)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">bash_script_start</span><span class="p">,</span> <span class="n">bash_script_end</span> <span class="o">=</span> <span class="n">get_oscar_log</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">job_name</span><span class="p">)</span>
+
+        <span class="n">timed_job_list</span><span class="p">[</span><span class="n">job_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="n">service</span><span class="p">,</span>
+                                    <span class="s2">&quot;resource&quot;</span><span class="p">:</span> <span class="n">resource</span><span class="p">,</span>
+                                    <span class="c1"># &quot;node&quot;: pod_node,</span>
+                                    <span class="s2">&quot;job_create&quot;</span><span class="p">:</span> <span class="n">job_create</span><span class="p">,</span>
+                                    <span class="c1"># &quot;pod_create&quot;: pod_creation,</span>
+                                    <span class="s2">&quot;job_start&quot;</span><span class="p">:</span> <span class="n">job_start</span><span class="p">,</span>
+                                    <span class="s2">&quot;bash_script_start&quot;</span><span class="p">:</span> <span class="n">bash_script_start</span><span class="p">,</span>
+                                    <span class="s2">&quot;bash_script_end&quot;</span><span class="p">:</span> <span class="n">bash_script_start</span><span class="p">,</span>
+                                    <span class="s2">&quot;job_finish&quot;</span><span class="p">:</span> <span class="n">job_finish</span>
+                                    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">timed_job_list</span></div>
+
+
+<span class="c1"># retrieve the content of the log of a given job</span>
+<div class="viewcode-block" id="get_oscar_log"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.get_oscar_log">[docs]</a><span class="k">def</span> <span class="nf">get_oscar_log</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">job_name</span><span class="p">):</span>
+    <span class="c1"># command = oscar_cli + &quot;service logs get &quot; + service_name + &quot; &quot; + job_name</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;service logs get &quot;</span> <span class="o">+</span> <span class="n">service_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">job_name</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="c1"># date_format_precise = &quot;%d-%m-%Y %H:%M:%S.%f&quot;</span>
+    <span class="n">date_format_precise</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S,</span><span class="si">%f</span><span class="s2">&quot;</span>
+
+    <span class="n">time_correction</span> <span class="o">=</span> <span class="n">get_time_correction</span><span class="p">()</span>
+
+    <span class="n">bash_script_start</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">bash_script_end</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;/logs_oscar/&quot;</span> <span class="o">+</span> <span class="n">job_name</span> <span class="o">+</span> <span class="s2">&quot;.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="c1"># nanoseconds after finding the script it is executed</span>
+            <span class="k">if</span> <span class="s2">&quot;Script file found in &#39;/oscar/config/script.sh&#39;&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="c1"># bash_script_start = line.split(&quot; &quot;)[1].replace(&quot;\n&quot;, &quot;&quot;)</span>
+                <span class="n">bash_script_start</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; - &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># print(bash_script_start)</span>
+                <span class="n">bash_script_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">bash_script_start</span><span class="p">,</span> <span class="n">date_format_precise</span><span class="p">)</span> \
+                                    <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">time_correction</span><span class="p">)</span>
+            <span class="c1"># this happens immediately after the bash script exits</span>
+            <span class="k">if</span> <span class="s2">&quot;Searching for files to upload in folder&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">bash_script_end</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; - &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">bash_script_end</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">bash_script_end</span><span class="p">,</span> <span class="n">date_format_precise</span><span class="p">)</span> \
+                                  <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">time_correction</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bash_script_start</span><span class="p">,</span> <span class="n">bash_script_end</span></div>
+
+
+<div class="viewcode-block" id="get_kubernetes_pod_list"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.get_kubernetes_pod_list">[docs]</a><span class="k">def</span> <span class="nf">get_kubernetes_pod_list</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;sudo kubectl get pods -A&quot;</span>
+    <span class="k">return</span> <span class="n">get_ssh_output</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span></div>
+
+
+<span class="c1"># downloads and save to file the log for the specified pod, returns pod creation time and node</span>
+<span class="c1"># the pod creation time is the only time not gathered from OSCAR, so it&#39;s easier to apply the time correction here</span>
+<div class="viewcode-block" id="get_kubectl_log"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.get_kubectl_log">[docs]</a><span class="k">def</span> <span class="nf">get_kubectl_log</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">pod_name</span><span class="p">):</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;sudo kubectl describe pods &quot;</span> <span class="o">+</span> <span class="n">pod_name</span> <span class="o">+</span> <span class="s2">&quot; -n oscar-svc&quot;</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">get_ssh_output</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;/logs_kubectl/&quot;</span> <span class="o">+</span> <span class="n">pod_name</span> <span class="o">+</span> <span class="s2">&quot;.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="n">create_time</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="n">time_correction</span> <span class="o">=</span> <span class="n">get_time_correction</span><span class="p">()</span>
+    <span class="n">show_debug_info</span><span class="p">(</span><span class="s2">&quot;Time correction: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time_correction</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;Start Time:&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">create_time</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; +&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">create_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">create_time</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> %b %Y %H:%M:%S&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">time_correction</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;Node:&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">create_time</span><span class="p">,</span> <span class="n">node</span></div>
+
+
+<div class="viewcode-block" id="pull_lambda_logs"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.pull_lambda_logs">[docs]</a><span class="k">def</span> <span class="nf">pull_lambda_logs</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    pulls the log for every lambda function, start time is the first &quot;storage event found&quot;, end is last &quot;uploading file&quot;</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">has_active_lambdas</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Collecting Lambda logs...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;is_lambda&quot;</span><span class="p">]:</span>
+            <span class="n">service_name</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;cluster&quot;</span><span class="p">]</span>
+
+            <span class="n">timed_job_list</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws logs describe-log-streams --log-group-name /aws/lambda/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">service_name</span>
+            <span class="n">log_streams</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+            <span class="n">log_stream_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">log_streams</span> <span class="k">if</span> <span class="s2">&quot;logStreamName&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">]</span>
+            <span class="n">log_stream_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">log_stream_names</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">log_stream_name</span> <span class="ow">in</span> <span class="n">log_stream_names</span><span class="p">:</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws logs get-log-events --log-group-name /aws/lambda/</span><span class="si">%s</span><span class="s2"> --log-stream-name </span><span class="si">%s</span><span class="s2">&quot;</span> \
+                          <span class="o">%</span> <span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">log_stream_name</span><span class="p">)</span>
+
+                <span class="n">log</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">log</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="s2">&quot;START&quot;</span> <span class="ow">in</span> <span class="n">log</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="n">request_id</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span>
+                        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]))</span>
+
+                        <span class="n">timed_job_list</span><span class="p">[</span><span class="n">request_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="n">service_name</span><span class="p">,</span>
+                            <span class="s2">&quot;resource&quot;</span><span class="p">:</span> <span class="n">resource</span><span class="p">,</span>
+                            <span class="s2">&quot;job_create&quot;</span><span class="p">:</span> <span class="n">start_time</span><span class="p">,</span>
+                            <span class="s2">&quot;job_finish&quot;</span><span class="p">:</span> <span class="kc">None</span>
+                        <span class="p">}</span>
+
+                    <span class="k">if</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="n">log</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="n">request_id</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n</span><span class="se">\&quot;</span><span class="s2">,&quot;</span><span class="p">)</span>
+                        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]))</span>
+
+                        <span class="n">timed_job_list</span><span class="p">[</span><span class="n">request_id</span><span class="p">][</span><span class="s2">&quot;job_finish&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_time</span>
+
+            <span class="n">save_timelist_to_file</span><span class="p">(</span><span class="n">timed_job_list</span><span class="p">,</span> <span class="n">service_name</span><span class="p">)</span>
+
+            <span class="c1"># todo move this elsewhere, BEFORE starting the tests</span>
+            <span class="k">for</span> <span class="n">log_stream_name</span> <span class="ow">in</span> <span class="n">log_stream_names</span><span class="p">:</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws logs delete-log-stream --log-group-name /aws/lambda/</span><span class="si">%s</span><span class="s2"> --log-stream-name </span><span class="si">%s</span><span class="s2">&quot;</span> \
+                          <span class="o">%</span> <span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">log_stream_name</span><span class="p">)</span>
+                <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="get_scar_log"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.get_scar_log">[docs]</a><span class="k">def</span> <span class="nf">get_scar_log</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">update_marker</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;scar log -n &quot;</span> <span class="o">+</span> <span class="n">function</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="n">cropped_log</span> <span class="o">=</span> <span class="n">log</span>
+
+    <span class="k">if</span> <span class="n">function</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">scar_logs_end_indexes</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">index_last_line</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">scar_logs_end_indexes</span><span class="p">[</span><span class="n">function</span><span class="p">]</span>
+        <span class="n">cropped_log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">index_last_line</span><span class="p">:]</span>
+
+    <span class="k">if</span> <span class="n">update_marker</span><span class="p">:</span>
+        <span class="n">gp</span><span class="o">.</span><span class="n">scar_logs_end_indexes</span><span class="p">[</span><span class="n">function</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">log</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;/logs_scar/&quot;</span> <span class="o">+</span> <span class="n">function</span> <span class="o">+</span> <span class="s2">&quot;.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">cropped_log</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cropped_log</span></div>
+
+
+<span class="c1"># dumps a timelist to file</span>
+<div class="viewcode-block" id="save_timelist_to_file"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.save_timelist_to_file">[docs]</a><span class="k">def</span> <span class="nf">save_timelist_to_file</span><span class="p">(</span><span class="n">timed_job_list</span><span class="p">,</span> <span class="n">service_name</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;/time_table_&quot;</span> <span class="o">+</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">timed_job_list</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;/time_table_&quot;</span> <span class="o">+</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot;.pkl&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">timed_job_list</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="get_data_size"><a class="viewcode-back" href="../../oscarp.html#oscarp.retrieve_logs.get_data_size">[docs]</a><span class="k">def</span> <span class="nf">get_data_size</span><span class="p">():</span>  <span class="c1"># urgent missing SCAR support</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="s2">&quot;-partition&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-partition&quot;</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="s2">&quot;_partition&quot;</span> <span class="o">+</span> <span class="n">b</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">name</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">cluster</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;cluster&quot;</span><span class="p">]</span>
+    <span class="n">output_bucket</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;output_bucket&quot;</span><span class="p">]</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;ls minio-</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">output_bucket</span><span class="p">))</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="n">data_size</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;MiB&quot;</span> <span class="ow">in</span> <span class="n">size</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;MiB&quot;</span><span class="p">))</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">elif</span> <span class="s2">&quot;GiB&quot;</span> <span class="ow">in</span> <span class="n">size</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;GiB&quot;</span><span class="p">))</span> <span class="o">*</span> <span class="mi">1000000</span>
+        <span class="k">elif</span> <span class="s2">&quot;KiB&quot;</span> <span class="ow">in</span> <span class="n">size</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;KiB&quot;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="s2">&quot;B&quot;</span> <span class="ow">in</span> <span class="n">size</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1000</span>
+
+        <span class="c1"># print(size, type(size))</span>
+        <span class="n">data_size</span> <span class="o">+=</span> <span class="n">size</span>
+
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;oscarp/components_data_size.yaml&quot;</span>
+    <span class="n">components_data_sizes</span> <span class="o">=</span> <span class="n">read_yaml</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">components_data_sizes</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">components_data_sizes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_size</span>
+        <span class="n">write_yaml</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">components_data_sizes</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>deployment_generator &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">deployment_generator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for deployment_generator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+
+<span class="kn">from</span> <span class="nn">classes.Component</span> <span class="kn">import</span> <span class="n">generalize_unit_id</span><span class="p">,</span> <span class="n">get_alternative_containers</span>
+<span class="kn">from</span> <span class="nn">classes.Service</span> <span class="kn">import</span> <span class="n">Service</span>
+<span class="kn">from</span> <span class="nn">oscarp.utils</span> <span class="kn">import</span> <span class="n">show_fatal_error</span><span class="p">,</span> <span class="n">show_warning</span><span class="p">,</span> <span class="n">delete_directory</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+
+
+<span class="c1"># # # # # # # # # # # #</span>
+<span class="c1"># Main functions</span>
+<span class="c1"># # # # # # # # # # # #</span>
+
+<div class="viewcode-block" id="get_testing_units"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#deployment_generator.get_testing_units">[docs]</a><span class="k">def</span> <span class="nf">get_testing_units</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function lists all the available containers, divided in groups, BUT partitions are grouped together.</span>
+<span class="sd">    Component_groups contains a list for each group (component1, component2, ...), and each list contains all the \</span>
+<span class="sd">     testing_units for that group; a testing_unit is just a way to keep together all the correlated partitions.</span>
+<span class="sd">    An example of testing unit for a base component is [&#39;C1@VM1&#39;], an example for a partitioned component \</span>
+<span class="sd">     is [&#39;C1P1.1@VM1&#39;, &#39;C1P1.2@VM1&#39;]</span>
+
+<span class="sd">    :return: container_groups, list of lists</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">containers_groups</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">components_groups</span><span class="p">:</span>
+
+        <span class="c1"># create a new &quot;testing_units&quot; column for the current group</span>
+        <span class="n">testing_units</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">group</span> <span class="o">==</span> <span class="s2">&quot;alternatives&quot;</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">components_groups</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">component</span><span class="o">.</span><span class="n">is_partition</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">component</span><span class="o">.</span><span class="n">partition_number</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+
+                    <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">containers</span><span class="p">:</span>
+                        <span class="n">testing_units</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">container</span><span class="o">.</span><span class="n">unit</span><span class="p">])</span>
+
+                    <span class="c1"># it is assumed that the first partitions always have a next component</span>
+                    <span class="c1"># this isn&#39;t recursive, it only considers the first partition and its next component</span>
+                    <span class="n">next_component</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">components_names</span><span class="p">[</span><span class="n">component</span><span class="o">.</span><span class="n">next</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">next_component</span><span class="o">.</span><span class="n">containers</span><span class="p">:</span>
+                        <span class="n">testing_units</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">container</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">containers</span><span class="p">:</span>
+                    <span class="n">testing_units</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">container</span><span class="o">.</span><span class="n">unit</span><span class="p">])</span>
+
+        <span class="c1"># add the testing units for the current group to the list</span>
+        <span class="n">containers_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">testing_units</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">containers_groups</span></div>
+
+
+<div class="viewcode-block" id="get_deployments"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#deployment_generator.get_deployments">[docs]</a><span class="k">def</span> <span class="nf">get_deployments</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    From the testing units, generates all the possible combinations of them; these are the possible deployments.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">itertools</span>
+
+    <span class="n">gp</span><span class="o">.</span><span class="n">deployments</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">iterables</span> <span class="o">=</span> <span class="n">get_testing_units</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">iterables</span><span class="p">)):</span>
+        <span class="n">deployment</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">t</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">unit</span><span class="p">:</span>
+                <span class="n">deployment</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+        <span class="n">gp</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deployment</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="reorder_deployments"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#deployment_generator.reorder_deployments">[docs]</a><span class="k">def</span> <span class="nf">reorder_deployments</span><span class="p">(</span><span class="n">deployments</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>  <span class="c1"># todo fix or remove</span>
+    <span class="n">reordered_deployments</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">combined_resources</span> <span class="o">=</span> <span class="n">get_resources_combinations</span><span class="p">(</span><span class="n">resources</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">combined_resources</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">deployments</span><span class="p">:</span>
+            <span class="n">used_resources</span> <span class="o">=</span> <span class="n">get_used_resources</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">check_match_combined_used_resources</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">used_resources</span><span class="p">):</span>
+                <span class="n">reordered_deployments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reordered_deployments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">deployments</span><span class="p">:</span>
+                <span class="n">deployments</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">reordered_deployments</span></div>
+
+
+<div class="viewcode-block" id="get_services_to_test"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#deployment_generator.get_services_to_test">[docs]</a><span class="k">def</span> <span class="nf">get_services_to_test</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a list of services to test given the current deployment, skipping the ones already tested in previous \</span>
+<span class="sd">     deployments, and adding in the alternative versions, if any.</span>
+
+<span class="sd">    :return: list of services (Service class)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">services_to_test</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tested_services</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># step one, checks what was tested in previous deployments</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_index</span><span class="p">):</span>
+        <span class="n">tested_services</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">deployments</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># step two, add services only if they haven&#39;t been tested already AND they aren&#39;t lambdas</span>
+    <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">service</span><span class="o">.</span><span class="n">unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tested_services</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">service</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">:</span>
+            <span class="n">services_to_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">service</span><span class="p">)</span>
+
+    <span class="c1"># step three, create and add alternatives services</span>
+    <span class="n">alternative_services_to_test</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">services_to_test</span><span class="p">:</span>
+        <span class="n">alternative_containers</span> <span class="o">=</span> <span class="n">get_alternative_containers</span><span class="p">(</span><span class="n">service</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">alternative_container_key</span> <span class="ow">in</span> <span class="n">alternative_containers</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">alternative_container_key</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">bucket_index</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">input_bucket_index</span>
+            <span class="n">alternative_services_to_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Service</span><span class="p">(</span><span class="n">alternative_container_key</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bucket_index</span><span class="p">))</span>
+
+    <span class="n">services_to_test</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">alternative_services_to_test</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">services_to_test</span></div>
+
+
+<div class="viewcode-block" id="make_deployments_summary"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#deployment_generator.make_deployments_summary">[docs]</a><span class="k">def</span> <span class="nf">make_deployments_summary</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prints the list of the deployments, and also writes it to a file.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Deployments:&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">campaign_dir</span> <span class="o">+</span> <span class="s2">&quot;/deployments_summary.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">deployments</span><span class="p">)):</span>
+            <span class="n">deployment</span> <span class="o">=</span> <span class="s2">&quot;deployment_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">deployments</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">deployment</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">deployment</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_resources_requirements"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#deployment_generator.make_resources_requirements">[docs]</a><span class="k">def</span> <span class="nf">make_resources_requirements</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the requirements of each resource in terms of nodes, given the hardware of the resource, the \</span>
+<span class="sd">     requirements of the containers, and the number of parallel instances to be supported.</span>
+<span class="sd">    The calculations are done taking into account a 10% headroom for the OS in terms of both CPU and RAM.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Calculating hardware requirements...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+
+    <span class="n">gp</span><span class="o">.</span><span class="n">current_resources</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">:</span>
+        <span class="n">group</span><span class="p">,</span> <span class="n">resource_id</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)</span>
+
+        <span class="c1"># container requirements</span>
+        <span class="n">container</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">generalize_unit_id</span><span class="p">(</span><span class="n">component</span><span class="p">)]</span>
+        <span class="n">parallelism</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parallelism</span>
+        <span class="n">cpu</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">cpu</span>
+        <span class="n">memory</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">memory</span>
+
+        <span class="c1"># node resources (minus 10% headroom for OS)</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">resource_id</span><span class="p">]</span>
+        <span class="n">node_cpu</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">max_cpu_cores</span> <span class="o">*</span> <span class="mf">0.9</span>
+        <span class="n">node_memory</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">max_memory_mb</span> <span class="o">*</span> <span class="mf">0.9</span>
+        <span class="n">total_nodes</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">total_nodes</span>
+
+        <span class="c1"># make sure that a node can fit at least one container</span>
+        <span class="k">if</span> <span class="n">cpu</span> <span class="o">&gt;</span> <span class="n">node_cpu</span> <span class="ow">or</span> <span class="n">memory</span> <span class="o">&gt;</span> <span class="n">node_memory</span><span class="p">:</span>
+            <span class="n">show_fatal_error</span><span class="p">(</span><span class="s2">&quot;Container requires more resources than available on a node&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">resource</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;lambda&quot;</span> <span class="ow">and</span> <span class="n">memory</span> <span class="o">&gt;</span> <span class="mi">3008</span><span class="p">:</span>
+            <span class="n">show_fatal_error</span><span class="p">(</span><span class="s2">&quot;Memory for Lambda functions can&#39;t exceed 3008 MB&quot;</span><span class="p">)</span>
+
+        <span class="c1"># calculate how many containers can a node accommodate</span>
+        <span class="n">container_per_node</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">node_cpu</span> <span class="o">/</span> <span class="n">cpu</span><span class="p">,</span> <span class="n">node_memory</span> <span class="o">/</span> <span class="n">memory</span><span class="p">))</span>
+        <span class="n">node_per_container</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">container_per_node</span>
+
+        <span class="k">if</span> <span class="n">resource</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s2">&quot;lambda&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Component </span><span class="si">%s</span><span class="s2"> can fit </span><span class="si">%s</span><span class="s2"> container(s) on every node:&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">container_per_node</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">node_cpu</span> <span class="o">/</span> <span class="n">cpu</span> <span class="o">&lt;</span> <span class="n">node_memory</span> <span class="o">/</span> <span class="n">memory</span><span class="p">:</span>
+                <span class="n">new_cpu</span> <span class="o">=</span> <span class="n">node_cpu</span> <span class="o">/</span> <span class="p">(</span><span class="n">container_per_node</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CPU needs to be decreased to (at least) </span><span class="si">%s</span><span class="s2"> to fit more&quot;</span> <span class="o">%</span> <span class="n">new_cpu</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_memory</span> <span class="o">=</span> <span class="n">node_memory</span> <span class="o">/</span> <span class="p">(</span><span class="n">container_per_node</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Memory needs to be decreased to (at least) </span><span class="si">%s</span><span class="s2"> to fit more&quot;</span> <span class="o">%</span> <span class="n">new_memory</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">resource_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_resources</span><span class="p">:</span>
+            <span class="n">gp</span><span class="o">.</span><span class="n">current_resources</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resource_id</span><span class="p">)</span>
+
+        <span class="n">node_requirements</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">resource_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parallelism</span><span class="p">:</span>
+                <span class="n">nr</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">node_per_container</span><span class="p">)</span>
+                <span class="n">node_requirements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prev_node_requirements</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="p">[</span><span class="n">resource_id</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parallelism</span><span class="p">)):</span>
+                <span class="n">nr</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">parallelism</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">*</span> <span class="n">node_per_container</span><span class="p">)</span>  <span class="c1"># node requirement for current parallelism</span>
+                <span class="n">nr</span> <span class="o">+=</span> <span class="n">prev_node_requirements</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>  <span class="c1"># node requirement for current parallelism, for all services up to now</span>
+                <span class="n">node_requirements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nr</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">nr</span> <span class="o">&gt;</span> <span class="n">total_nodes</span> <span class="ow">and</span> <span class="n">resource</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s2">&quot;lambda&quot;</span><span class="p">:</span>
+                    <span class="n">show_fatal_error</span><span class="p">(</span><span class="s2">&quot;Resource </span><span class="si">{}</span><span class="s2"> has </span><span class="si">{}</span><span class="s2"> nodes, but </span><span class="si">{}</span><span class="s2"> are needed for testing&quot;</span>
+                                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">total_nodes</span><span class="p">,</span> <span class="n">nr</span><span class="p">))</span>
+
+        <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="p">[</span><span class="n">resource_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_requirements</span>
+
+    <span class="k">return</span></div>
+
+
+<span class="c1"># # # # # # # # # # # #</span>
+<span class="c1"># Secondary functions</span>
+<span class="c1"># # # # # # # # # # # #</span>
+
+<div class="viewcode-block" id="get_resources_combinations"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#deployment_generator.get_resources_combinations">[docs]</a><span class="k">def</span> <span class="nf">get_resources_combinations</span><span class="p">(</span><span class="n">resources</span><span class="p">):</span>
+    <span class="n">resources</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">resources</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="n">combined_resources</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">resources</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">combined_resources</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">resources</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">combined_resources</span></div>
+
+
+<div class="viewcode-block" id="check_match_combined_used_resources"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#deployment_generator.check_match_combined_used_resources">[docs]</a><span class="k">def</span> <span class="nf">check_match_combined_used_resources</span><span class="p">(</span><span class="n">combined_resources</span><span class="p">,</span> <span class="n">used_resources</span><span class="p">):</span>
+    <span class="c1"># if they have different sizes they&#39;re not identical</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">combined_resources</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">used_resources</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># if they have the same size, check that every item in combined appears in used</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">combined_resources</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used_resources</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="has_completes_results"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#deployment_generator.has_completes_results">[docs]</a><span class="k">def</span> <span class="nf">has_completes_results</span><span class="p">(</span><span class="n">deployment_dir</span><span class="p">,</span> <span class="n">service_dir</span><span class="p">):</span>
+    <span class="n">results_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">campaign_dir</span><span class="p">,</span> <span class="n">deployment_dir</span><span class="p">,</span> <span class="n">service_dir</span><span class="p">,</span> <span class="s2">&quot;results&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">results_dir</span><span class="p">):</span>
+        <span class="n">done_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">done_path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">False</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

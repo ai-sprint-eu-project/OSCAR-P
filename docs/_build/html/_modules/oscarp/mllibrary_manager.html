@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>oscarp.mllibrary_manager &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">oscarp.mllibrary_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for oscarp.mllibrary_manager</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+
+<span class="kn">import</span> <span class="nn">executables</span>
+
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">auto_mkdir</span><span class="p">,</span> <span class="n">read_json</span><span class="p">,</span> <span class="n">write_json</span>
+
+<span class="kn">from</span> <span class="nn">aMLLibrary</span> <span class="kn">import</span> <span class="n">sequence_data_processing</span>
+<span class="c1"># from aMLLibrary.model_building.predictor import Predictor</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+
+
+<div class="viewcode-block" id="run_mllibrary"><a class="viewcode-back" href="../../oscarp.html#oscarp.mllibrary_manager.run_mllibrary">[docs]</a><span class="k">def</span> <span class="nf">run_mllibrary</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Generating models...&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">deployments</span><span class="p">)):</span>
+        <span class="n">deployment</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">deployments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">deployment</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Full_workflow&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Deployment: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">deployment</span><span class="p">:</span>
+            <span class="n">results_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">deployment_</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">/results/&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">campaign_dir</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">results_dir</span><span class="p">):</span>
+                <span class="c1"># sets directories</span>
+                <span class="n">dataframes_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;Dataframes/&quot;</span>
+                <span class="n">models_dir</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;Models/&quot;</span>
+                <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">models_dir</span><span class="p">)</span>
+
+                <span class="n">train_and_predict</span><span class="p">(</span><span class="n">dataframes_dir</span><span class="p">,</span> <span class="n">models_dir</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_name</span><span class="p">)</span>
+                <span class="n">add_to_performance_models_json</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="train_and_predict"><a class="viewcode-back" href="../../oscarp.html#oscarp.mllibrary_manager.train_and_predict">[docs]</a><span class="k">def</span> <span class="nf">train_and_predict</span><span class="p">(</span><span class="n">dataframes_dir</span><span class="p">,</span> <span class="n">models_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    this function trains the regressors, both with and without SFS, and then makes the predictions</span>
+<span class="sd">    :param dataframes_dir: points to either CSVs/Interpolation or CSVs/Extrapolation and makes this function reusable</span>
+<span class="sd">    :param models_dir: points to either Models/Interpolation or Models/Extrapolation</span>
+<span class="sd">    :param run_name:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># training_set = csvs_dir + &quot;training_set.csv&quot;</span>
+    <span class="c1"># test_set = csvs_dir + &quot;test_set.csv&quot;</span>
+    <span class="c1"># training_set = dataframes_dir + &quot;dataframe.csv&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">has_active_lambdas</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dataframe</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dataframes_dir</span><span class="p">):</span>
+            <span class="n">config_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span><span class="p">,</span> <span class="s2">&quot;oscarp&quot;</span><span class="p">,</span> <span class="s2">&quot;aMLLibrary-config.ini&quot;</span><span class="p">)</span>
+            <span class="n">output_dir</span> <span class="o">=</span> <span class="n">models_dir</span> <span class="o">+</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_dataframe.csv&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_model&quot;</span>
+            <span class="n">train_models</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">dataframes_dir</span> <span class="o">+</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># dummy</span>
+        <span class="k">pass</span>  <span class="c1"># todo fill</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # prediction</span>
+<span class="sd">    config_file = &quot;aMLLibrary/aMLLibrary-predict.ini&quot;</span>
+<span class="sd">    set_mllibrary_predict_path(config_file, test_set)</span>
+<span class="sd">    make_prediction(config_file, output_dir_sfs)</span>
+<span class="sd">    make_prediction(config_file, output_dir_no_sfs)</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="train_models"><a class="viewcode-back" href="../../oscarp.html#oscarp.mllibrary_manager.train_models">[docs]</a><span class="k">def</span> <span class="nf">train_models</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    this function train the four regressors, either with or without SFS depending on the parameters</span>
+<span class="sd">    :param config_file: path to the configuration file</span>
+<span class="sd">    :param filepath: path to the test set csv</span>
+<span class="sd">    :param output_dir: output directory for the four regressors (i.e. &quot;Models/Extrapolation/full_model_noSFS&quot;)</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">set_mllibrary_config_path</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+    <span class="n">sequence_data_processor</span> <span class="o">=</span> <span class="n">sequence_data_processing</span><span class="o">.</span><span class="n">SequenceDataProcessing</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">output_dir</span><span class="p">)</span>
+    <span class="n">sequence_data_processor</span><span class="o">.</span><span class="n">process</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="set_mllibrary_config_path"><a class="viewcode-back" href="../../oscarp.html#oscarp.mllibrary_manager.set_mllibrary_config_path">[docs]</a><span class="k">def</span> <span class="nf">set_mllibrary_config_path</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    this function sets the correct path to the train set in the SFS or noSFS configuration file</span>
+<span class="sd">    :param config_file: path to the configuration file</span>
+<span class="sd">    :param filepath: path to the test set csv</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;DataPreparation&quot;</span><span class="p">,</span> <span class="s2">&quot;input_path&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="set_mllibrary_predict_path"><a class="viewcode-back" href="../../oscarp.html#oscarp.mllibrary_manager.set_mllibrary_predict_path">[docs]</a><span class="k">def</span> <span class="nf">set_mllibrary_predict_path</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    this function sets the correct path to the test set in the &quot;predict&quot; configuration file</span>
+<span class="sd">    :param config_file: path to the configuration file</span>
+<span class="sd">    :param filepath: path to the test set csv</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;DataPreparation&quot;</span><span class="p">,</span> <span class="s2">&quot;input_path&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="make_prediction"><a class="viewcode-back" href="../../oscarp.html#oscarp.mllibrary_manager.make_prediction">[docs]</a><span class="k">def</span> <span class="nf">make_prediction</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">workdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    this functions makes predictions by using the trained models</span>
+<span class="sd">    :param config_file: points to aMLLibrary-predict.ini</span>
+<span class="sd">    :param workdir: points to the currently considered model (e.g. Models/Interpolation/full_model_noSFS)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">regressors_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;DecisionTree&quot;</span><span class="p">,</span> <span class="s2">&quot;RandomForest&quot;</span><span class="p">,</span> <span class="s2">&quot;XGBoost&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">regressor_name</span> <span class="ow">in</span> <span class="n">regressors_list</span><span class="p">:</span>
+        <span class="n">regressor_path</span> <span class="o">=</span> <span class="n">workdir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">regressor_name</span> <span class="o">+</span> <span class="s2">&quot;.pickle&quot;</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">workdir</span> <span class="o">+</span> <span class="s2">&quot;/output_predict_&quot;</span> <span class="o">+</span> <span class="n">regressor_name</span>
+        <span class="n">predictor_obj</span> <span class="o">=</span> <span class="n">Predictor</span><span class="p">(</span><span class="n">regressor_file</span><span class="o">=</span><span class="n">regressor_path</span><span class="p">,</span> <span class="n">output_folder</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">predictor_obj</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">config_file</span><span class="o">=</span><span class="n">config_file</span><span class="p">,</span> <span class="n">mape_to_file</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_to_performance_models_json"><a class="viewcode-back" href="../../oscarp.html#oscarp.mllibrary_manager.add_to_performance_models_json">[docs]</a><span class="k">def</span> <span class="nf">add_to_performance_models_json</span><span class="p">():</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;oscarp/performance_models.json&quot;</span>
+    <span class="n">performance_models</span> <span class="o">=</span> <span class="n">read_json</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="n">component_name</span><span class="p">,</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)</span>
+    <span class="n">component_name</span> <span class="o">=</span> <span class="n">component_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;component&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;P&quot;</span> <span class="ow">in</span> <span class="n">component_name</span><span class="p">:</span>
+        <span class="n">component_name</span> <span class="o">=</span> <span class="n">component_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;_partition&quot;</span><span class="p">)</span>
+        <span class="n">component_name</span> <span class="o">=</span> <span class="n">component_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <span class="n">partition_name</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="n">component_name</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">component_name</span> <span class="o">=</span> <span class="n">partition_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_partition&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">component_name</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="n">component_name</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">partition_name</span> <span class="o">=</span> <span class="n">component_name</span>
+
+    <span class="n">model_type</span> <span class="o">=</span> <span class="s2">&quot;CoreBasedPredictor&quot;</span>
+    <span class="n">model_path</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;Models/&quot;</span> <span class="o">+</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;_model/best.pickle&quot;</span>
+
+    <span class="k">if</span> <span class="n">component_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">performance_models</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">performance_models</span><span class="p">[</span><span class="n">component_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">partition_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">performance_models</span><span class="p">[</span><span class="n">component_name</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">performance_models</span><span class="p">[</span><span class="n">component_name</span><span class="p">][</span><span class="n">partition_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">performance_models</span><span class="p">[</span><span class="n">component_name</span><span class="p">][</span><span class="n">partition_name</span><span class="p">][</span><span class="n">resource</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model_type</span><span class="p">,</span>
+        <span class="s2">&quot;regressor_file&quot;</span><span class="p">:</span> <span class="n">model_path</span>
+    <span class="p">}</span>
+
+    <span class="n">write_json</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">performance_models</span><span class="p">)</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>oscarp package &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="jmeterLoadInjector package" href="jmeterLoadInjector.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">oscarp package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.cluster_manager">oscarp.cluster_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager._apply_fdl_configuration_oscar"><code class="docutils literal notranslate"><span class="pre">_apply_fdl_configuration_oscar()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.apply_fdl_configuration_wrapped"><code class="docutils literal notranslate"><span class="pre">apply_fdl_configuration_wrapped()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.clean_s3_buckets"><code class="docutils literal notranslate"><span class="pre">clean_s3_buckets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.generate_fdl_configuration"><code class="docutils literal notranslate"><span class="pre">generate_fdl_configuration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.generate_fdl_storage_providers"><code class="docutils literal notranslate"><span class="pre">generate_fdl_storage_providers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.generate_service_script"><code class="docutils literal notranslate"><span class="pre">generate_service_script()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.get_deployed_services"><code class="docutils literal notranslate"><span class="pre">get_deployed_services()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.remove_all_buckets"><code class="docutils literal notranslate"><span class="pre">remove_all_buckets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.remove_all_services"><code class="docutils literal notranslate"><span class="pre">remove_all_services()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.set_default_oscar_cluster_from_alias"><code class="docutils literal notranslate"><span class="pre">set_default_oscar_cluster_from_alias()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.upload_input_files_to_storage"><code class="docutils literal notranslate"><span class="pre">upload_input_files_to_storage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.cluster_manager.verify_correct_oscar_deployment"><code class="docutils literal notranslate"><span class="pre">verify_correct_oscar_deployment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.executables">oscarp.executables module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.executables.Mc"><code class="docutils literal notranslate"><span class="pre">Mc</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#oscarp.executables.Mc.get_command"><code class="docutils literal notranslate"><span class="pre">Mc.get_command()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.executables.Oscarcli"><code class="docutils literal notranslate"><span class="pre">Oscarcli</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#oscarp.executables.Oscarcli.get_command"><code class="docutils literal notranslate"><span class="pre">Oscarcli.get_command()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.executables.init"><code class="docutils literal notranslate"><span class="pre">init()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.gui">oscarp.gui module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.gui.append_to_deployment_summary"><code class="docutils literal notranslate"><span class="pre">append_to_deployment_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.gui.runs_diff_resources"><code class="docutils literal notranslate"><span class="pre">runs_diff_resources()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.gui.runs_diff_services"><code class="docutils literal notranslate"><span class="pre">runs_diff_services()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.gui.show_all_resources"><code class="docutils literal notranslate"><span class="pre">show_all_resources()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.gui.show_all_services"><code class="docutils literal notranslate"><span class="pre">show_all_services()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.gui.show_and_save_to_summary"><code class="docutils literal notranslate"><span class="pre">show_and_save_to_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.gui.show_runs"><code class="docutils literal notranslate"><span class="pre">show_runs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.input_file_processing">oscarp.input_file_processing module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.input_file_processing.show_workflow"><code class="docutils literal notranslate"><span class="pre">show_workflow()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.mllibrary_manager">oscarp.mllibrary_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.mllibrary_manager.add_to_performance_models_json"><code class="docutils literal notranslate"><span class="pre">add_to_performance_models_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.mllibrary_manager.make_prediction"><code class="docutils literal notranslate"><span class="pre">make_prediction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.mllibrary_manager.run_mllibrary"><code class="docutils literal notranslate"><span class="pre">run_mllibrary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.mllibrary_manager.set_mllibrary_config_path"><code class="docutils literal notranslate"><span class="pre">set_mllibrary_config_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.mllibrary_manager.set_mllibrary_predict_path"><code class="docutils literal notranslate"><span class="pre">set_mllibrary_predict_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.mllibrary_manager.train_and_predict"><code class="docutils literal notranslate"><span class="pre">train_and_predict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.mllibrary_manager.train_models"><code class="docutils literal notranslate"><span class="pre">train_models()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.oscarp">oscarp.oscarp module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.oscarp.end_run_full"><code class="docutils literal notranslate"><span class="pre">end_run_full()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.oscarp.final_processing"><code class="docutils literal notranslate"><span class="pre">final_processing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.oscarp.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.oscarp.manage_campaign_dir"><code class="docutils literal notranslate"><span class="pre">manage_campaign_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.oscarp.prepare_clusters"><code class="docutils literal notranslate"><span class="pre">prepare_clusters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.oscarp.process_subfolder"><code class="docutils literal notranslate"><span class="pre">process_subfolder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.oscarp.start_run_full"><code class="docutils literal notranslate"><span class="pre">start_run_full()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.oscarp.test_single_lambda"><code class="docutils literal notranslate"><span class="pre">test_single_lambda()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.postprocessing">oscarp.postprocessing module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.calculate_average"><code class="docutils literal notranslate"><span class="pre">calculate_average()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.calculate_maximum_parallelism"><code class="docutils literal notranslate"><span class="pre">calculate_maximum_parallelism()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.calculate_parallelism"><code class="docutils literal notranslate"><span class="pre">calculate_parallelism()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.calculate_runtime"><code class="docutils literal notranslate"><span class="pre">calculate_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.find_best_model"><code class="docutils literal notranslate"><span class="pre">find_best_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.find_best_prediction"><code class="docutils literal notranslate"><span class="pre">find_best_prediction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.find_best_predictions"><code class="docutils literal notranslate"><span class="pre">find_best_predictions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.get_first_job"><code class="docutils literal notranslate"><span class="pre">get_first_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.get_last_job"><code class="docutils literal notranslate"><span class="pre">get_last_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.load_dataframes"><code class="docutils literal notranslate"><span class="pre">load_dataframes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.make_runtime_core_csv"><code class="docutils literal notranslate"><span class="pre">make_runtime_core_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.make_runtime_core_csv_for_ml"><code class="docutils literal notranslate"><span class="pre">make_runtime_core_csv_for_ml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.make_statistics"><code class="docutils literal notranslate"><span class="pre">make_statistics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.merge_csv_of_service"><code class="docutils literal notranslate"><span class="pre">merge_csv_of_service()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.plot_ml_predictions_graph"><code class="docutils literal notranslate"><span class="pre">plot_ml_predictions_graph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.plot_ml_predictions_graphs"><code class="docutils literal notranslate"><span class="pre">plot_ml_predictions_graphs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.plot_runtime_core_graphs"><code class="docutils literal notranslate"><span class="pre">plot_runtime_core_graphs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.prepare_runtime_data"><code class="docutils literal notranslate"><span class="pre">prepare_runtime_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.read_csv_content"><code class="docutils literal notranslate"><span class="pre">read_csv_content()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.read_csv_header"><code class="docutils literal notranslate"><span class="pre">read_csv_header()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.postprocessing.save_dataframes"><code class="docutils literal notranslate"><span class="pre">save_dataframes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.process_logs">oscarp.process_logs module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.process_logs.delete_logs_folder"><code class="docutils literal notranslate"><span class="pre">delete_logs_folder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.process_logs.make_csv_table"><code class="docutils literal notranslate"><span class="pre">make_csv_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.process_logs.make_done_file"><code class="docutils literal notranslate"><span class="pre">make_done_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.process_logs.zip_logs"><code class="docutils literal notranslate"><span class="pre">zip_logs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.retrieve_logs">oscarp.retrieve_logs module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.calculate_throughput"><code class="docutils literal notranslate"><span class="pre">calculate_throughput()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.get_data_size"><code class="docutils literal notranslate"><span class="pre">get_data_size()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.get_kubectl_log"><code class="docutils literal notranslate"><span class="pre">get_kubectl_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.get_kubernetes_pod_list"><code class="docutils literal notranslate"><span class="pre">get_kubernetes_pod_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.get_oscar_log"><code class="docutils literal notranslate"><span class="pre">get_oscar_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.get_scar_log"><code class="docutils literal notranslate"><span class="pre">get_scar_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.get_timed_jobs_list"><code class="docutils literal notranslate"><span class="pre">get_timed_jobs_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.pull_jmeter_logs"><code class="docutils literal notranslate"><span class="pre">pull_jmeter_logs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.pull_lambda_logs"><code class="docutils literal notranslate"><span class="pre">pull_lambda_logs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.pull_logs"><code class="docutils literal notranslate"><span class="pre">pull_logs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.retrieve_logs.save_timelist_to_file"><code class="docutils literal notranslate"><span class="pre">save_timelist_to_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.run_manager">oscarp.run_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.duplicate_bucket"><code class="docutils literal notranslate"><span class="pre">duplicate_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.duplicate_bucket_sync"><code class="docutils literal notranslate"><span class="pre">duplicate_bucket_sync()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.get_input_files_count"><code class="docutils literal notranslate"><span class="pre">get_input_files_count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.get_jobs_list"><code class="docutils literal notranslate"><span class="pre">get_jobs_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.increment_sleep"><code class="docutils literal notranslate"><span class="pre">increment_sleep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.move_file_between_buckets"><code class="docutils literal notranslate"><span class="pre">move_file_between_buckets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.move_from_storage"><code class="docutils literal notranslate"><span class="pre">move_from_storage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.move_input_files_to_input_bucket"><code class="docutils literal notranslate"><span class="pre">move_input_files_to_input_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.move_input_files_to_s3_bucket"><code class="docutils literal notranslate"><span class="pre">move_input_files_to_s3_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.use_jmeter"><code class="docutils literal notranslate"><span class="pre">use_jmeter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.wait_interval"><code class="docutils literal notranslate"><span class="pre">wait_interval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.wait_lambda_completion"><code class="docutils literal notranslate"><span class="pre">wait_lambda_completion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.wait_oscar_service_completion"><code class="docutils literal notranslate"><span class="pre">wait_oscar_service_completion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.run_manager.wait_services_completion"><code class="docutils literal notranslate"><span class="pre">wait_services_completion()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp.utils">oscarp.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils._get_command_output"><code class="docutils literal notranslate"><span class="pre">_get_command_output()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.append_string_to_file"><code class="docutils literal notranslate"><span class="pre">append_string_to_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.auto_mkdir"><code class="docutils literal notranslate"><span class="pre">auto_mkdir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.configure_ssh_client"><code class="docutils literal notranslate"><span class="pre">configure_ssh_client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.create_new_file"><code class="docutils literal notranslate"><span class="pre">create_new_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.delete_directory"><code class="docutils literal notranslate"><span class="pre">delete_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.delete_file"><code class="docutils literal notranslate"><span class="pre">delete_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.dict_to_string"><code class="docutils literal notranslate"><span class="pre">dict_to_string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.ensure_slash_end"><code class="docutils literal notranslate"><span class="pre">ensure_slash_end()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.get_command_output_wrapped"><code class="docutils literal notranslate"><span class="pre">get_command_output_wrapped()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.get_private_key"><code class="docutils literal notranslate"><span class="pre">get_private_key()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.get_ssh_output"><code class="docutils literal notranslate"><span class="pre">get_ssh_output()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.get_valid_input"><code class="docutils literal notranslate"><span class="pre">get_valid_input()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.read_json"><code class="docutils literal notranslate"><span class="pre">read_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.read_yaml"><code class="docutils literal notranslate"><span class="pre">read_yaml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.show_debug_info"><code class="docutils literal notranslate"><span class="pre">show_debug_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.show_error"><code class="docutils literal notranslate"><span class="pre">show_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.show_external_error"><code class="docutils literal notranslate"><span class="pre">show_external_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.show_fatal_error"><code class="docutils literal notranslate"><span class="pre">show_fatal_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.show_warning"><code class="docutils literal notranslate"><span class="pre">show_warning()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.strip_ansi_from_string"><code class="docutils literal notranslate"><span class="pre">strip_ansi_from_string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.write_json"><code class="docutils literal notranslate"><span class="pre">write_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.write_list_of_strings_to_file"><code class="docutils literal notranslate"><span class="pre">write_list_of_strings_to_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oscarp.utils.write_yaml"><code class="docutils literal notranslate"><span class="pre">write_yaml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oscarp">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+      <li class="breadcrumb-item active">oscarp package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/oscarp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="oscarp-package">
+<h1>oscarp package<a class="headerlink" href="#oscarp-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-oscarp.cluster_manager">
+<span id="oscarp-cluster-manager-module"></span><h2>oscarp.cluster_manager module<a class="headerlink" href="#module-oscarp.cluster_manager" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager._apply_fdl_configuration_oscar">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">_apply_fdl_configuration_oscar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#_apply_fdl_configuration_oscar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager._apply_fdl_configuration_oscar" title="Permalink to this definition"></a></dt>
+<dd><p>Applies the FDL configuration file through the OSCAR cli binary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.apply_fdl_configuration_wrapped">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">apply_fdl_configuration_wrapped</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#apply_fdl_configuration_wrapped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.apply_fdl_configuration_wrapped" title="Permalink to this definition"></a></dt>
+<dd><p>Applies the FDL configuration file, then verifies that all the required services have actually been deployed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.clean_s3_buckets">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">clean_s3_buckets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#clean_s3_buckets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.clean_s3_buckets" title="Permalink to this definition"></a></dt>
+<dd><p>Cleans the S3 buckets used by the lambda functions, if any are present.
+Updated 17/07/2023 after moving from SCAR to IM deployment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.generate_fdl_configuration">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">generate_fdl_configuration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#generate_fdl_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.generate_fdl_configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Generates the FDL configuration file containing all the OSCAR services needed for the current test Lambda      functions (old SCAR) are no longer included as they are deployed together with the infrastructures by IM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.generate_fdl_storage_providers">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">generate_fdl_storage_providers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#generate_fdl_storage_providers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.generate_fdl_storage_providers" title="Permalink to this definition"></a></dt>
+<dd><p>Services deployed on different resources need to know the location of input bucket of the next service;      this is done by including the used storage providers in the FDL configuration file.
+This info is extracted by the MinIO configuration file, which is filled after the resources are created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a dictionary containing the providers, ready to be added in the FDL file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.generate_service_script">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">generate_service_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#generate_service_script"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.generate_service_script" title="Permalink to this definition"></a></dt>
+<dd><p>The bash script of the services is included inside their docker image (01/03/2023). The bash script supplied to      OSCAR just needs to call said “real” script.
+These simple scripts are generated locally in an hidden folder called “.scripts”, and their path is added to the      FDL file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>path to the service script</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.get_deployed_services">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">get_deployed_services</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oscarcli_alias</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#get_deployed_services"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.get_deployed_services" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the OSCAR services deployed on a certain resource.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of deployed services</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.remove_all_buckets">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">remove_all_buckets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#remove_all_buckets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.remove_all_buckets" title="Permalink to this definition"></a></dt>
+<dd><p>Removes all the buckets (aside from the storage bucket) for all resources that are not lambdas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.remove_all_services">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">remove_all_services</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#remove_all_services"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.remove_all_services" title="Permalink to this definition"></a></dt>
+<dd><p>Removes all the services from all resources that are not lambdas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.set_default_oscar_cluster_from_alias">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">set_default_oscar_cluster_from_alias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oscarcli_alias</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#set_default_oscar_cluster_from_alias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.set_default_oscar_cluster_from_alias" title="Permalink to this definition"></a></dt>
+<dd><p>Sets a cluster as default for the OSCAR CLI binary; in this way the commands don’t need to specify on which      cluster they need to be executed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.upload_input_files_to_storage">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">upload_input_files_to_storage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#upload_input_files_to_storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.upload_input_files_to_storage" title="Permalink to this definition"></a></dt>
+<dd><p>Uploads the input files to the MinIO storage bucket on the resource of the first service.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.cluster_manager.verify_correct_oscar_deployment">
+<span class="sig-prename descclassname"><span class="pre">oscarp.cluster_manager.</span></span><span class="sig-name descname"><span class="pre">verify_correct_oscar_deployment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/cluster_manager.html#verify_correct_oscar_deployment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.cluster_manager.verify_correct_oscar_deployment" title="Permalink to this definition"></a></dt>
+<dd><p>Starting from the list of active services, it makes sure that all of them are deployed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-oscarp.executables">
+<span id="oscarp-executables-module"></span><h2>oscarp.executables module<a class="headerlink" href="#module-oscarp.executables" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="oscarp.executables.Mc">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">oscarp.executables.</span></span><span class="sig-name descname"><span class="pre">Mc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mc_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/executables.html#Mc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.executables.Mc" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="oscarp.executables.Mc.get_command">
+<span class="sig-name descname"><span class="pre">get_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/executables.html#Mc.get_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.executables.Mc.get_command" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="oscarp.executables.Oscarcli">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">oscarp.executables.</span></span><span class="sig-name descname"><span class="pre">Oscarcli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oscar_cli_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/executables.html#Oscarcli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.executables.Oscarcli" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="oscarp.executables.Oscarcli.get_command">
+<span class="sig-name descname"><span class="pre">get_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/executables.html#Oscarcli.get_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.executables.Oscarcli.get_command" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.executables.init">
+<span class="sig-prename descclassname"><span class="pre">oscarp.executables.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">executables_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/executables.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.executables.init" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-oscarp.gui">
+<span id="oscarp-gui-module"></span><h2>oscarp.gui module<a class="headerlink" href="#module-oscarp.gui" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.gui.append_to_deployment_summary">
+<span class="sig-prename descclassname"><span class="pre">oscarp.gui.</span></span><span class="sig-name descname"><span class="pre">append_to_deployment_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/gui.html#append_to_deployment_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.gui.append_to_deployment_summary" title="Permalink to this definition"></a></dt>
+<dd><p>Receives a line and appends it to the summary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>string</strong> (<em>str</em>) – Output line, stripped of ANSI</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.gui.runs_diff_resources">
+<span class="sig-prename descclassname"><span class="pre">oscarp.gui.</span></span><span class="sig-name descname"><span class="pre">runs_diff_resources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/gui.html#runs_diff_resources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.gui.runs_diff_resources" title="Permalink to this definition"></a></dt>
+<dd><p>Given two runs, it shows the difference in the number of nodes for each resource.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>run_name1</strong> (<em>str</em>) – name of the first run (e.g. “Run #1”)</p></li>
+<li><p><strong>run_name2</strong> (<em>str</em>) – name of the second run</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.gui.runs_diff_services">
+<span class="sig-prename descclassname"><span class="pre">oscarp.gui.</span></span><span class="sig-name descname"><span class="pre">runs_diff_services</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/gui.html#runs_diff_services"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.gui.runs_diff_services" title="Permalink to this definition"></a></dt>
+<dd><p>Given two runs, it shows the difference in the parallelism level for each service.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>run_name1</strong> (<em>str</em>) – name of the first run (e.g. “Run #1”)</p></li>
+<li><p><strong>run_name2</strong> (<em>str</em>) – name of the second run</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.gui.show_all_resources">
+<span class="sig-prename descclassname"><span class="pre">oscarp.gui.</span></span><span class="sig-name descname"><span class="pre">show_all_resources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/gui.html#show_all_resources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.gui.show_all_resources" title="Permalink to this definition"></a></dt>
+<dd><p>For a given run, it shows for each resource the required number of nodes; it’s called for the first run only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>run_index</strong> (<em>int</em>) – run index</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.gui.show_all_services">
+<span class="sig-prename descclassname"><span class="pre">oscarp.gui.</span></span><span class="sig-name descname"><span class="pre">show_all_services</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetitions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/gui.html#show_all_services"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.gui.show_all_services" title="Permalink to this definition"></a></dt>
+<dd><p>For a given run, it shows for each service their cpu, memory, parallelism level and resource; it’s called      for the first run only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>run_index</strong> (<em>int</em>) – run index</p></li>
+<li><p><strong>repetitions</strong> (<em>int</em>) – number of repetitions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.gui.show_and_save_to_summary">
+<span class="sig-prename descclassname"><span class="pre">oscarp.gui.</span></span><span class="sig-name descname"><span class="pre">show_and_save_to_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/gui.html#show_and_save_to_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.gui.show_and_save_to_summary" title="Permalink to this definition"></a></dt>
+<dd><p>Receives a line, prints it and then appends it to the campaign summary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>string</strong> (<em>str</em>) – Output line</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.gui.show_runs">
+<span class="sig-prename descclassname"><span class="pre">oscarp.gui.</span></span><span class="sig-name descname"><span class="pre">show_runs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/gui.html#show_runs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.gui.show_runs" title="Permalink to this definition"></a></dt>
+<dd><p>It combines the previous functions to show all the scheduled runs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-oscarp.input_file_processing">
+<span id="oscarp-input-file-processing-module"></span><h2>oscarp.input_file_processing module<a class="headerlink" href="#module-oscarp.input_file_processing" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.input_file_processing.show_workflow">
+<span class="sig-prename descclassname"><span class="pre">oscarp.input_file_processing.</span></span><span class="sig-name descname"><span class="pre">show_workflow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/input_file_processing.html#show_workflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.input_file_processing.show_workflow" title="Permalink to this definition"></a></dt>
+<dd><p>From the list of the current services, it prints the workflow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-oscarp.mllibrary_manager">
+<span id="oscarp-mllibrary-manager-module"></span><h2>oscarp.mllibrary_manager module<a class="headerlink" href="#module-oscarp.mllibrary_manager" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.mllibrary_manager.add_to_performance_models_json">
+<span class="sig-prename descclassname"><span class="pre">oscarp.mllibrary_manager.</span></span><span class="sig-name descname"><span class="pre">add_to_performance_models_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/mllibrary_manager.html#add_to_performance_models_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.mllibrary_manager.add_to_performance_models_json" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.mllibrary_manager.make_prediction">
+<span class="sig-prename descclassname"><span class="pre">oscarp.mllibrary_manager.</span></span><span class="sig-name descname"><span class="pre">make_prediction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/mllibrary_manager.html#make_prediction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.mllibrary_manager.make_prediction" title="Permalink to this definition"></a></dt>
+<dd><p>this functions makes predictions by using the trained models
+:param config_file: points to aMLLibrary-predict.ini
+:param workdir: points to the currently considered model (e.g. Models/Interpolation/full_model_noSFS)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.mllibrary_manager.run_mllibrary">
+<span class="sig-prename descclassname"><span class="pre">oscarp.mllibrary_manager.</span></span><span class="sig-name descname"><span class="pre">run_mllibrary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/mllibrary_manager.html#run_mllibrary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.mllibrary_manager.run_mllibrary" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.mllibrary_manager.set_mllibrary_config_path">
+<span class="sig-prename descclassname"><span class="pre">oscarp.mllibrary_manager.</span></span><span class="sig-name descname"><span class="pre">set_mllibrary_config_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/mllibrary_manager.html#set_mllibrary_config_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.mllibrary_manager.set_mllibrary_config_path" title="Permalink to this definition"></a></dt>
+<dd><p>this function sets the correct path to the train set in the SFS or noSFS configuration file
+:param config_file: path to the configuration file
+:param filepath: path to the test set csv</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.mllibrary_manager.set_mllibrary_predict_path">
+<span class="sig-prename descclassname"><span class="pre">oscarp.mllibrary_manager.</span></span><span class="sig-name descname"><span class="pre">set_mllibrary_predict_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/mllibrary_manager.html#set_mllibrary_predict_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.mllibrary_manager.set_mllibrary_predict_path" title="Permalink to this definition"></a></dt>
+<dd><p>this function sets the correct path to the test set in the “predict” configuration file
+:param config_file: path to the configuration file
+:param filepath: path to the test set csv</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.mllibrary_manager.train_and_predict">
+<span class="sig-prename descclassname"><span class="pre">oscarp.mllibrary_manager.</span></span><span class="sig-name descname"><span class="pre">train_and_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframes_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/mllibrary_manager.html#train_and_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.mllibrary_manager.train_and_predict" title="Permalink to this definition"></a></dt>
+<dd><p>this function trains the regressors, both with and without SFS, and then makes the predictions
+:param dataframes_dir: points to either CSVs/Interpolation or CSVs/Extrapolation and makes this function reusable
+:param models_dir: points to either Models/Interpolation or Models/Extrapolation
+:param run_name:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.mllibrary_manager.train_models">
+<span class="sig-prename descclassname"><span class="pre">oscarp.mllibrary_manager.</span></span><span class="sig-name descname"><span class="pre">train_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/mllibrary_manager.html#train_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.mllibrary_manager.train_models" title="Permalink to this definition"></a></dt>
+<dd><p>this function train the four regressors, either with or without SFS depending on the parameters
+:param config_file: path to the configuration file
+:param filepath: path to the test set csv
+:param output_dir: output directory for the four regressors (i.e. “Models/Extrapolation/full_model_noSFS”)
+:return:</p>
+</dd></dl>
+
+</section>
+<section id="module-oscarp.oscarp">
+<span id="oscarp-oscarp-module"></span><h2>oscarp.oscarp module<a class="headerlink" href="#module-oscarp.oscarp" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.oscarp.end_run_full">
+<span class="sig-prename descclassname"><span class="pre">oscarp.oscarp.</span></span><span class="sig-name descname"><span class="pre">end_run_full</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_run_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/oscarp.html#end_run_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.oscarp.end_run_full" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.oscarp.final_processing">
+<span class="sig-prename descclassname"><span class="pre">oscarp.oscarp.</span></span><span class="sig-name descname"><span class="pre">final_processing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/oscarp.html#final_processing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.oscarp.final_processing" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.oscarp.main">
+<span class="sig-prename descclassname"><span class="pre">oscarp.oscarp.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/oscarp.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.oscarp.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.oscarp.manage_campaign_dir">
+<span class="sig-prename descclassname"><span class="pre">oscarp.oscarp.</span></span><span class="sig-name descname"><span class="pre">manage_campaign_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/oscarp.html#manage_campaign_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.oscarp.manage_campaign_dir" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>if the campaign_dir already exists, and a “Results” folder is present, it exits, otherwise it finds the last</dt><dd><p>run (i.e. “Run #11”), it deletes it (it may have failed) and resumes from there if the run_dir doesn’t exist
+it creates it and starts as normal</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the index of the next run to execute; this is the index from the list “runs”, not the run id (i.e. run
+with index 0 has id “Run #1”)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.oscarp.prepare_clusters">
+<span class="sig-prename descclassname"><span class="pre">oscarp.oscarp.</span></span><span class="sig-name descname"><span class="pre">prepare_clusters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/oscarp.html#prepare_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.oscarp.prepare_clusters" title="Permalink to this definition"></a></dt>
+<dd><p>Prepares the cluster for the new test by removing the leftover services and bucket, then generating and applying
+the new FDL configuration. It also uploads the input files to the storage bucket on the resource of the first
+service, if the test is asynchronous.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.oscarp.process_subfolder">
+<span class="sig-prename descclassname"><span class="pre">oscarp.oscarp.</span></span><span class="sig-name descname"><span class="pre">process_subfolder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/oscarp.html#process_subfolder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.oscarp.process_subfolder" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.oscarp.start_run_full">
+<span class="sig-prename descclassname"><span class="pre">oscarp.oscarp.</span></span><span class="sig-name descname"><span class="pre">start_run_full</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/oscarp.html#start_run_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.oscarp.start_run_full" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.oscarp.test_single_lambda">
+<span class="sig-prename descclassname"><span class="pre">oscarp.oscarp.</span></span><span class="sig-name descname"><span class="pre">test_single_lambda</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/oscarp.html#test_single_lambda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.oscarp.test_single_lambda" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-oscarp.postprocessing">
+<span id="oscarp-postprocessing-module"></span><h2>oscarp.postprocessing module<a class="headerlink" href="#module-oscarp.postprocessing" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.calculate_average">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">calculate_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#calculate_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.calculate_average" title="Permalink to this definition"></a></dt>
+<dd><p>receives a list of values, returns the average
+:param values: list of values
+:return: average</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.calculate_maximum_parallelism">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">calculate_maximum_parallelism</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#calculate_maximum_parallelism"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.calculate_maximum_parallelism" title="Permalink to this definition"></a></dt>
+<dd><p>checks the resources of every service in a run and returns the parallelism level of the “most parallel” service
+:param run: dictionary containing info on a specific run, such as the number of nodes, the list and configuration of services
+:return: the parallelism level of the “most parallel” service</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.calculate_parallelism">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">calculate_parallelism</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cores</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cores</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_memory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#calculate_parallelism"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.calculate_parallelism" title="Permalink to this definition"></a></dt>
+<dd><p>given the number of nodes, the maximum number of cores and the used number of core, it returns the parallelism level, that is the maximum possible number of containers that can run together at the same time
+:param cores: number of active cores (i.e. 0.9, 1.9, 3.9)
+:param max_cores: total number of cores on a node (i.e. 4)
+:param nodes: number of active nodes
+:return: the maximum possible number of containers that can run together at the same time</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.calculate_runtime">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">calculate_runtime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">services</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#calculate_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.calculate_runtime" title="Permalink to this definition"></a></dt>
+<dd><p>given the directory of a specific run (i.e. “Run #1/”) and the list of services, it returns the runtime of that run;
+the list of services is ordered, so it doesn’t need too many checks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>working_dir</strong> – directory of a specific run (i.e. “Run #1/”)</p></li>
+<li><p><strong>services</strong> – ordered list of services, each a dictionary containing name of the service (as string),
+input bucket (as string) and output buckets (list of strings)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>runtime of the run in seconds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.find_best_model">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">find_best_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#find_best_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.find_best_model" title="Permalink to this definition"></a></dt>
+<dd><p>called by find_best_prediction, returns the name of the best model, its mape, and a summary (as list of string) containing the mape of all other models
+:param workdir: path to two directories of the currently considered models (with and without SFS)
+:returns: name of best model, best mape, summary of other models performance</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.find_best_prediction">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">find_best_prediction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#find_best_prediction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.find_best_prediction" title="Permalink to this definition"></a></dt>
+<dd><p>called by find_best_predictions, given two model directories (each contains 4 regressors) returns the predictions of the best model
+:param workdir: path to two directories of the currently considered models (with and without SFS)
+:param summary_path: path to the summary text file
+:return: a dictionary containing info on predictions such as the name of the best model, its mape and the predicted values</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.find_best_predictions">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">find_best_predictions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#find_best_predictions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.find_best_predictions" title="Permalink to this definition"></a></dt>
+<dd><p>called by plot_ml_predictions_graphs, returns two dictionaries containing the predictions made with the best models
+:param results_dir: path to the “Results” folder of the considered campaign
+:param run_name:
+:returns: two dictionary, one for interpolation and one for extrapolation, each containing info on predictions such as the name of the best model, its mape and the predicted values</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.get_first_job">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">get_first_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timelist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#get_first_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.get_first_job" title="Permalink to this definition"></a></dt>
+<dd><p>returns the time of the creation of the first job in a given timelist</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timelist</strong> – dictionary containing a list of jobs, each job itself a dictionary containing the following info:
+service, node, job_create, pod_create, job_start, bash_script_start, bash_script_end, job_finish;
+timelists are created by function “get_timed_jobs_list” in file “retrieve_logs.py”</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the time of the creation (job_create) of the first job as datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.get_last_job">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">get_last_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timelist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#get_last_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.get_last_job" title="Permalink to this definition"></a></dt>
+<dd><p>returns the time of the completion of the last job in a given timelist</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timelist</strong> – dictionary containing a list of jobs, each job itself a dictionary containing the following info:
+service, node, job_create, pod_create, job_start, bash_script_start, bash_script_end, job_finish;
+timelists are created by function “get_timed_jobs_list” in file “retrieve_logs.py”</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the time of the completion (job_finish) of the last job as datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.load_dataframes">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">load_dataframes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#load_dataframes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.load_dataframes" title="Permalink to this definition"></a></dt>
+<dd><p>loads the dataframe and averaged_dataframe for a specific subfolder of a specific campaign
+:param results_dir: path to the “Results” folder of the considered campaign
+:param subfolder: specifies whether we’re considering the full workflow (“full”) or a service</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.make_runtime_core_csv">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">make_runtime_core_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#make_runtime_core_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.make_runtime_core_csv" title="Permalink to this definition"></a></dt>
+<dd><p>writes the dataframe as CSV that can be fed to the ML library</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results_dir</strong> – path to the “Results” folder of the considered campaign</p></li>
+<li><p><strong>subfolder</strong> – specifies whether we’re considering the full workflow (“full”) or a service</p></li>
+<li><p><strong>df</strong> – dataframe containing the runtime/parallelism data for every run (including repetitions)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.make_runtime_core_csv_for_ml">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">make_runtime_core_csv_for_ml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">averaged_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#make_runtime_core_csv_for_ml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.make_runtime_core_csv_for_ml" title="Permalink to this definition"></a></dt>
+<dd><p>generates the training and test set for the interpolation (or extrapolation) tests of a campaign
+:param results_dir: path to the “Results” folder of the considered campaign
+:param data: complete dataframe with all values obtained in the campaign, used for the training set
+:param averaged_data: reduced dataframe with averaged values, used for the test set
+:param operation: specifies whether we are performing Interpolation or Extrapolation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.make_statistics">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">make_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">campaign_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">services</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#make_statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.make_statistics" title="Permalink to this definition"></a></dt>
+<dd><p>for every operation of a service (wait, overhead, compute etc.) calculates its mean, average, variance, population standard deviation and coefficient of variation, saved in a text file under “Results/Statistics”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>campaign_dir</strong> – path to the current campaign folder, containing all the “Run #i” folders as well as the “Results” folder</p></li>
+<li><p><strong>results_dir</strong> – path to the “Results” folder of the considered campaign</p></li>
+<li><p><strong>subfolder</strong> – specifies whether we’re considering the full workflow (“full”) or a service</p></li>
+<li><p><strong>services</strong> – ordered list of services, each a dictionary containing name of the service (as string), input bucket (as string) and output buckets (list of strings)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.merge_csv_of_service">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">merge_csv_of_service</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">campaign_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#merge_csv_of_service"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.merge_csv_of_service" title="Permalink to this definition"></a></dt>
+<dd><p>for all the runs in a campaign, merges together the CSV files of a specified service
+:param campaign_dir: path to the current campaign folder, containing all the “Run #i” folders as well as the “Results” folder
+:param service_name: name of the considered service</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.plot_ml_predictions_graph">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">plot_ml_predictions_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graphs_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#plot_ml_predictions_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.plot_ml_predictions_graph" title="Permalink to this definition"></a></dt>
+<dd><p>plots a graph with all the runs, a line for the average and red marks for the predictions
+:param graphs_dir: directory containing the graphs of the considered campaign (i.e. “Results/Graphs”)
+:param subfolder: specifies whether we’re considering the full workflow (“full”) or a service
+:param test_values: array with the “parallelism” values used to make the predictions on
+:param dictionary: contains info on the prediction, such as the best model, its mape, and the predicted values
+:param df: dataframe containing the runtime/parallelism data for every run (including repetitions)
+:param adf: dataframe containing the runtime/parallelism data for every run (repeated runs are averaged)
+:param operation: string, is either “interpolation” or “extrapolation”, only needed to save the image</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.plot_ml_predictions_graphs">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">plot_ml_predictions_graphs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#plot_ml_predictions_graphs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.plot_ml_predictions_graphs" title="Permalink to this definition"></a></dt>
+<dd><p>collects the required data needed to plot the ml graphs, such as test values, dataframes and predictions
+:param results_dir: path to the “Results” folder of the considered campaign
+:param run_name:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.plot_runtime_core_graphs">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">plot_runtime_core_graphs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#plot_runtime_core_graphs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.plot_runtime_core_graphs" title="Permalink to this definition"></a></dt>
+<dd><p>plots a graph with all the runs and a line for the average
+:param results_dir: path to the “Results” folder of the considered campaign
+:param subfolder: specifies whether we’re considering the full workflow (“full”) or a service
+:param df: dataframe containing the runtime/parallelism data for every run (including repetitions)
+:param adf: dataframe containing the runtime/parallelism data for every run (repeated runs are averaged)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.prepare_runtime_data">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">prepare_runtime_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repetitions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">services</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#prepare_runtime_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.prepare_runtime_data" title="Permalink to this definition"></a></dt>
+<dd><p>outputs two runtime/parallelism dataframes:
+* the first contains every run (including repetitions)
+* the second one instead averages the repeated runs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>repetitions</strong> – number of times each run is repeated</p></li>
+<li><p><strong>runs</strong> – list of runs, each run being a dictionary containing info such as the number of nodes, the list and configuration of services</p></li>
+<li><p><strong>services</strong> – ordered list of services, each a dictionary containing name of the service (as string), input bucket (as string) and output buckets (list of strings)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>two runtime/parallelism dataframes, complete and averaged</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.read_csv_content">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">read_csv_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#read_csv_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.read_csv_content" title="Permalink to this definition"></a></dt>
+<dd><p>returns the content of a csv file
+:param filepath: path to the csv file
+:returns: content of specified csv file</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.read_csv_header">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">read_csv_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#read_csv_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.read_csv_header" title="Permalink to this definition"></a></dt>
+<dd><p>returns the header of a csv file
+:param filepath: path to the csv file
+:returns: header of specified csv file</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.postprocessing.save_dataframes">
+<span class="sig-prename descclassname"><span class="pre">oscarp.postprocessing.</span></span><span class="sig-name descname"><span class="pre">save_dataframes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/postprocessing.html#save_dataframes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.postprocessing.save_dataframes" title="Permalink to this definition"></a></dt>
+<dd><p>saves the two dataframes to file so that they can be reused (when making the prediction graphs for example)
+:param results_dir: path to the “Results” folder of the considered campaign
+:param subfolder: specifies whether we’re considering the full workflow (“full”) or a service
+:param df: dataframe containing the runtime/parallelism data for every run (including repetitions)
+:param adf: dataframe containing the runtime/parallelism data for every run (repeated runs are averaged)</p>
+</dd></dl>
+
+</section>
+<section id="module-oscarp.process_logs">
+<span id="oscarp-process-logs-module"></span><h2>oscarp.process_logs module<a class="headerlink" href="#module-oscarp.process_logs" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.process_logs.delete_logs_folder">
+<span class="sig-prename descclassname"><span class="pre">oscarp.process_logs.</span></span><span class="sig-name descname"><span class="pre">delete_logs_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/process_logs.html#delete_logs_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.process_logs.delete_logs_folder" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.process_logs.make_csv_table">
+<span class="sig-prename descclassname"><span class="pre">oscarp.process_logs.</span></span><span class="sig-name descname"><span class="pre">make_csv_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">services</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_run_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/process_logs.html#make_csv_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.process_logs.make_csv_table" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.process_logs.make_done_file">
+<span class="sig-prename descclassname"><span class="pre">oscarp.process_logs.</span></span><span class="sig-name descname"><span class="pre">make_done_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/process_logs.html#make_done_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.process_logs.make_done_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.process_logs.zip_logs">
+<span class="sig-prename descclassname"><span class="pre">oscarp.process_logs.</span></span><span class="sig-name descname"><span class="pre">zip_logs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/process_logs.html#zip_logs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.process_logs.zip_logs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-oscarp.retrieve_logs">
+<span id="oscarp-retrieve-logs-module"></span><h2>oscarp.retrieve_logs module<a class="headerlink" href="#module-oscarp.retrieve_logs" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.calculate_throughput">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">calculate_throughput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timed_job_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#calculate_throughput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.calculate_throughput" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.get_data_size">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">get_data_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#get_data_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.get_data_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.get_kubectl_log">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">get_kubectl_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pod_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#get_kubectl_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.get_kubectl_log" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.get_kubernetes_pod_list">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">get_kubernetes_pod_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#get_kubernetes_pod_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.get_kubernetes_pod_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.get_oscar_log">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">get_oscar_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#get_oscar_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.get_oscar_log" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.get_scar_log">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">get_scar_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#get_scar_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.get_scar_log" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.get_timed_jobs_list">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">get_timed_jobs_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oscarcli_alias</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#get_timed_jobs_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.get_timed_jobs_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.pull_jmeter_logs">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">pull_jmeter_logs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#pull_jmeter_logs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.pull_jmeter_logs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.pull_lambda_logs">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">pull_lambda_logs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#pull_lambda_logs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.pull_lambda_logs" title="Permalink to this definition"></a></dt>
+<dd><p>pulls the log for every lambda function, start time is the first “storage event found”, end is last “uploading file”
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.pull_logs">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">pull_logs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#pull_logs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.pull_logs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.retrieve_logs.save_timelist_to_file">
+<span class="sig-prename descclassname"><span class="pre">oscarp.retrieve_logs.</span></span><span class="sig-name descname"><span class="pre">save_timelist_to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timed_job_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/retrieve_logs.html#save_timelist_to_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.retrieve_logs.save_timelist_to_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-oscarp.run_manager">
+<span id="oscarp-run-manager-module"></span><h2>oscarp.run_manager module<a class="headerlink" href="#module-oscarp.run_manager" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.duplicate_bucket">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">duplicate_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination_bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_batches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distribution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inter_upload_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#duplicate_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.duplicate_bucket" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.duplicate_bucket_sync">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">duplicate_bucket_sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination_bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distribution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#duplicate_bucket_sync"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.duplicate_bucket_sync" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.get_input_files_count">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">get_input_files_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#get_input_files_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.get_input_files_count" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.get_jobs_list">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">get_jobs_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oscarcli_alias</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#get_jobs_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.get_jobs_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.increment_sleep">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">increment_sleep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sleep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#increment_sleep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.increment_sleep" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.move_file_between_buckets">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">move_file_between_buckets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination_bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#move_file_between_buckets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.move_file_between_buckets" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.move_from_storage">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">move_from_storage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_batches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distribution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inter_upload_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#move_from_storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.move_from_storage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.move_input_files_to_input_bucket">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">move_input_files_to_input_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#move_input_files_to_input_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.move_input_files_to_input_bucket" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.move_input_files_to_s3_bucket">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">move_input_files_to_s3_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_bucket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#move_input_files_to_s3_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.move_input_files_to_s3_bucket" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.use_jmeter">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">use_jmeter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#use_jmeter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.use_jmeter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.wait_interval">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">wait_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distribution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inter_upload_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#wait_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.wait_interval" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.wait_lambda_completion">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">wait_lambda_completion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#wait_lambda_completion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.wait_lambda_completion" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.wait_oscar_service_completion">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">wait_oscar_service_completion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#wait_oscar_service_completion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.wait_oscar_service_completion" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.run_manager.wait_services_completion">
+<span class="sig-prename descclassname"><span class="pre">oscarp.run_manager.</span></span><span class="sig-name descname"><span class="pre">wait_services_completion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">services</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/run_manager.html#wait_services_completion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.run_manager.wait_services_completion" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-oscarp.utils">
+<span id="oscarp-utils-module"></span><h2>oscarp.utils module<a class="headerlink" href="#module-oscarp.utils" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils._get_command_output">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">_get_command_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#_get_command_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils._get_command_output" title="Permalink to this definition"></a></dt>
+<dd><p>Execute a command as an OS subprocess, returns the output lines and eventual errors.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.append_string_to_file">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">append_string_to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#append_string_to_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.append_string_to_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.auto_mkdir">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">auto_mkdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#auto_mkdir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.auto_mkdir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.configure_ssh_client">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">configure_ssh_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cluster</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#configure_ssh_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.configure_ssh_client" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.create_new_file">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">create_new_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#create_new_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.create_new_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.delete_directory">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">delete_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#delete_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.delete_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.delete_file">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">delete_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#delete_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.delete_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.dict_to_string">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">dict_to_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#dict_to_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.dict_to_string" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.ensure_slash_end">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">ensure_slash_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#ensure_slash_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.ensure_slash_end" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.get_command_output_wrapped">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">get_command_output_wrapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#get_command_output_wrapped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.get_command_output_wrapped" title="Permalink to this definition"></a></dt>
+<dd><p>Execute a command as an OS subprocess, if there are errors they are printed and the command is retried.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.get_private_key">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">get_private_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#get_private_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.get_private_key" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.get_ssh_output">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">get_ssh_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#get_ssh_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.get_ssh_output" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.get_valid_input">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">get_valid_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#get_valid_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.get_valid_input" title="Permalink to this definition"></a></dt>
+<dd><p>Receives a message and an array of values, keeps asking for an input that is among the allowed values.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.read_json">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">read_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#read_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.read_json" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.read_yaml">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">read_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#read_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.read_yaml" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.show_debug_info">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">show_debug_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#show_debug_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.show_debug_info" title="Permalink to this definition"></a></dt>
+<dd><p>Receives a string, prints it in cyan.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.show_error">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">show_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#show_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.show_error" title="Permalink to this definition"></a></dt>
+<dd><p>Receives a string, prints it in red.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.show_external_error">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">show_external_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#show_external_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.show_external_error" title="Permalink to this definition"></a></dt>
+<dd><p>Receives a string, prints it in red.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.show_fatal_error">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">show_fatal_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#show_fatal_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.show_fatal_error" title="Permalink to this definition"></a></dt>
+<dd><p>Prints an unrecoverable error message in red and exits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – error message</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.show_warning">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">show_warning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#show_warning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.show_warning" title="Permalink to this definition"></a></dt>
+<dd><p>Receives a string, prints it in yellow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.strip_ansi_from_string">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">strip_ansi_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#strip_ansi_from_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.strip_ansi_from_string" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.write_json">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">write_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#write_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.write_json" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.write_list_of_strings_to_file">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">write_list_of_strings_to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_strings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#write_list_of_strings_to_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.write_list_of_strings_to_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oscarp.utils.write_yaml">
+<span class="sig-prename descclassname"><span class="pre">oscarp.utils.</span></span><span class="sig-name descname"><span class="pre">write_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/oscarp/utils.html#write_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#oscarp.utils.write_yaml" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-oscarp">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-oscarp" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jmeterLoadInjector.html" class="btn btn-neutral float-left" title="jmeterLoadInjector package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

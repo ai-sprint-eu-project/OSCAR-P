@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>oscarp.run_manager &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">oscarp.run_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for oscarp.run_manager</h1><div class="highlight"><pre>
+<span></span><span class="c1"># all methods related to starting and finishing the runs go in here</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">executables</span>
+
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">cluster_manager</span> <span class="kn">import</span> <span class="n">set_default_oscar_cluster_from_alias</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">get_command_output_wrapped</span><span class="p">,</span> <span class="n">auto_mkdir</span>
+
+<span class="kn">from</span> <span class="nn">jmeterLoadInjector.main</span> <span class="kn">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">jmeter</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+
+
+<span class="c1"># wait between the upload of two files, to emulate arrival rate</span>
+<span class="c1"># not a boolean to allow adding new distributions</span>
+<div class="viewcode-block" id="wait_interval"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.wait_interval">[docs]</a><span class="k">def</span> <span class="nf">wait_interval</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">inter_upload_time</span><span class="p">):</span>
+    <span class="n">wait</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">distribution</span> <span class="o">==</span> <span class="s2">&quot;exponential&quot;</span><span class="p">:</span>
+        <span class="n">wait</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">inter_upload_time</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">inter_upload_time</span><span class="p">,</span> <span class="mi">1</span><span class="p">))),</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">distribution</span> <span class="o">==</span> <span class="s2">&quot;deterministic&quot;</span><span class="p">:</span>
+        <span class="n">wait</span> <span class="o">=</span> <span class="n">inter_upload_time</span>
+    <span class="k">return</span> <span class="n">wait</span></div>
+
+
+<span class="c1"># move files to the input bucket, starting the workflow execution</span>
+<div class="viewcode-block" id="move_input_files_to_input_bucket"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.move_input_files_to_input_bucket">[docs]</a><span class="k">def</span> <span class="nf">move_input_files_to_input_bucket</span><span class="p">(</span><span class="n">service</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Moving input files...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="n">storage_bucket</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">number_of_batches</span><span class="p">,</span> <span class="n">distribution</span><span class="p">,</span> <span class="n">inter_upload_time</span> <span class="o">=</span> <span class="n">get_workflow_input_async</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_single_service_test</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_sync</span><span class="p">:</span>
+            <span class="n">use_jmeter</span><span class="p">(</span><span class="n">service</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">move_from_storage</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">number_of_batches</span><span class="p">,</span> <span class="n">distribution</span><span class="p">,</span> <span class="n">inter_upload_time</span><span class="p">)</span>
+            <span class="n">get_input_files_count</span><span class="p">(</span><span class="n">service</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># is single service test</span>
+        <span class="n">service_name</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">service_distribution</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">components_names</span><span class="p">[</span><span class="n">service_name</span><span class="p">]</span><span class="o">.</span><span class="n">time_distribution</span>
+
+        <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_sync</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">service_distribution</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># first service</span>
+                <span class="n">use_jmeter</span><span class="p">(</span><span class="n">service</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">duplicate_bucket_sync</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">storage_bucket</span><span class="p">,</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;input_bucket&quot;</span><span class="p">],</span> <span class="n">service_distribution</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">duplicate_bucket</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">storage_bucket</span><span class="p">,</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;input_bucket&quot;</span><span class="p">],</span> <span class="n">number_of_batches</span><span class="p">,</span>
+                             <span class="n">service_distribution</span><span class="p">,</span> <span class="n">inter_upload_time</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="get_input_files_count"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.get_input_files_count">[docs]</a><span class="k">def</span> <span class="nf">get_input_files_count</span><span class="p">(</span><span class="n">service</span><span class="p">):</span>
+    <span class="n">minio_alias</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;storage_provider_alias&quot;</span><span class="p">]</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">minio_alias</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;input_bucket&quot;</span><span class="p">]</span>
+    <span class="n">set_default_oscar_cluster_from_alias</span><span class="p">(</span><span class="n">service</span><span class="p">[</span><span class="s2">&quot;oscarcli_alias&quot;</span><span class="p">])</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;ls &quot;</span> <span class="o">+</span> <span class="n">source</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">input_files_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">input_files_count</span><span class="p">,</span> <span class="s2">&quot;input files found&quot;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="move_from_storage"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.move_from_storage">[docs]</a><span class="k">def</span> <span class="nf">move_from_storage</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">number_of_batches</span><span class="p">,</span> <span class="n">distribution</span><span class="p">,</span> <span class="n">inter_upload_time</span><span class="p">):</span>
+    <span class="n">minio_alias</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;storage_provider_alias&quot;</span><span class="p">]</span>
+    <span class="n">stripped_filename</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">input_bucket</span> <span class="o">=</span> <span class="n">minio_alias</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;input_bucket&quot;</span><span class="p">]</span>
+    <span class="n">storage_bucket</span> <span class="o">=</span> <span class="n">minio_alias</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;storage&quot;</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_batches</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">destination_file</span> <span class="o">=</span> <span class="n">stripped_filename</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">batch_size</span><span class="o">+</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">extension</span>
+            <span class="n">move_file_between_buckets</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">storage_bucket</span><span class="p">,</span> <span class="n">destination_file</span><span class="p">,</span> <span class="n">input_bucket</span><span class="p">)</span>
+
+        <span class="n">wait</span> <span class="o">=</span> <span class="n">wait_interval</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">inter_upload_time</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">wait</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="use_jmeter"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.use_jmeter">[docs]</a><span class="k">def</span> <span class="nf">use_jmeter</span><span class="p">(</span><span class="n">service</span><span class="p">):</span>
+    <span class="n">service_name</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;cluster list&quot;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;cluster&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">endpoint</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;cluster default -s oscar-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;cluster&quot;</span><span class="p">])</span>
+    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;service get </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;token&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># print(service_name, endpoint, token)</span>
+
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_debug</span><span class="p">:</span>
+        <span class="n">current_work_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_work_dir</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s2">&quot;jmeterLoadInjector&quot;</span><span class="p">)</span>
+
+    <span class="n">input_file_name</span> <span class="o">=</span> <span class="s2">&quot;Test-Video.mp4&quot;</span>
+    <span class="n">oscarp_dir</span> <span class="o">=</span> <span class="n">current_work_dir</span> <span class="o">+</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;oscarp/&quot;</span>
+    <span class="n">input_file</span> <span class="o">=</span> <span class="n">oscarp_dir</span> <span class="o">+</span> <span class="s2">&quot;input_files/&quot;</span> <span class="o">+</span> <span class="n">input_file_name</span>
+    <span class="n">jmeter_dir</span> <span class="o">=</span> <span class="n">oscarp_dir</span> <span class="o">+</span> <span class="s2">&quot;jmeter_files/&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_debug</span><span class="p">:</span>
+        <span class="n">jmeter_dir</span> <span class="o">=</span> <span class="s2">&quot;/tmp/jmeter_files/&quot;</span>
+
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">jmeter_dir</span><span class="p">)</span>
+    <span class="n">jmeter_results_file</span> <span class="o">=</span> <span class="n">jmeter_dir</span> <span class="o">+</span> <span class="s2">&quot;results.csv&quot;</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">jmeter_results_file</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">jmeter_results_file</span><span class="p">)</span>
+
+    <span class="n">configuration</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;cluster_endpoint&#39;</span><span class="p">:</span> <span class="n">endpoint</span><span class="p">,</span>
+        <span class="s1">&#39;oscar_service&#39;</span><span class="p">:</span> <span class="n">service_name</span><span class="p">,</span>
+        <span class="s1">&#39;token&#39;</span><span class="p">:</span> <span class="n">token</span><span class="p">,</span>
+        <span class="s1">&#39;input_file&#39;</span><span class="p">:</span> <span class="n">input_file</span><span class="p">,</span>
+        <span class="s1">&#39;connect_timeout_seconds&#39;</span><span class="p">:</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;connect_timeout_seconds&quot;</span><span class="p">],</span>
+        <span class="s1">&#39;request_timeout_seconds&#39;</span><span class="p">:</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;request_timeout_seconds&quot;</span><span class="p">],</span>
+        <span class="s1">&#39;tests&#39;</span><span class="p">:</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;intervals&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+
+    <span class="n">jmeter</span><span class="p">(</span><span class="n">jmeter_dir</span><span class="p">,</span> <span class="n">configuration</span><span class="p">)</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">current_work_dir</span><span class="p">)</span>
+
+    <span class="n">destination</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">Run #</span><span class="si">%s</span><span class="s2">/jmeter_results.csv&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_run_index</span><span class="p">)</span>
+
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">jmeter_results_file</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">def move_input_files_to_dead_start_bucket(service):</span>
+<span class="sd">    print(colored(&quot;Moving input files...&quot;, &quot;yellow&quot;))</span>
+<span class="sd">    minio_alias = service[&quot;minio_alias&quot;]</span>
+<span class="sd">    storage_bucket = minio_alias + &quot;/&quot; + &quot;storage&quot;</span>
+<span class="sd">    input_bucket = minio_alias + &quot;/&quot; + &quot;dead-start&quot;</span>
+
+<span class="sd">    filename, number_of_files, distribution, inter_upload_time = get_workflow_input()</span>
+<span class="sd">    stripped_filename, extension = filename.split(&quot;.&quot;)</span>
+
+<span class="sd">    for i in tqdm(range(0, number_of_files)):</span>
+<span class="sd">        destination_file = stripped_filename + &quot;_&quot; + str(i) + &quot;.&quot; + extension</span>
+<span class="sd">        move_file_between_buckets(filename, storage_bucket, destination_file, input_bucket)</span>
+
+<span class="sd">        wait = wait_interval(distribution, inter_upload_time)</span>
+<span class="sd">        time.sleep(wait)</span>
+<span class="sd">    print(colored(&quot;Done!&quot;, &quot;green&quot;))</span>
+<span class="sd">    return</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1"># origin and destination bucket must already include the minio_alias, i.e. &quot;minio-vm/storage&quot;</span>
+<div class="viewcode-block" id="move_file_between_buckets"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.move_file_between_buckets">[docs]</a><span class="k">def</span> <span class="nf">move_file_between_buckets</span><span class="p">(</span><span class="n">origin_file</span><span class="p">,</span> <span class="n">origin_bucket</span><span class="p">,</span> <span class="n">destination_file</span><span class="p">,</span> <span class="n">destination_bucket</span><span class="p">):</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">origin_bucket</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">origin_file</span>
+    <span class="n">destination</span> <span class="o">=</span> <span class="n">destination_bucket</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">destination_file</span>
+    <span class="c1"># command = mc + &quot;cp &quot; + origin + &quot; &quot; + destination</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;cp &quot;</span> <span class="o">+</span> <span class="n">origin</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">destination</span><span class="p">)</span>
+    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="duplicate_bucket"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.duplicate_bucket">[docs]</a><span class="k">def</span> <span class="nf">duplicate_bucket</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">source_bucket</span><span class="p">,</span> <span class="n">destination_bucket</span><span class="p">,</span> <span class="n">number_of_batches</span><span class="p">,</span> <span class="n">distribution</span><span class="p">,</span> <span class="n">inter_upload_time</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Duplicating bucket...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="n">minio_alias</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;storage_provider_alias&quot;</span><span class="p">]</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">minio_alias</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">source_bucket</span>
+    <span class="n">destination</span> <span class="o">=</span> <span class="n">minio_alias</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">destination_bucket</span>
+    <span class="n">set_default_oscar_cluster_from_alias</span><span class="p">(</span><span class="n">service</span><span class="p">[</span><span class="s2">&quot;oscarcli_alias&quot;</span><span class="p">])</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;ls &quot;</span> <span class="o">+</span> <span class="n">source</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span> <span class="o">/</span> <span class="n">gp</span><span class="o">.</span><span class="n">input_files_count</span><span class="p">)</span>
+
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span><span class="p">:</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;cp </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+        <span class="c1"># print(command)</span>
+        <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+        <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;=</span> <span class="n">batch_size</span><span class="p">:</span>
+            <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">wait</span> <span class="o">=</span> <span class="n">wait_interval</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">inter_upload_time</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">wait</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="duplicate_bucket_sync"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.duplicate_bucket_sync">[docs]</a><span class="k">def</span> <span class="nf">duplicate_bucket_sync</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">source_bucket</span><span class="p">,</span> <span class="n">destination_bucket</span><span class="p">,</span> <span class="n">distribution</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Duplicating bucket...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="n">minio_alias</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;storage_provider_alias&quot;</span><span class="p">]</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">minio_alias</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">source_bucket</span>
+    <span class="n">destination</span> <span class="o">=</span> <span class="n">minio_alias</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">destination_bucket</span>
+    <span class="n">set_default_oscar_cluster_from_alias</span><span class="p">(</span><span class="n">service</span><span class="p">[</span><span class="s2">&quot;oscarcli_alias&quot;</span><span class="p">])</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;ls &quot;</span> <span class="o">+</span> <span class="n">source</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span> <span class="o">/</span> <span class="n">gp</span><span class="o">.</span><span class="n">input_files_count</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;synchronous&quot;</span><span class="p">][</span><span class="s2">&quot;intervals&quot;</span><span class="p">]:</span>
+        <span class="n">throughput</span> <span class="o">=</span> <span class="n">interval</span><span class="p">[</span><span class="s2">&quot;throughput&quot;</span><span class="p">]</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">interval</span><span class="p">[</span><span class="s2">&quot;duration_seconds&quot;</span><span class="p">]</span>
+
+        <span class="n">inter_upload_time</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">throughput</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="n">batch_number_counter</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">duration</span> <span class="o">/</span> <span class="n">inter_upload_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">batch_size_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span><span class="p">:</span>
+
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;cp </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+            <span class="c1"># print(command)</span>
+            <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+            <span class="n">batch_size_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">batch_size_counter</span> <span class="o">&gt;=</span> <span class="n">batch_size</span><span class="p">:</span>
+                <span class="n">batch_size_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="n">batch_number_counter</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">batch_number_counter</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pausing&quot;</span><span class="p">)</span>
+                <span class="n">wait</span> <span class="o">=</span> <span class="n">wait_interval</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">inter_upload_time</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">wait</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="move_input_files_to_s3_bucket"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.move_input_files_to_s3_bucket">[docs]</a><span class="k">def</span> <span class="nf">move_input_files_to_s3_bucket</span><span class="p">(</span><span class="n">input_bucket</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Duplicating bucket...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="n">base_bucket</span> <span class="o">=</span> <span class="n">input_bucket</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">temp_bucket</span> <span class="o">=</span> <span class="n">base_bucket</span> <span class="o">+</span> <span class="s2">&quot;/temp_bucket/&quot;</span>
+    <span class="n">input_bucket</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws s3 cp s3://&quot;</span> <span class="o">+</span> <span class="n">input_bucket</span> <span class="o">+</span> <span class="s2">&quot; s3://&quot;</span> <span class="o">+</span> <span class="n">temp_bucket</span>
+    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws s3 mv s3://&quot;</span> <span class="o">+</span> <span class="n">input_bucket</span> <span class="o">+</span> <span class="s2">&quot; s3://&quot;</span> <span class="o">+</span> <span class="n">temp_bucket</span> <span class="o">+</span> <span class="s2">&quot; --recursive&quot;</span>
+    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws s3 mv s3://&quot;</span> <span class="o">+</span> <span class="n">temp_bucket</span> <span class="o">+</span> <span class="s2">&quot; s3://&quot;</span> <span class="o">+</span> <span class="n">input_bucket</span> <span class="o">+</span> <span class="s2">&quot; --recursive&quot;</span>
+    <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span></div>
+
+
+<span class="c1"># given a service, returns the list of jobs with their status</span>
+<div class="viewcode-block" id="get_jobs_list"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.get_jobs_list">[docs]</a><span class="k">def</span> <span class="nf">get_jobs_list</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">oscarcli_alias</span><span class="p">):</span>
+
+    <span class="n">set_default_oscar_cluster_from_alias</span><span class="p">(</span><span class="n">oscarcli_alias</span><span class="p">)</span>
+
+    <span class="c1"># command = oscar_cli + &quot;service logs list &quot; + service_name</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="s2">&quot;service logs list &quot;</span> <span class="o">+</span> <span class="n">service_name</span><span class="p">)</span>
+    <span class="n">logs_list</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">logs_list</span><span class="p">:</span>
+        <span class="n">logs_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">job_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">logs_list</span><span class="p">:</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">job_name</span> <span class="o">=</span> <span class="n">segments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">job_status</span> <span class="o">=</span> <span class="n">segments</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">job_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">job_name</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">job_status</span>
+        <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">job_list</span></div>
+
+
+<div class="viewcode-block" id="increment_sleep"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.increment_sleep">[docs]</a><span class="k">def</span> <span class="nf">increment_sleep</span><span class="p">(</span><span class="n">sleep</span><span class="p">):</span>
+    <span class="n">max_wait</span> <span class="o">=</span> <span class="mi">300</span>
+    <span class="n">sleep</span> <span class="o">+=</span> <span class="nb">round</span><span class="p">(</span><span class="n">sleep</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sleep</span> <span class="o">&gt;</span> <span class="n">max_wait</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">max_wait</span>
+    <span class="k">return</span> <span class="n">sleep</span></div>
+
+
+<span class="c1"># awaits the completion of all the jobs before passing to processing</span>
+<div class="viewcode-block" id="wait_services_completion"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.wait_services_completion">[docs]</a><span class="k">def</span> <span class="nf">wait_services_completion</span><span class="p">(</span><span class="n">services</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;is_lambda&quot;</span><span class="p">]:</span>
+            <span class="n">wait_lambda_completion</span><span class="p">(</span><span class="n">service</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wait_oscar_service_completion</span><span class="p">(</span><span class="n">service</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="wait_oscar_service_completion"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.wait_oscar_service_completion">[docs]</a><span class="k">def</span> <span class="nf">wait_oscar_service_completion</span><span class="p">(</span><span class="n">service</span><span class="p">):</span>
+    <span class="n">service_name</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+    <span class="n">service_distribution</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">components_names</span><span class="p">[</span><span class="n">service_name</span><span class="p">]</span><span class="o">.</span><span class="n">time_distribution</span>
+
+    <span class="k">if</span> <span class="n">service_distribution</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_sync</span><span class="p">:</span>  <span class="c1"># first service</span>
+        <span class="k">return</span>
+
+    <span class="c1"># sleep_interval = 10</span>
+    <span class="n">completed</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">service_name</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+    <span class="c1"># cluster = get_active_cluster(service, clusters)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Waiting for service &quot;</span> <span class="o">+</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot; completion...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+
+    <span class="c1"># before considering the service completed it&#39;ll wait for a bit more</span>
+    <span class="n">retries_counter</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">sleep_timer_seconds</span> <span class="o">=</span> <span class="mi">60</span>
+
+    <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">()</span>
+    <span class="n">old_pending_jobs</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">completed</span><span class="p">:</span>
+        <span class="n">job_list</span> <span class="o">=</span> <span class="n">get_jobs_list</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;oscarcli_alias&quot;</span><span class="p">])</span>
+        <span class="n">pbar</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">job_list</span><span class="p">)</span>
+        <span class="n">pbar</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_timer_seconds</span><span class="p">)</span>
+
+        <span class="n">pending_jobs</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">job_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">job_list</span><span class="p">:</span>  <span class="c1"># if list not empty</span>
+            <span class="n">completed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">job_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">j</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Running&quot;</span><span class="p">:</span>
+                    <span class="n">completed</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">j</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Pending&quot;</span><span class="p">:</span>
+                    <span class="n">pending_jobs</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="c1"># completed is true if there are no jobs running, everything is either completed or pending</span>
+
+        <span class="n">pbar</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">pbar</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">completed</span><span class="p">:</span>  <span class="c1"># resets the counter</span>
+            <span class="n">retries_counter</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if there are no running jobs and the number of pending is under 5%,</span>
+            <span class="c1"># and it stays the same (meaning every job is either finished or stuck)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">job_list</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span><span class="o">*</span><span class="mi">5</span> <span class="o">&gt;</span> <span class="n">pending_jobs</span> <span class="o">==</span> <span class="n">old_pending_jobs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">retries_counter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">completed</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">retries_counter</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># if I reach here it means everything is pending</span>
+                <span class="n">completed</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">old_pending_jobs</span> <span class="o">=</span> <span class="n">pending_jobs</span>
+
+        <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Pending jobs: </span><span class="si">%s</span><span class="s2">, Checks completed: (</span><span class="si">%s</span><span class="s2">/3)&quot;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">pending_jobs</span><span class="p">,</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">retries_counter</span><span class="p">),</span> <span class="s2">&quot;magenta&quot;</span><span class="p">))</span>
+
+    <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Service &quot;</span> <span class="o">+</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot; completed!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<span class="c1"># todo this isn&#39;t done yet, finish it</span>
+<div class="viewcode-block" id="wait_lambda_completion"><a class="viewcode-back" href="../../oscarp.html#oscarp.run_manager.wait_lambda_completion">[docs]</a><span class="k">def</span> <span class="nf">wait_lambda_completion</span><span class="p">(</span><span class="n">service</span><span class="p">):</span>
+    <span class="n">service_name</span> <span class="o">=</span> <span class="n">service</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Waiting for service &quot;</span> <span class="o">+</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot; completion...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+
+    <span class="n">completed</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">retries_counter</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">sleep_timer_seconds</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">old_log_length</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">completed</span><span class="p">:</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_timer_seconds</span><span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws logs describe-log-streams --log-group-name /aws/lambda/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">service_name</span>
+        <span class="n">log_streams</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+        <span class="n">log_stream_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">log_streams</span> <span class="k">if</span> <span class="s2">&quot;logStreamName&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">]</span>
+        <span class="n">log_stream_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">log_stream_names</span><span class="p">]</span>
+
+        <span class="n">total_length</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">log_stream_name</span> <span class="ow">in</span> <span class="n">log_stream_names</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;aws logs get-log-events --log-group-name /aws/lambda/</span><span class="si">%s</span><span class="s2"> --log-stream-name </span><span class="si">%s</span><span class="s2">&quot;</span> \
+                      <span class="o">%</span> <span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">log_stream_name</span><span class="p">)</span>
+
+            <span class="n">log</span> <span class="o">=</span> <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="n">total_length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Total length: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">total_length</span><span class="p">,</span> <span class="s2">&quot;magenta&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">total_length</span> <span class="o">==</span> <span class="n">old_log_length</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">retries_counter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">completed</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">retries_counter</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">completed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">old_log_length</span> <span class="o">=</span> <span class="n">total_length</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Service &quot;</span> <span class="o">+</span> <span class="n">service_name</span> <span class="o">+</span> <span class="s2">&quot; completed!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">def download_bucket(destination, bucket_name):</span>
+<span class="sd">    print(colored(&quot;Downloading bucket...&quot;, &quot;yellow&quot;))</span>
+<span class="sd">    mc_alias = get_mc_alias()</span>
+<span class="sd">    origin = mc_alias + &quot;/&quot; + bucket_name</span>
+<span class="sd">    auto_mkdir(destination)</span>
+<span class="sd">    command = &quot;oscar-p/mc cp &quot; + origin + &quot; &quot; + destination + &quot; -r&quot;</span>
+<span class="sd">    get_command_output_wrapped(command)</span>
+<span class="sd">    print(colored(&quot;Done!&quot;, &quot;green&quot;))</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

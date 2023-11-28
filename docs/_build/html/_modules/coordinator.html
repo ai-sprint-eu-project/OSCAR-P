@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coordinator &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coordinator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coordinator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+
+<span class="kn">from</span> <span class="nn">infrastructure_manager</span> <span class="kn">import</span> <span class="n">create_virtual_infrastructures</span><span class="p">,</span> <span class="n">adjust_physical_infrastructures_configuration</span><span class="p">,</span> \
+    <span class="n">update_virtual_infrastructures</span><span class="p">,</span> <span class="n">delete_all_virtual_infrastructures</span><span class="p">,</span> <span class="n">delete_unused_virtual_infrastructures</span><span class="p">,</span> \
+    <span class="n">get_outputs</span><span class="p">,</span> <span class="n">configure_jmeter_cluster</span>
+<span class="kn">from</span> <span class="nn">input_files_parser</span> <span class="kn">import</span> <span class="n">get_resources</span><span class="p">,</span> <span class="n">get_run_parameters</span><span class="p">,</span> <span class="n">get_components</span><span class="p">,</span> <span class="n">set_testing_parameters</span>
+<span class="kn">from</span> <span class="nn">deployment_generator</span> <span class="kn">import</span> <span class="n">get_testing_units</span><span class="p">,</span> <span class="n">get_deployments</span><span class="p">,</span> <span class="n">reorder_deployments</span><span class="p">,</span> \
+    <span class="n">make_deployments_summary</span><span class="p">,</span> <span class="n">make_resources_requirements</span><span class="p">,</span> <span class="n">get_services_to_test</span>
+<span class="kn">from</span> <span class="nn">lambda_manager</span> <span class="kn">import</span> <span class="n">setup_scar</span><span class="p">,</span> <span class="n">remove_all_lambdas</span>
+<span class="kn">from</span> <span class="nn">oscarp.mllibrary_manager</span> <span class="kn">import</span> <span class="n">run_mllibrary</span>
+<span class="kn">from</span> <span class="nn">results_maker</span> <span class="kn">import</span> <span class="n">make_results</span>
+<span class="kn">from</span> <span class="nn">run_coordinator</span> <span class="kn">import</span> <span class="n">make_oscar_p_input_file</span><span class="p">,</span> <span class="n">make_current_services</span><span class="p">,</span> <span class="n">make_oscar_p_input_file_single</span><span class="p">,</span> \
+    <span class="n">run_scheduler</span>
+<span class="kn">from</span> <span class="nn">oscarp.utils</span> <span class="kn">import</span> <span class="n">auto_mkdir</span><span class="p">,</span> <span class="n">show_fatal_error</span><span class="p">,</span> <span class="n">show_warning</span><span class="p">,</span> <span class="n">get_command_output_wrapped</span>
+<span class="kn">from</span> <span class="nn">oscarp.gui</span> <span class="kn">import</span> <span class="n">show_runs</span>
+
+
+<span class="kn">import</span> <span class="nn">oscarp.oscarp</span> <span class="k">as</span> <span class="nn">oscarp</span>
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#coordinator.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">is_dry</span><span class="p">):</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">is_debug</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">is_development</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">is_dry</span> <span class="o">=</span> <span class="n">is_dry</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">set_application_dir</span><span class="p">(</span><span class="n">input_dir</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_development</span><span class="p">:</span>
+        <span class="n">oscarp</span><span class="o">.</span><span class="n">executables</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="s2">&quot;oscarp/executables/&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">oscarp</span><span class="o">.</span><span class="n">executables</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="s2">&quot;/bin/oscarp_executables/&quot;</span><span class="p">)</span>
+
+    <span class="c1"># get the necessary info from the different input file</span>
+    <span class="n">get_resources</span><span class="p">()</span>  <span class="c1"># uses common_config/candidate_resources.yaml</span>
+    <span class="n">get_run_parameters</span><span class="p">()</span>  <span class="c1"># uses oscarp/run_parameters</span>
+
+    <span class="n">get_components</span><span class="p">()</span>  <span class="c1"># uses common_config/candidate_deployments.yaml</span>
+
+    <span class="n">set_testing_parameters</span><span class="p">()</span>  <span class="c1"># adds the parallelism field to the components</span>
+
+    <span class="c1"># create list of deployments, rearrange them as necessary</span>
+    <span class="n">get_deployments</span><span class="p">()</span>
+    <span class="c1"># deployments = reorder_deployments(deployments, resources)  # todo fix or remove</span>
+
+    <span class="c1"># set the stage for the campaign</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">make_campaign_dir</span><span class="p">()</span>
+    <span class="n">make_deployments_summary</span><span class="p">()</span>
+
+    <span class="n">gp</span><span class="o">.</span><span class="n">is_first_launch</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># todo rename it, this is used by the GUI to print the summary</span>
+
+    <span class="c1"># # # # # # # # # # #</span>
+    <span class="c1"># DEPLOYMENTS LOOP  #</span>
+    <span class="c1"># # # # # # # # # # #</span>
+
+    <span class="k">for</span> <span class="n">deployment_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">deployments</span><span class="p">)):</span>
+
+        <span class="c1"># todo check if deployment completed and eventually skip?</span>
+
+        <span class="c1"># deployment_index = 1</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Testing deployment_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">deployment_index</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span><span class="p">)</span>
+
+        <span class="n">gp</span><span class="o">.</span><span class="n">set_current_deployment</span><span class="p">(</span><span class="n">deployment_index</span><span class="p">)</span>
+        <span class="n">make_resources_requirements</span><span class="p">()</span>  <span class="c1"># makes list of resources in use and their requirements</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cluster requirements: &quot;</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="p">)</span>  <span class="c1"># todo keep this, and improve it</span>
+
+        <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;main_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span>
+        <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;campaign_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">campaign_dir</span>
+        <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;run_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;deployment_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">deployment_index</span><span class="p">)</span>
+
+        <span class="n">make_current_services</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Services&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="n">service</span><span class="p">)</span>
+
+        <span class="n">run_scheduler</span><span class="p">()</span>
+        <span class="n">show_runs</span><span class="p">()</span>
+
+        <span class="c1"># Infrastructure Manager</span>
+        <span class="c1"># create_virtual_infrastructures()</span>
+        <span class="c1"># gp.virtual_infrastructures = []  # todo temporary</span>
+
+        <span class="c1"># Lambdas</span>
+        <span class="c1"># setup_scar()</span>
+
+        <span class="c1"># Jmeter</span>
+        <span class="c1"># configure_jmeter_cluster()</span>
+
+        <span class="c1"># # # # # # #</span>
+        <span class="c1"># RUNS LOOP #</span>
+        <span class="c1"># # # # # # #</span>
+
+        <span class="n">indexed_runs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+        <span class="c1"># entry index: index of the list, from 0; run index: index of the run, from 1</span>
+        <span class="k">for</span> <span class="n">entry_index</span><span class="p">,</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">indexed_runs</span><span class="p">:</span>
+
+            <span class="n">gp</span><span class="o">.</span><span class="n">set_current_work_dir</span><span class="p">(</span><span class="s2">&quot;Full_workflow&quot;</span><span class="p">)</span>
+            <span class="n">gp</span><span class="o">.</span><span class="n">current_run_index</span> <span class="o">=</span> <span class="n">entry_index</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">gp</span><span class="o">.</span><span class="n">current_run_id</span> <span class="o">=</span> <span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entry_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">gp</span><span class="o">.</span><span class="n">has_active_lambdas</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">has_lambdas</span>
+            <span class="n">gp</span><span class="o">.</span><span class="n">is_single_service_test</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span><span class="p">)</span>
+            <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span> <span class="o">+</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_run_id</span><span class="p">)</span>  <span class="c1"># todo, if dir exists and done file exists, skip</span>
+
+            <span class="c1"># if the resources requirements are different, update the infrastructures</span>
+            <span class="k">if</span> <span class="n">entry_index</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">prev_run</span> <span class="o">=</span> <span class="n">indexed_runs</span><span class="p">[</span><span class="n">entry_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;resources&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">prev_run</span><span class="p">[</span><span class="s2">&quot;resources&quot;</span><span class="p">]:</span>
+                    <span class="c1"># adjust_physical_infrastructures_configuration()</span>
+                    <span class="c1"># update_virtual_infrastructures()  todo rbf</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;yeh&quot;</span><span class="p">)</span>
+
+            <span class="n">oscarp</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+
+            <span class="c1"># # # # # # # # #</span>
+            <span class="c1"># SERVICES LOOP #</span>
+            <span class="c1"># # # # # # # # #</span>
+
+            <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;test_single_services&quot;</span><span class="p">]:</span>
+                <span class="n">current_services_backup</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span>
+                <span class="n">services_to_test</span> <span class="o">=</span> <span class="n">get_services_to_test</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">services_to_test</span><span class="p">:</span>
+                    <span class="n">gp</span><span class="o">.</span><span class="n">set_current_work_dir</span><span class="p">(</span><span class="n">service</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+
+                    <span class="n">service</span><span class="o">.</span><span class="n">set_buckets_single_testing</span><span class="p">()</span>
+                    <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">service</span><span class="p">]</span>
+                    <span class="n">gp</span><span class="o">.</span><span class="n">is_single_service_test</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span><span class="p">)</span>
+                    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">runs_dir</span> <span class="o">+</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_run_id</span><span class="p">)</span>  <span class="c1"># todo, if dir exists and done file exists, skip</span>
+                    <span class="n">oscarp</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+                    <span class="n">service</span><span class="o">.</span><span class="n">set_buckets_full_workflow</span><span class="p">()</span>
+
+                <span class="n">gp</span><span class="o">.</span><span class="n">current_services_list</span> <span class="o">=</span> <span class="n">current_services_backup</span>
+
+        <span class="n">exit</span><span class="p">()</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        while gp.current_base_index &lt; base_length:  # or deployment_has_all_results(gp.current_deployment_index) is False:</span>
+
+<span class="sd">            # set the stage for the current deployment, including creating the deployment directory</span>
+<span class="sd">            gp.set_current_work_dir(&quot;Full_workflow&quot;)</span>
+<span class="sd">            gp.has_active_lambdas = gp.has_lambdas</span>
+
+<span class="sd">            if gp.current_base_index &lt; base_length:</span>
+<span class="sd">                if gp.is_debug:  # todo change to if has physicals</span>
+<span class="sd">                    adjust_physical_infrastructures_configuration()</span>
+<span class="sd">                # print(colored(&quot;! Updating cluster&quot;, &quot;magenta&quot;))</span>
+<span class="sd">                update_virtual_infrastructures()</span>
+<span class="sd">            else:</span>
+<span class="sd">                gp.current_base_index = base_length - 1</span>
+
+<span class="sd">            gp.is_single_service_test = False</span>
+
+<span class="sd">            # todo rename main_dir to application_dir</span>
+<span class="sd">            # todo will get rid of the input file altogether</span>
+<span class="sd">            make_oscar_p_input_file()</span>
+<span class="sd">            oscarp.main()</span>
+
+<span class="sd">            # # # # # # # # #</span>
+<span class="sd">            # SERVICES LOOP #</span>
+<span class="sd">            # # # # # # # # #</span>
+
+<span class="sd">            if gp.run_parameters[&quot;run&quot;][&quot;test_single_services&quot;]:</span>
+
+<span class="sd">                gp.tested_services = []</span>
+<span class="sd">                # auto_mkdir(gp.current_deployment_dir + &quot;single_services/&quot;)</span>
+<span class="sd">                services_to_test = get_services_to_test()</span>
+<span class="sd">                gp.is_single_service_test = True</span>
+
+<span class="sd">                print(services_to_test)</span>
+
+<span class="sd">                print(&quot;\nTesting services of deployment_&quot; + str(deployment_index) + &quot;:&quot;)</span>
+
+<span class="sd">                for service in services_to_test:</span>
+<span class="sd">                    gp.current_services_list = [service]</span>
+
+<span class="sd">                    gp.run_parameters[&quot;run&quot;][&quot;campaign_dir&quot;] = gp.current_deployment_dir + &quot;single_services/&quot;</span>
+<span class="sd">                    # todo line above is wrong, campaign dir should contain the deployment dirs</span>
+<span class="sd">                    gp.run_parameters[&quot;run&quot;][&quot;run_name&quot;] = service[&quot;unit&quot;]</span>
+<span class="sd">                    gp.set_current_work_dir(service[&quot;unit&quot;])</span>
+
+<span class="sd">                    # todo set gp.has_active_lambdas</span>
+
+<span class="sd">                    make_oscar_p_input_file_single(service[&quot;unit&quot;], service_number=service[&quot;input_bucket_index&quot;])</span>
+<span class="sd">                    oscarp.main()</span>
+
+<span class="sd">                    gp.tested_services.append(service[&quot;unit&quot;])</span>
+
+<span class="sd">                    print()</span>
+
+<span class="sd">            time.sleep(5)</span>
+<span class="sd">            gp.current_base_index += 1</span>
+<span class="sd">            </span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+        <span class="c1"># at the end of the deployment testing, generate dataframes</span>
+        <span class="n">make_results</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;other&quot;</span><span class="p">][</span><span class="s2">&quot;clean_infrastructures_after_testing&quot;</span><span class="p">]:</span>
+        <span class="n">delete_all_virtual_infrastructures</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">has_lambdas</span><span class="p">:</span>
+        <span class="n">remove_all_lambdas</span><span class="p">()</span></div>
+
+    <span class="c1"># run_mllibrary()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">(</span><span class="s2">&quot;Gordon_project&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

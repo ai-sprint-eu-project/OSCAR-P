@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>classes.Resource &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">classes.Resource</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for classes.Resource</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">oscarp.utils</span> <span class="kn">import</span> <span class="n">show_fatal_error</span>
+
+
+<div class="viewcode-block" id="Resource"><a class="viewcode-back" href="../../classes.html#classes.Resource.Resource">[docs]</a><span class="k">class</span> <span class="nc">Resource</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Resource class, contains resources parsed from candidate_resources.yaml</span>
+
+<span class="sd">    :param str self.name: name of the resource (e.g. VM1, RasPi, ...)</span>
+<span class="sd">    :param str self.type: type of resource, physical, virtual or lambda</span>
+<span class="sd">    :param str self.oscarcli_alias: oscarcli alias of the resource (e.g. oscar-VM1)</span>
+<span class="sd">    :param str self.storage_provider: storage provider of the resource, usually minio, s3 for lambdas</span>
+<span class="sd">    :param str self.storage_provider_alias: storage provider alias (e.g. minio-VM1), always &quot;aws&quot; for lambdas</span>
+<span class="sd">    :param str self.ssh: ssh address of the resource, if physical, saved as user@host:port</span>
+<span class="sd">    :param int self.total_nodes: max number of nodes of the resource</span>
+<span class="sd">    :param float self.max_cpu_cores: max number of cpu cores of the resource (node resource times the number of nodes)</span>
+<span class="sd">    :param int self.max_memory_mb: max memory size in MB of the resource (node resource times the number of nodes)</span>
+<span class="sd">    :param str self.bucket_name: name of the s3 bucket of the resource (if lambda, None otherwise)</span>
+<span class="sd">    :param int self.execution_layer: execution layer of the resource</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">resource_type</span><span class="p">,</span> <span class="n">physical_nodes</span><span class="p">,</span> <span class="n">execution_layer</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_type</span><span class="p">(</span><span class="n">resource_type</span><span class="p">)</span>  <span class="c1"># physical, virtual or lambda</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">oscarcli_alias</span> <span class="o">=</span> <span class="s2">&quot;oscar-&quot;</span> <span class="o">+</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage_provider</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage_provider_alias</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_ssh</span><span class="p">(</span><span class="n">physical_nodes</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_nodes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_cpu_cores</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_memory_mb</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bucket_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">execution_layer</span> <span class="o">=</span> <span class="n">execution_layer</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">, Type: </span><span class="si">%s</span><span class="s2">, Nodes: </span><span class="si">%s</span><span class="s2">, Cores: </span><span class="si">%s</span><span class="s2">, Memory: </span><span class="si">%s</span><span class="s2"> MB&quot;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_cpu_cores</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_memory_mb</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Resource._set_type"><a class="viewcode-back" href="../../classes.html#classes.Resource.Resource._set_type">[docs]</a>    <span class="k">def</span> <span class="nf">_set_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_type</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the type of the resource as physical, virtual or lambda</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">resource_type</span> <span class="o">==</span> <span class="s2">&quot;PhysicalAlreadyProvisioned&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;physical&quot;</span>
+        <span class="k">elif</span> <span class="n">resource_type</span> <span class="o">==</span> <span class="s2">&quot;Virtual&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;virtual&quot;</span>
+        <span class="k">elif</span> <span class="n">resource_type</span> <span class="o">==</span> <span class="s2">&quot;NativeCloudFunction&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;lambda&quot;</span></div>
+
+<div class="viewcode-block" id="Resource.set_storage_provider_alias"><a class="viewcode-back" href="../../classes.html#classes.Resource.Resource.set_storage_provider_alias">[docs]</a>    <span class="k">def</span> <span class="nf">set_storage_provider_alias</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_provider</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the storage provider alias of the resource</span>
+
+<span class="sd">        :param str storage_provider: either minio or s3</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage_provider</span> <span class="o">=</span> <span class="n">storage_provider</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage_provider</span> <span class="o">==</span> <span class="s2">&quot;minio&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage_provider_alias</span> <span class="o">=</span> <span class="s2">&quot;minio-&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage_provider</span> <span class="o">==</span> <span class="s2">&quot;s3&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage_provider_alias</span> <span class="o">=</span> <span class="s2">&quot;aws&quot;</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Resource._set_ssh"><a class="viewcode-back" href="../../classes.html#classes.Resource.Resource._set_ssh">[docs]</a>    <span class="k">def</span> <span class="nf">_set_ssh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">physical_nodes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the ssh address of the resource from the physical_nodes.yaml file if the resource is physical, otherwise \</span>
+<span class="sd">        sets it to None.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;physical&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">physical_nodes</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">physical_nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">show_fatal_error</span><span class="p">(</span><span class="s2">&quot;Physical node &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; not found in physical_nodes.yaml&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssh</span> <span class="o">=</span> <span class="n">physical_nodes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;ssh&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Resource.is_physical"><a class="viewcode-back" href="../../classes.html#classes.Resource.Resource.is_physical">[docs]</a>    <span class="k">def</span> <span class="nf">is_physical</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:return: True if the resource is physical, False otherwise&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;physical&quot;</span></div>
+
+<div class="viewcode-block" id="Resource.is_lambda"><a class="viewcode-back" href="../../classes.html#classes.Resource.Resource.is_lambda">[docs]</a>    <span class="k">def</span> <span class="nf">is_lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:return: True if the resource is on a lambda, False otherwise&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;lambda&quot;</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

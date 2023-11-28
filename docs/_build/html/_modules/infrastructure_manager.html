@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>infrastructure_manager &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">infrastructure_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for infrastructure_manager</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="kn">from</span> <span class="nn">classes.Component</span> <span class="kn">import</span> <span class="n">generalize_unit_id</span><span class="p">,</span> <span class="n">generalize_name</span>
+<span class="kn">from</span> <span class="nn">toscarizer.utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">DEPLOYMENTS_FILE</span><span class="p">,</span>
+                              <span class="n">RESOURCES_FILE</span><span class="p">,</span>
+                              <span class="n">BASE_DAG_FILE</span><span class="p">,</span>
+                              <span class="n">PHYSICAL_NODES_FILE</span><span class="p">,</span>
+                              <span class="n">CONTAINERS_FILE</span><span class="p">,</span>
+                              <span class="n">QOS_CONSTRAINTS_FILE</span><span class="p">,</span>
+                              <span class="n">parse_dag</span><span class="p">,</span>
+                              <span class="n">parse_resources</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">toscarizer.im_tosca</span> <span class="kn">import</span> <span class="n">gen_tosca_yamls</span>
+
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+<span class="kn">from</span> <span class="nn">oscarp.utils</span> <span class="kn">import</span> <span class="n">get_ssh_output</span><span class="p">,</span> <span class="n">auto_mkdir</span><span class="p">,</span> <span class="n">show_fatal_error</span><span class="p">,</span> <span class="n">get_command_output_wrapped</span><span class="p">,</span> \
+    <span class="n">delete_file</span><span class="p">,</span> <span class="n">read_json</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+
+<span class="kn">import</span> <span class="nn">oscarp.oscarp</span> <span class="k">as</span> <span class="nn">oscarp</span>
+
+
+<span class="c1"># # # # # # # # # # # #</span>
+<span class="c1"># Virtual infrastructures</span>
+<span class="c1"># # # # # # # # # # # #</span>
+
+<div class="viewcode-block" id="create_virtual_infrastructures"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.create_virtual_infrastructures">[docs]</a><span class="k">def</span> <span class="nf">create_virtual_infrastructures</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scenario 1: starting from zero, assumes &quot;virtual_infrastructures.json&quot; not present, or present but the \</span>
+<span class="sd">     infrastructures no longer exist on IM; in both cases, reset virtual_infrastructures as {}, then delete all on IM \</span>
+<span class="sd">     with delete_unused_virtual_infrastructures.</span>
+<span class="sd">    Scenario 2: resuming interrupted, checks that &quot;virtual_infrastructures.json&quot; is present and its infrastructures \</span>
+<span class="sd">     are still on IM: if yes, delete_unused_virtual_infrastructures anyway, nothing bad should happen, if not, proceed \</span>
+<span class="sd">     as for scenario 1.</span>
+<span class="sd">    Scenario 3: changing deployment, &quot;virtual_infrastructures.json&quot; will be loaded but it won&#39;t change anything, \</span>
+<span class="sd">     proceed as usual.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_dry</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c1"># gp.virtual_infrastructures = read_json(gp.campaign_dir + &quot;/virtual_infrastructures.json&quot;)</span>
+    <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span> <span class="o">=</span> <span class="n">read_json</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;oscarp/virtual_infrastructures.json&quot;</span><span class="p">)</span>
+    <span class="c1"># if file doesn&#39;t exist, read_json returns an empty dict</span>
+
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;other&quot;</span><span class="p">][</span><span class="s2">&quot;clean_infrastructures_before_testing&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">delete_all_virtual_infrastructures</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">delete_unused_virtual_infrastructures</span><span class="p">()</span>
+
+    <span class="c1"># virtual is the list of the infrastructures that need to be deployed</span>
+    <span class="c1"># an infrastructure is added as long as: 1_ it&#39;s not physical, 2_ it&#39;s not already deployed</span>
+    <span class="n">to_deploy</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">:</span>
+        <span class="n">c</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">is_physical</span><span class="p">()</span> <span class="ow">and</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">to_deploy</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;to_deploy A: &quot;</span><span class="p">,</span> <span class="n">to_deploy</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">to_deploy</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Deploying virtual infrastructures...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">configure_executables</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="n">auto_mkdir</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;oscarp/.toscarizer&quot;</span><span class="p">)</span>
+    <span class="n">to_deploy</span> <span class="o">=</span> <span class="n">_generate_modified_candidate_files</span><span class="p">(</span><span class="n">to_deploy</span><span class="p">)</span>
+    <span class="n">_generate_modified_dag</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;to_deploy B: &quot;</span><span class="p">,</span> <span class="n">to_deploy</span><span class="p">)</span>
+
+    <span class="n">tosca_files</span> <span class="o">=</span> <span class="n">generate_tosca</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;tosca_files: &quot;</span><span class="p">,</span> <span class="n">tosca_files</span><span class="p">)</span>
+
+    <span class="n">cleaned_tosca_files</span> <span class="o">=</span> <span class="n">clean_and_rename_tosca_files</span><span class="p">(</span><span class="n">to_deploy</span><span class="p">,</span> <span class="n">tosca_files</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cleaned_tosca_files: &quot;</span><span class="p">,</span> <span class="n">cleaned_tosca_files</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">tosca_file</span> <span class="ow">in</span> <span class="n">cleaned_tosca_files</span><span class="p">:</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="n">tosca_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">inf_url</span> <span class="o">=</span> <span class="n">deploy_virtual_infrastructure</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;inf_url&quot;</span><span class="p">:</span> <span class="n">inf_url</span><span class="p">,</span>
+            <span class="s2">&quot;inf_id&quot;</span><span class="p">:</span> <span class="n">inf_url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;tosca_file_path&quot;</span><span class="p">:</span> <span class="n">tosca_file</span><span class="p">,</span>
+            <span class="s2">&quot;oscar_endpoint&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;oscar_password&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;minio_endpoint&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;minio_password&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">}</span>
+
+    <span class="n">wait_for_infrastructure_deployment</span><span class="p">()</span>
+
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># todo temporary, to circumvent issue with IM</span>
+
+    <span class="n">get_infrastructures_outputs</span><span class="p">()</span>
+    <span class="n">configure_executables</span><span class="p">()</span>  <span class="c1"># todo this needs to be moved, since it&#39;ll be done for physical too</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="_generate_modified_candidate_files"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager._generate_modified_candidate_files">[docs]</a><span class="k">def</span> <span class="nf">_generate_modified_candidate_files</span><span class="p">(</span><span class="n">to_deploy</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a modified version of candidate_deployments, containing (only) the components that are needed for the \</span>
+<span class="sd">     current test; this file is needed by the Toscarizer to generate the correct TOSCA files.</span>
+<span class="sd">    Additionally, it returns the names of the components that need to be deployed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span><span class="p">,</span> <span class="n">DEPLOYMENTS_FILE</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="s2">&quot;Components&quot;</span><span class="p">]</span>
+
+    <span class="n">modified_components</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">:</span>
+        <span class="n">c</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">unit</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;P&quot;</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;_partition&quot;</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">a</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;X_&quot;</span> <span class="o">+</span> <span class="n">b</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;component&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">to_deploy</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">to_deploy</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">components</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;Containers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;candidateExecutionResources&quot;</span><span class="p">]:</span>  <span class="c1"># found the right container</span>
+                <span class="n">components</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;Containers&quot;</span><span class="p">][</span><span class="s2">&quot;container1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">container</span>
+                <span class="n">components</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;Containers&quot;</span><span class="p">][</span><span class="s2">&quot;container1&quot;</span><span class="p">][</span><span class="s2">&quot;candidateExecutionResources&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">]</span>
+                <span class="n">components</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;candidateExecutionLayers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">execution_layer</span><span class="p">]</span>
+                <span class="k">break</span>
+
+        <span class="n">modified_components</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">oscarp/.toscarizer/modified_candidate_deployments.yaml&quot;</span> <span class="o">%</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">({</span><span class="s2">&quot;Components&quot;</span><span class="p">:</span> <span class="n">modified_components</span><span class="p">},</span> <span class="n">file</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">to_deploy</span></div>
+
+
+<div class="viewcode-block" id="_generate_modified_dag"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager._generate_modified_dag">[docs]</a><span class="k">def</span> <span class="nf">_generate_modified_dag</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Similar to the previous function, it creates a customized version of the application_dag containing whatever needs \</span>
+<span class="sd">     to be tested; the file is used by the Toscarizer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">common_config/application_dag.yaml&quot;</span> <span class="o">%</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">dag</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">Loader</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">dag</span><span class="p">[</span><span class="s2">&quot;System&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+    <span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">:</span>
+
+        <span class="n">component_name</span> <span class="o">=</span> <span class="n">generalize_name</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">generalize_unit_id</span><span class="p">(</span><span class="n">unit</span><span class="p">)]</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">component_name</span><span class="p">)</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">):</span>
+            <span class="k">break</span>
+
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">dag</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;components&quot;</span><span class="p">:</span> <span class="n">components</span><span class="p">,</span>
+        <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="n">dependencies</span>
+    <span class="p">}</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.toscarizer/modified_application_dag.yaml&quot;</span> <span class="o">%</span> <span class="n">gp</span><span class="o">.</span><span class="n">oscarp_dir</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">({</span><span class="s2">&quot;System&quot;</span><span class="p">:</span> <span class="n">dag</span><span class="p">},</span> <span class="n">file</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="generate_tosca"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.generate_tosca">[docs]</a><span class="k">def</span> <span class="nf">generate_tosca</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given the original of modified files, this function uses the Toscarizer to generate the required Tosca files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">domain_name</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;other&quot;</span><span class="p">][</span><span class="s2">&quot;domain_name&quot;</span><span class="p">]</span>
+
+    <span class="n">elastic</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">auth_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">application_dir</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">app_name</span><span class="p">,</span> <span class="n">dag</span> <span class="o">=</span> <span class="n">parse_dag</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.toscarizer/modified_application_dag.yaml&quot;</span> <span class="o">%</span> <span class="n">gp</span><span class="o">.</span><span class="n">oscarp_dir</span><span class="p">)</span>
+    <span class="n">deployments_file</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.toscarizer/modified_candidate_deployments.yaml&quot;</span> <span class="o">%</span> <span class="n">gp</span><span class="o">.</span><span class="n">oscarp_dir</span>
+    <span class="n">resources_file</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">application_dir</span><span class="p">,</span> <span class="n">RESOURCES_FILE</span><span class="p">)</span>
+    <span class="n">qos_contraints_file</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">application_dir</span><span class="p">,</span> <span class="n">QOS_CONSTRAINTS_FILE</span><span class="p">)</span>
+
+    <span class="n">toscas</span> <span class="o">=</span> <span class="n">gen_tosca_yamls</span><span class="p">(</span><span class="n">app_name</span><span class="p">,</span> <span class="n">dag</span><span class="p">,</span> <span class="n">resources_file</span><span class="p">,</span> <span class="n">deployments_file</span><span class="p">,</span>
+                             <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">application_dir</span><span class="p">,</span> <span class="n">PHYSICAL_NODES_FILE</span><span class="p">),</span>
+                             <span class="n">elastic</span><span class="p">,</span> <span class="n">auth_data</span><span class="p">,</span> <span class="n">domain_name</span><span class="p">,</span> <span class="s2">&quot;https://influx.oncloudandheat.com/&quot;</span><span class="p">,</span>
+                             <span class="kc">None</span><span class="p">,</span> <span class="n">qos_contraints_file</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">application_dir</span><span class="p">,</span> <span class="n">CONTAINERS_FILE</span><span class="p">))</span>
+
+    <span class="n">tosca_files</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">cl</span><span class="p">,</span> <span class="n">tosca</span> <span class="ow">in</span> <span class="n">toscas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">tosca_file</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/.toscarizer/</span><span class="si">%s</span><span class="s2">.yaml&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;oscarp&quot;</span><span class="p">,</span> <span class="n">cl</span><span class="p">)</span>
+        <span class="n">tosca_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">tosca</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># print(colored(&quot;TOSCA file has been generated for component %s.&quot; % cl, &quot;green&quot;))</span>
+
+    <span class="k">return</span> <span class="n">tosca_files</span></div>
+
+
+<div class="viewcode-block" id="clean_and_rename_tosca"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.clean_and_rename_tosca">[docs]</a><span class="k">def</span> <span class="nf">clean_and_rename_tosca</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="n">component_name</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">node_requirements</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function &quot;cleans&quot; the Tosca file by removing the section related to OSCAR and its services, since those will \</span>
+<span class="sd">     be deployed by OSCAR-P instead.</span>
+<span class="sd">    It also selects the correct number of nodes, sets the domain name, and renames the file as its associated resource \</span>
+<span class="sd">     (e.g. VM1.yaml).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">resource</span><span class="p">]</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">():</span>
+        <span class="n">content</span><span class="p">[</span><span class="s2">&quot;topology_template&quot;</span><span class="p">][</span><span class="s2">&quot;node_templates&quot;</span><span class="p">][</span><span class="s2">&quot;oscar&quot;</span><span class="p">][</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;yunikorn_enable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">content</span><span class="p">[</span><span class="s2">&quot;topology_template&quot;</span><span class="p">][</span><span class="s2">&quot;node_templates&quot;</span><span class="p">][</span><span class="s2">&quot;lrms_front_end&quot;</span><span class="p">][</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;install_yunikorn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">del</span> <span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s2">&quot;topology_template&quot;</span><span class="p">][</span><span class="s2">&quot;node_templates&quot;</span><span class="p">][</span><span class="s2">&quot;oscar_service_&quot;</span> <span class="o">+</span> <span class="n">component_name</span><span class="p">])</span>
+        <span class="k">del</span> <span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s2">&quot;topology_template&quot;</span><span class="p">][</span><span class="s2">&quot;outputs&quot;</span><span class="p">][</span><span class="s2">&quot;oscar_service_url&quot;</span><span class="p">])</span>
+        <span class="k">del</span> <span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s2">&quot;topology_template&quot;</span><span class="p">][</span><span class="s2">&quot;outputs&quot;</span><span class="p">][</span><span class="s2">&quot;oscar_service_cred&quot;</span><span class="p">])</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;wn_resource1&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">content</span><span class="p">[</span><span class="s2">&quot;topology_template&quot;</span><span class="p">][</span><span class="s2">&quot;node_templates&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;wn_resource&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="n">content</span><span class="p">[</span><span class="s2">&quot;topology_template&quot;</span><span class="p">][</span><span class="s2">&quot;node_templates&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;capabilities&quot;</span><span class="p">][</span><span class="s2">&quot;scalable&quot;</span><span class="p">][</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">node_requirements</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;oscarp/.toscarizer/&quot;</span> <span class="o">+</span> <span class="n">resource</span> <span class="o">+</span> <span class="s2">&quot;.yaml&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">filename</span></div>
+
+
+<div class="viewcode-block" id="clean_and_rename_tosca_files"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.clean_and_rename_tosca_files">[docs]</a><span class="k">def</span> <span class="nf">clean_and_rename_tosca_files</span><span class="p">(</span><span class="n">to_deploy</span><span class="p">,</span> <span class="n">tosca_files</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calls clean_and_rename_tosca() for each tosca_files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cleaned_tosca_files</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">tosca_file</span> <span class="ow">in</span> <span class="n">tosca_files</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">to_deploy</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tosca_file</span><span class="p">:</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">clean_and_rename_tosca</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="p">)</span>
+                <span class="n">cleaned_tosca_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">tosca_file</span> <span class="ow">in</span> <span class="n">tosca_files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tosca_file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cleaned_tosca_files</span><span class="p">:</span>
+            <span class="n">delete_file</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cleaned_tosca_files</span></div>
+
+
+<div class="viewcode-block" id="deploy_virtual_infrastructure"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.deploy_virtual_infrastructure">[docs]</a><span class="k">def</span> <span class="nf">deploy_virtual_infrastructure</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">inf_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calls the IM API to deploy (or update) all the virtual infrastructure.&quot;&quot;&quot;</span>
+
+    <span class="n">im_url</span> <span class="o">=</span> <span class="s2">&quot;https://im.egi.eu/im/&quot;</span>
+
+    <span class="n">tosca_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">im&quot;</span> <span class="o">%</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span>
+    <span class="n">im_auth</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/auth.dat&quot;</span> <span class="o">%</span> <span class="n">tosca_dir</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">im_auth</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">auth_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="p">)</span>
+
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="n">auth_data</span><span class="p">,</span> <span class="s1">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;text/yaml&#39;</span><span class="p">}</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="c1"># print(data)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inf_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/infrastructures?async=1&quot;</span> <span class="o">%</span> <span class="n">im_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Resource </span><span class="si">%s</span><span class="s2"> is being deployed...&quot;</span> <span class="o">%</span> <span class="n">resource</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/infrastructures/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">im_url</span><span class="p">,</span> <span class="n">inf_id</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Resource </span><span class="si">%s</span><span class="s2"> is being updated...&quot;</span> <span class="o">%</span> <span class="n">resource</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">text</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exception:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">))</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="wait_for_infrastructure_deployment"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.wait_for_infrastructure_deployment">[docs]</a><span class="k">def</span> <span class="nf">wait_for_infrastructure_deployment</span><span class="p">(</span><span class="n">is_update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function waits for the deployment of the virtual infrastructure, checking on their status periodically.</span>
+<span class="sd">    If an error is detected, the execution stops.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_update</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Waiting for infrastructure deployment (this may take up to 15 minutes)...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Waiting for infrastructure update (this should take only a minute)...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+    <span class="n">completed</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">completed</span><span class="p">:</span>
+        <span class="n">completed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">resource</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">resource</span><span class="p">]</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">():</span>
+                <span class="n">inf_url</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;inf_url&quot;</span><span class="p">]</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="n">get_state</span><span class="p">(</span><span class="n">inf_url</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">state</span> <span class="o">!=</span> <span class="s2">&quot;configured&quot;</span><span class="p">:</span>
+                    <span class="n">completed</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;failed&quot;</span> <span class="ow">or</span> <span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;unconfigured&quot;</span><span class="p">:</span>
+                    <span class="n">show_fatal_error</span><span class="p">(</span><span class="s2">&quot;The deployment of infrastructure </span><span class="si">%s</span><span class="s2"> failed.&quot;</span> <span class="o">%</span> <span class="n">resource</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_update</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Deployment completed, waiting for configuration...&quot;</span><span class="p">,</span> <span class="s2">&quot;magenta&quot;</span><span class="p">))</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;/oscarp/virtual_infrastructures.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="get_state"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.get_state">[docs]</a><span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="n">inf_url</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function returns the state of the deployment of a virtual infrastructure.&quot;&quot;&quot;</span>
+
+    <span class="n">tosca_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">im&quot;</span> <span class="o">%</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span>
+    <span class="n">im_auth</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/auth.dat&quot;</span> <span class="o">%</span> <span class="n">tosca_dir</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">im_auth</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">auth_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="p">)</span>
+
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="n">auth_data</span><span class="p">,</span> <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/state&quot;</span> <span class="o">%</span> <span class="n">inf_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;state&quot;</span><span class="p">][</span><span class="s2">&quot;state&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">text</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="configure_executables"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.configure_executables">[docs]</a><span class="k">def</span> <span class="nf">configure_executables</span><span class="p">():</span>  <span class="c1"># todo this will also have to include physical infrastructures</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function configures the executables (MC and oscar_cli) used by OSCAR-P according to the credentials \</span>
+<span class="sd">     retrieved from IM.&quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">resource</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">resource</span><span class="p">]</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">():</span>
+            <span class="c1"># set for oscar_cli</span>
+            <span class="n">oscar_endpoint</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;oscar_endpoint&quot;</span><span class="p">]</span>
+            <span class="n">oscar_password</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;oscar_password&quot;</span><span class="p">]</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;cluster add oscar-</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> oscar </span><span class="si">%s</span><span class="s2">  --disable-ssl&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">oscar_endpoint</span><span class="p">,</span> <span class="n">oscar_password</span><span class="p">)</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="n">oscarp</span><span class="o">.</span><span class="n">executables</span><span class="o">.</span><span class="n">oscar_cli</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="c1"># print(command)</span>
+            <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+            <span class="c1"># set for mc</span>
+            <span class="n">minio_endpoint</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;minio_endpoint&quot;</span><span class="p">]</span>
+            <span class="n">minio_password</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;minio_password&quot;</span><span class="p">]</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;alias set minio-</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> minio </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">minio_endpoint</span><span class="p">,</span> <span class="n">minio_password</span><span class="p">)</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="n">oscarp</span><span class="o">.</span><span class="n">executables</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">get_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="c1"># print(command)</span>
+            <span class="n">get_command_output_wrapped</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="get_infrastructures_outputs"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.get_infrastructures_outputs">[docs]</a><span class="k">def</span> <span class="nf">get_infrastructures_outputs</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function retrieves the outputs (endpoints and credentials) from IM for every virtual resource and \</span>
+<span class="sd">     stores them in the virtual_infrastructures.json file.&quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">resource</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">resource</span><span class="p">]</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">():</span>
+            <span class="c1"># get outputs from IM</span>
+            <span class="n">inf_url</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;inf_url&quot;</span><span class="p">]</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">get_outputs</span><span class="p">(</span><span class="n">inf_url</span><span class="p">)</span>
+            <span class="c1"># print(outputs)</span>
+
+            <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;oscar_endpoint&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;oscarui_endpoint&quot;</span><span class="p">]</span>
+            <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;oscar_password&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;oscar_password&quot;</span><span class="p">]</span>
+
+            <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;minio_endpoint&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;minio_endpoint&quot;</span><span class="p">]</span>
+            <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;minio_password&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;minio_password&quot;</span><span class="p">]</span>
+
+    <span class="c1"># with open(gp.campaign_dir + &quot;/virtual_infrastructures.json&quot;, &quot;w&quot;) as file:</span>
+    <span class="c1">#    json.dump(gp.virtual_infrastructures, file, indent=4)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span> <span class="o">+</span> <span class="s2">&quot;/oscarp/virtual_infrastructures.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="get_outputs"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.get_outputs">[docs]</a><span class="k">def</span> <span class="nf">get_outputs</span><span class="p">(</span><span class="n">inf_url</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function retrieves the outputs (endpoints and credentials) from IM for a single virtual resource.&quot;&quot;&quot;</span>
+
+    <span class="n">tosca_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">im&quot;</span> <span class="o">%</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span>
+    <span class="n">im_auth</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/auth.dat&quot;</span> <span class="o">%</span> <span class="n">tosca_dir</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">im_auth</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">auth_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="p">)</span>
+
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="n">auth_data</span><span class="p">,</span> <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/outputs&quot;</span> <span class="o">%</span> <span class="n">inf_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;outputs&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="n">show_fatal_error</span><span class="p">(</span><span class="s2">&quot;Error: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="update_virtual_infrastructures"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.update_virtual_infrastructures">[docs]</a><span class="k">def</span> <span class="nf">update_virtual_infrastructures</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function updates the virtual infrastructures, usually by reducing its nodes.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">is_dry</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">:</span>  <span class="c1"># if empty return</span>
+        <span class="k">return</span>
+
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">resource</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">tosca_file_path</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;tosca_file_path&quot;</span><span class="p">]</span>
+        <span class="n">inf_id</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="s2">&quot;inf_id&quot;</span><span class="p">]</span>
+
+        <span class="c1"># returns True if number of nodes actually changed</span>
+        <span class="k">if</span> <span class="n">update_tosca</span><span class="p">(</span><span class="n">tosca_file_path</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_base_index</span><span class="p">):</span>  <span class="c1"># todo need to update</span>
+            <span class="n">deploy_virtual_infrastructure</span><span class="p">(</span><span class="n">tosca_file_path</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">inf_id</span><span class="p">)</span>
+
+    <span class="n">wait_for_infrastructure_deployment</span><span class="p">(</span><span class="n">is_update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">(),</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Update time: </span><span class="si">%s</span><span class="s2"> seconds&quot;</span> <span class="o">%</span> <span class="n">delta</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="update_tosca"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.update_tosca">[docs]</a><span class="k">def</span> <span class="nf">update_tosca</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">node_requirements</span><span class="p">,</span> <span class="n">current_base_run_index</span><span class="p">):</span>  <span class="c1"># todo must update this</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function updates the Tosca file of a virtual infrastructure by setting the correct number of nodes.&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">resource</span><span class="p">]</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;wn_resource1&quot;</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">content</span><span class="p">[</span><span class="s2">&quot;topology_template&quot;</span><span class="p">][</span><span class="s2">&quot;node_templates&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s2">&quot;wn_resource&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="n">old_value</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="s2">&quot;topology_template&quot;</span><span class="p">][</span><span class="s2">&quot;node_templates&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;capabilities&quot;</span><span class="p">][</span><span class="s2">&quot;scalable&quot;</span><span class="p">][</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;count&quot;</span><span class="p">]</span>
+    <span class="n">new_value</span> <span class="o">=</span> <span class="n">node_requirements</span><span class="p">[</span><span class="n">resource</span><span class="p">][</span><span class="n">current_base_run_index</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">old_value</span> <span class="o">==</span> <span class="n">new_value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">content</span><span class="p">[</span><span class="s2">&quot;topology_template&quot;</span><span class="p">][</span><span class="s2">&quot;node_templates&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;capabilities&quot;</span><span class="p">][</span><span class="s2">&quot;scalable&quot;</span><span class="p">][</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">=</span> \
+        <span class="n">new_value</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="delete_virtual_infrastructure"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.delete_virtual_infrastructure">[docs]</a><span class="k">def</span> <span class="nf">delete_virtual_infrastructure</span><span class="p">(</span><span class="n">inf_url</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function deletes a virtual infrastructure.&quot;&quot;&quot;</span>
+
+    <span class="c1"># inf_url = &quot;https://appsgrycap.i3m.upv.es:31443/im/infrastructures/5aad513e-8120-11ed-9ece-ca414e79af22&quot;</span>
+
+    <span class="n">tosca_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">im&quot;</span> <span class="o">%</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span>
+    <span class="n">im_auth</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/auth.dat&quot;</span> <span class="o">%</span> <span class="n">tosca_dir</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">im_auth</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">auth_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="p">)</span>
+
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="n">auth_data</span><span class="p">,</span> <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">inf_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="n">show_fatal_error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="delete_unused_virtual_infrastructures"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.delete_unused_virtual_infrastructures">[docs]</a><span class="k">def</span> <span class="nf">delete_unused_virtual_infrastructures</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function deletes unused virtual infrastructures; first it checks if there are infrastructures deployed on \</span>
+<span class="sd">     IM but not tracked by gp.virtual_infrastructures, then checks if there are non-existing infrastructures still \</span>
+<span class="sd">     tracked in gp.virtual_infrastructures, and finally checks if there are deployed and tracked infrastructures \</span>
+<span class="sd">     that are no longer needed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Deleting unused infrastructures...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+
+    <span class="c1"># part one checks if there are deployed infrastructures not tracked by gp.virtual_infrastructures</span>
+    <span class="k">for</span> <span class="n">inf_url</span> <span class="ow">in</span> <span class="n">get_all_infrastructures</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">inf_url</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>  <span class="c1"># nothing is deployed</span>
+            <span class="k">break</span>
+
+        <span class="n">is_in_use</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">inf_url</span> <span class="o">==</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="s2">&quot;inf_url&quot;</span><span class="p">]:</span>
+                <span class="n">is_in_use</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_in_use</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Deleting untracked infrastructure...&quot;</span><span class="p">,</span> <span class="s2">&quot;magenta&quot;</span><span class="p">))</span>
+            <span class="n">delete_virtual_infrastructure</span><span class="p">(</span><span class="n">inf_url</span><span class="p">)</span>
+
+    <span class="c1"># part two checks if there are non-existing infrastructures still tracked in gp.virtual_infrastructures</span>
+    <span class="n">existing_infrastructures</span> <span class="o">=</span> <span class="n">get_all_infrastructures</span><span class="p">()</span>
+
+    <span class="c1"># keys of infrastructures present in virtual_infrastructures but not on IM</span>
+    <span class="n">keys_to_delete</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="s2">&quot;inf_url&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_infrastructures</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Untracking missing infrastructure...&quot;</span><span class="p">,</span> <span class="s2">&quot;magenta&quot;</span><span class="p">))</span>
+            <span class="n">keys_to_delete</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">keys_to_delete</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+
+    <span class="c1"># part three checks if there are deployed and tracked infrastructures no longer needed</span>
+    <span class="n">resources_in_use</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">current_deployment</span><span class="p">:</span>
+        <span class="n">c</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)</span>
+        <span class="n">resources_in_use</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+    <span class="n">keys_to_delete</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">resources_in_use</span><span class="p">:</span>
+            <span class="n">inf_url</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="s2">&quot;inf_url&quot;</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Deleting infrastructure no longer needed...&quot;</span><span class="p">,</span> <span class="s2">&quot;magenta&quot;</span><span class="p">))</span>
+            <span class="n">delete_virtual_infrastructure</span><span class="p">(</span><span class="n">inf_url</span><span class="p">)</span>
+            <span class="n">keys_to_delete</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">keys_to_delete</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">oscarp_dir</span> <span class="o">+</span> <span class="s2">&quot;virtual_infrastructures.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">virtual_infrastructures</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="get_all_infrastructures"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.get_all_infrastructures">[docs]</a><span class="k">def</span> <span class="nf">get_all_infrastructures</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function returns a list of all infrastructures deployed on IM.&quot;&quot;&quot;</span>
+
+    <span class="n">im_url</span> <span class="o">=</span> <span class="s2">&quot;https://im.egi.eu/im&quot;</span>
+
+    <span class="n">tosca_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">im&quot;</span> <span class="o">%</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span>
+    <span class="n">im_auth</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/auth.dat&quot;</span> <span class="o">%</span> <span class="n">tosca_dir</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">im_auth</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">auth_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="p">)</span>
+
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="n">auth_data</span><span class="p">}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/infrastructures&quot;</span> <span class="o">%</span> <span class="n">im_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="delete_all_virtual_infrastructures"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.delete_all_virtual_infrastructures">[docs]</a><span class="k">def</span> <span class="nf">delete_all_virtual_infrastructures</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function deletes ALL virtual infrastructures, without checks.&quot;&quot;&quot;</span>
+
+    <span class="n">infrastructures</span> <span class="o">=</span> <span class="n">get_all_infrastructures</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">infrastructures</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]:</span>  <span class="c1"># if list is empty</span>
+        <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Deleting old infrastructures...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">inf_url</span> <span class="ow">in</span> <span class="n">infrastructures</span><span class="p">:</span>
+            <span class="n">delete_virtual_infrastructure</span><span class="p">(</span><span class="n">inf_url</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="configure_jmeter_cluster"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.configure_jmeter_cluster">[docs]</a><span class="k">def</span> <span class="nf">configure_jmeter_cluster</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;test_synchronously&quot;</span><span class="p">]:</span>
+        <span class="k">return</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Deploying Jmeter cluster...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+
+    <span class="c1"># todo measure time</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">tosca_file</span> <span class="o">=</span> <span class="s2">&quot;jmeterLoadInjector/jmeter_cluster.yml&quot;</span>
+    <span class="n">inf_url</span> <span class="o">=</span> <span class="n">deploy_virtual_infrastructure</span><span class="p">(</span><span class="n">tosca_file</span><span class="p">,</span> <span class="s2">&quot;Jmeter cluster&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">state</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">while</span> <span class="n">state</span> <span class="o">!=</span> <span class="s2">&quot;configured&quot;</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">get_state</span><span class="p">(</span><span class="n">inf_url</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">application_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;failed&quot;</span> <span class="ow">or</span> <span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;unconfigured&quot;</span><span class="p">:</span>
+            <span class="n">show_fatal_error</span><span class="p">(</span><span class="s2">&quot;The deployment of infrastructure Jmeter cluster failed.&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Jmeter cluster deployed successfully.&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">get_outputs</span><span class="p">(</span><span class="n">inf_url</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">(),</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Deployment time: </span><span class="si">%s</span><span class="s2"> seconds&quot;</span> <span class="o">%</span> <span class="n">delta</span><span class="p">)</span>
+
+    <span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<span class="c1"># # # # # # # # # # # #</span>
+<span class="c1"># Physical infrastructures</span>
+<span class="c1"># # # # # # # # # # # #</span>
+
+<span class="c1"># returns a list of nodes, with status = off if cordoned or on otherwise</span>
+<span class="c1"># doesn&#39;t return master nodes</span>
+<div class="viewcode-block" id="get_node_list"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.get_node_list">[docs]</a><span class="k">def</span> <span class="nf">get_node_list</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">get_ssh_output</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="s2">&quot;sudo kubectl get nodes&quot;</span><span class="p">)</span>
+
+    <span class="n">lines</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">node_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">node_name</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">node_status</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">node_role</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;SchedulingDisabled&quot;</span> <span class="ow">in</span> <span class="n">node_status</span><span class="p">:</span>
+            <span class="n">node_status</span> <span class="o">=</span> <span class="s2">&quot;off&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">node_status</span> <span class="o">=</span> <span class="s2">&quot;on&quot;</span>
+
+        <span class="c1"># doesn&#39;t include master node</span>
+        <span class="k">if</span> <span class="s2">&quot;master&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node_role</span><span class="p">:</span>
+            <span class="n">node_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">node_name</span><span class="p">,</span>
+                <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">node_status</span><span class="p">,</span>
+            <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">node_list</span></div>
+
+
+<span class="c1"># cordons or un-cordons the nodes of the cluster to obtain the number requested for the current run</span>
+<div class="viewcode-block" id="adjust_physical_infrastructures_configuration"><a class="viewcode-back" href="../OSCAR-P-Coordinator.html#infrastructure_manager.adjust_physical_infrastructures_configuration">[docs]</a><span class="k">def</span> <span class="nf">adjust_physical_infrastructures_configuration</span><span class="p">():</span>
+    <span class="n">has_printed_message</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="p">:</span>
+        <span class="n">cluster</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">cluster</span><span class="o">.</span><span class="n">ssh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">has_printed_message</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Adjusting physical infrastructures configuration...&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+                <span class="n">has_printed_message</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">client</span> <span class="o">=</span> <span class="n">configure_ssh_client</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
+            <span class="n">node_list</span> <span class="o">=</span> <span class="n">get_node_list</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+
+            <span class="n">requested_number_of_nodes</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources_node_requirements</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">gp</span><span class="o">.</span><span class="n">current_base_index</span><span class="p">]</span>
+
+            <span class="c1"># show_debug_info(make_debug_info([&quot;Cluster configuration BEFORE:&quot;] + node_list))</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_list</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">node_list</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">requested_number_of_nodes</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;off&quot;</span><span class="p">:</span>
+                    <span class="n">get_ssh_output</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="s2">&quot;sudo kubectl uncordon &quot;</span> <span class="o">+</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">requested_number_of_nodes</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;on&quot;</span><span class="p">:</span>
+                    <span class="n">get_ssh_output</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="s2">&quot;sudo kubectl cordon &quot;</span> <span class="o">+</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+
+            <span class="c1"># show_debug_info(make_debug_info([&quot;Cluster configuration AFTER:&quot;] + get_node_list(client)))</span>
+
+    <span class="k">if</span> <span class="n">has_printed_message</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>oscarp.gui &mdash; OSCAR-P  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            OSCAR-P
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OSCAR-P-Coordinator.html">OSCAR-P-Coordinator package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">classes package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../jmeterLoadInjector.html">jmeterLoadInjector package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../oscarp.html">oscarp package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OSCAR-P</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">oscarp.gui</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for oscarp.gui</h1><div class="highlight"><pre>
+<span></span><span class="c1"># this file includes functions that print out content</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">append_string_to_file</span><span class="p">,</span> <span class="n">strip_ansi_from_string</span><span class="p">,</span> <span class="n">create_new_file</span>
+
+<span class="kn">import</span> <span class="nn">global_parameters</span> <span class="k">as</span> <span class="nn">gp</span>
+
+
+<div class="viewcode-block" id="runs_diff_services"><a class="viewcode-back" href="../../oscarp.html#oscarp.gui.runs_diff_services">[docs]</a><span class="k">def</span> <span class="nf">runs_diff_services</span><span class="p">(</span><span class="n">run_name1</span><span class="p">,</span> <span class="n">run_name2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given two runs, it shows the difference in the parallelism level for each service.</span>
+
+<span class="sd">    :param str run_name1: name of the first run (e.g. &quot;Run #1&quot;)</span>
+<span class="sd">    :param str run_name2: name of the second run</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Services:&quot;</span><span class="p">)</span>
+
+    <span class="n">services1</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">run_name1</span><span class="p">][</span><span class="s2">&quot;services&quot;</span><span class="p">]</span>
+    <span class="n">services2</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">run_name2</span><span class="p">][</span><span class="s2">&quot;services&quot;</span><span class="p">]</span>
+
+    <span class="n">units</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">services1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="p">:</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="n">services1</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">services2</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span>
+
+        <span class="n">service_name</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">service_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&lt;35}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">service_name</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">s1</span><span class="p">[</span><span class="s2">&quot;parallelism&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">s2</span><span class="p">[</span><span class="s2">&quot;parallelism&quot;</span><span class="p">]:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="s2">&quot;parallelism: &quot;</span> \
+                      <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">s1</span><span class="p">[</span><span class="s2">&quot;parallelism&quot;</span><span class="p">],</span> <span class="s2">&quot;green&quot;</span><span class="p">)</span> \
+                      <span class="o">+</span> <span class="s2">&quot; -&gt; &quot;</span> \
+                      <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">s2</span><span class="p">[</span><span class="s2">&quot;parallelism&quot;</span><span class="p">],</span> <span class="s2">&quot;green&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">output</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">output</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="s2">&quot;unchanged&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="runs_diff_resources"><a class="viewcode-back" href="../../oscarp.html#oscarp.gui.runs_diff_resources">[docs]</a><span class="k">def</span> <span class="nf">runs_diff_resources</span><span class="p">(</span><span class="n">run_name1</span><span class="p">,</span> <span class="n">run_name2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given two runs, it shows the difference in the number of nodes for each resource.</span>
+
+<span class="sd">    :param str run_name1: name of the first run (e.g. &quot;Run #1&quot;)</span>
+<span class="sd">    :param str run_name2: name of the second run</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Resources:&quot;</span><span class="p">)</span>
+
+    <span class="n">resources1</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">run_name1</span><span class="p">][</span><span class="s2">&quot;resources&quot;</span><span class="p">]</span>
+    <span class="n">resources2</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">run_name2</span><span class="p">][</span><span class="s2">&quot;resources&quot;</span><span class="p">]</span>
+
+    <span class="n">resources</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">resources1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">resources</span><span class="p">:</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resource</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">():</span>
+            <span class="n">nodes1</span> <span class="o">=</span> <span class="n">resources1</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="n">resources2</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span>
+
+            <span class="n">resource_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&lt;35}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+            <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">nodes1</span> <span class="o">!=</span> <span class="n">nodes2</span><span class="p">:</span>
+                <span class="n">output</span> <span class="o">+=</span> <span class="s2">&quot;nodes: &quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">nodes1</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; -&gt; &quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">nodes2</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">output</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">output</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="s2">&quot;unchanged&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="show_all_services"><a class="viewcode-back" href="../../oscarp.html#oscarp.gui.show_all_services">[docs]</a><span class="k">def</span> <span class="nf">show_all_services</span><span class="p">(</span><span class="n">run_index</span><span class="p">,</span> <span class="n">repetitions</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For a given run, it shows for each service their cpu, memory, parallelism level and resource; it&#39;s called \</span>
+<span class="sd">     for the first run only.</span>
+
+<span class="sd">    :param int run_index: run index</span>
+<span class="sd">    :param int repetitions: number of repetitions</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">start_index</span> <span class="o">=</span> <span class="n">run_index</span>
+    <span class="n">end_index</span> <span class="o">=</span> <span class="n">run_index</span> <span class="o">*</span> <span class="n">repetitions</span>
+    <span class="n">run_name</span> <span class="o">=</span> <span class="s2">&quot;Run #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span>
+    <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Run #</span><span class="si">%s</span><span class="s2"> to #</span><span class="si">%s</span><span class="s2">:&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span><span class="p">))</span>
+    <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Services:&quot;</span><span class="p">)</span>
+
+    <span class="n">services</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">run_name</span><span class="p">][</span><span class="s2">&quot;services&quot;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span>
+        <span class="n">parallelism</span> <span class="o">=</span> <span class="n">services</span><span class="p">[</span><span class="n">unit</span><span class="p">][</span><span class="s2">&quot;parallelism&quot;</span><span class="p">]</span>
+        <span class="n">service_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&lt;35}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">)</span>
+                                 <span class="o">+</span> <span class="s2">&quot;cpu: &quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">cpu</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">)</span>
+                                 <span class="o">+</span> <span class="s2">&quot; , memory: &quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; mb&quot;</span>
+                                 <span class="o">+</span> <span class="s2">&quot; , parallelism: &quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">parallelism</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">)</span>
+                                 <span class="o">+</span> <span class="s2">&quot; , cluster: &quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">resource</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="show_all_resources"><a class="viewcode-back" href="../../oscarp.html#oscarp.gui.show_all_resources">[docs]</a><span class="k">def</span> <span class="nf">show_all_resources</span><span class="p">(</span><span class="n">run_index</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For a given run, it shows for each resource the required number of nodes; it&#39;s called for the first run only.</span>
+
+<span class="sd">    :param int run_index: run index</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Resources:&quot;</span><span class="p">)</span>
+    <span class="n">run_name</span> <span class="o">=</span> <span class="s2">&quot;Run #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">run_index</span><span class="p">)</span>
+    <span class="n">resources</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">[</span><span class="n">run_name</span><span class="p">][</span><span class="s2">&quot;resources&quot;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">resources</span><span class="p">:</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">resources</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">gp</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">is_lambda</span><span class="p">():</span>
+            <span class="n">resource_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&lt;35}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+            <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;nodes: &quot;</span>
+                                     <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="show_runs"><a class="viewcode-back" href="../../oscarp.html#oscarp.gui.show_runs">[docs]</a><span class="k">def</span> <span class="nf">show_runs</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It combines the previous functions to show all the scheduled runs.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">repetitions</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">run_parameters</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;repetitions&quot;</span><span class="p">]</span>
+    <span class="n">summary_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span><span class="p">,</span> <span class="s2">&quot;campaign_summary.txt&quot;</span><span class="p">)</span>
+    <span class="n">create_new_file</span><span class="p">(</span><span class="n">summary_filepath</span><span class="p">)</span>
+    <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Scheduler:&quot;</span><span class="p">)</span>
+    <span class="n">show_all_services</span><span class="p">(</span><span class="n">run_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">repetitions</span><span class="o">=</span><span class="n">repetitions</span><span class="p">)</span>
+    <span class="n">show_all_resources</span><span class="p">(</span><span class="n">run_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">repetitions</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">scheduled_runs</span><span class="p">),</span> <span class="n">repetitions</span><span class="p">):</span>
+        <span class="n">run_name</span> <span class="o">=</span> <span class="s2">&quot;Run #</span><span class="si">%s</span><span class="s2"> to #</span><span class="si">%s</span><span class="s2">:&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">repetitions</span><span class="p">)</span>
+        <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">run_name</span><span class="p">)</span>
+
+        <span class="n">runs_diff_services</span><span class="p">(</span><span class="s2">&quot;Run #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="s2">&quot;Run #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">runs_diff_resources</span><span class="p">(</span><span class="s2">&quot;Run #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="s2">&quot;Run #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">show_and_save_to_summary</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># todo re-enable this after testing!</span>
+    <span class="c1"># value = get_valid_input(&quot;Do you want to proceed? (y/n)\t&quot;, [&quot;y&quot;, &quot;n&quot;])</span>
+    <span class="nb">print</span><span class="p">()</span>  <span class="c1"># just for spacing</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;y&quot;</span>
+
+    <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Exiting...&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">))</span>
+        <span class="n">quit</span><span class="p">()</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="show_and_save_to_summary"><a class="viewcode-back" href="../../oscarp.html#oscarp.gui.show_and_save_to_summary">[docs]</a><span class="k">def</span> <span class="nf">show_and_save_to_summary</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Receives a line, prints it and then appends it to the campaign summary.</span>
+
+<span class="sd">    :param str string: Output line</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+    <span class="n">append_to_deployment_summary</span><span class="p">(</span><span class="n">strip_ansi_from_string</span><span class="p">(</span><span class="n">string</span><span class="p">))</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="append_to_deployment_summary"><a class="viewcode-back" href="../../oscarp.html#oscarp.gui.append_to_deployment_summary">[docs]</a><span class="k">def</span> <span class="nf">append_to_deployment_summary</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Receives a line and appends it to the summary.</span>
+
+<span class="sd">    :param str string: Output line, stripped of ANSI</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">summary_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">current_deployment_dir</span><span class="p">,</span> <span class="s2">&quot;campaign_summary.txt&quot;</span><span class="p">)</span>
+    <span class="n">append_string_to_file</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">summary_filepath</span><span class="p">)</span>
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Galimberti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

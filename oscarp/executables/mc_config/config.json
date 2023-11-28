@@ -1,0 +1,33 @@
+{
+	"version": "10",
+	"aliases": {
+		"minio-RasPi": {
+			"url": "https://minio.graspi.im.grycap.net",
+			"accessKey": "minio",
+			"secretKey": "minio-aisprint-2021",
+			"api": "s3v4",
+			"path": "auto"
+		},
+		"minio-VM1": {
+			"url": "https://minio.quirky-kowalevski6.im.grycap.net",
+			"accessKey": "minio",
+			"secretKey": "minio-aisprint-2022",
+			"api": "s3v4",
+			"path": "auto"
+		},
+		"minio-VM3": {
+			"url": "https://minio.oscar-cluster-v0s8x4nx.polimi-aisprint.click",
+			"accessKey": "minio",
+			"secretKey": "zej3np3bwrzxnp9d",
+			"api": "s3v4",
+			"path": "auto"
+		},
+		"minio-VM4": {
+			"url": "https://minio.oscar-cluster-m8h8uott.polimi-aisprint.click",
+			"accessKey": "minio",
+			"secretKey": "n53qcker7e157qlb",
+			"api": "s3v4",
+			"path": "auto"
+		}
+	}
+}

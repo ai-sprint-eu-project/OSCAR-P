@@ -1,0 +1,74 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class node0 as "classes.Resource.Resource" {
+   max_memory_mb: 
+   storage_provider_alias: 
+   max_cpu_cores: 
+   bucket_name: 
+   name: 
+   storage_provider: 
+   ssh: 
+   total_nodes: 
+   execution_layer: 
+   type: 
+   oscarcli_alias: 
+   __init__(self, name, resource_type, physical_nodes, execution_layer): 
+   __str__(self): 
+   _set_type(self, resource_type): 
+   set_storage_provider_alias(self, storage_provider): 
+   _set_ssh(self, physical_nodes): 
+   is_physical(self): 
+   is_lambda(self): 
+}
+class node1 as "classes.Component.Component" {
+   next: 
+   partition_number: 
+   component_key: 
+   parallelism: 
+   time_distribution: 
+   name: 
+   partition_group: 
+   containers: 
+   __init__(self, name, component_key, partition_group): 
+   __str__(self): 
+   _update_name(self, partition_group): 
+   add_container(self, parent, full_id, computing_units, memory_size, docker_image, gpu_requirement): 
+   _get_correct_image(self, docker_image): 
+   is_partition(self): 
+   set_parallelism(self, parallelism): 
+   set_time_distribution(self, time_distribution): 
+   set_following_partition(self, components): 
+}
+class node2 as "classes.Component.Container" {
+   parent: 
+   image: 
+   memory: 
+   resource: 
+   gpu_requirement: 
+   cpu: 
+   id: 
+   __init__(self, parent, full_id, image, computing_units, memory_size, gpu_requirement, is_partition, partition_group): 
+   __str__(self): 
+   _update_id(self, partition_group): 
+}
+class node3 as "classes.Service.Service" {
+   image: 
+   unit: 
+   is_lambda: 
+   input_bucket: 
+   storage_provider_alias: 
+   memory: 
+   output_bucket: 
+   resource: 
+   time_distribution: 
+   name: 
+   cpu: 
+   oscarcli_alias: 
+   __init__(self, unit, name, input_bucket_index): 
+}
+
+@enduml
