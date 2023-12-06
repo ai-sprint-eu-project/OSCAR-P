@@ -87,7 +87,7 @@ def create_virtual_infrastructures():
         c, r = c.split('@')
         if not gp.resources[r].is_physical() and r not in gp.virtual_infrastructures.keys():
             to_deploy[r] = c
-
+    
     # print("to_deploy A: ", to_deploy)
 
     ensure_correct_number_of_nodes()
@@ -101,7 +101,7 @@ def create_virtual_infrastructures():
     auto_mkdir(gp.application_dir + "oscarp/.toscarizer")
     to_deploy = _generate_modified_candidate_files(to_deploy)
     _generate_modified_dag()
-
+    
     # print("to_deploy B: ", to_deploy)
 
     tosca_files = generate_tosca()
@@ -160,7 +160,7 @@ def _generate_modified_candidate_files(to_deploy):
         components = yaml.safe_load(f)["Components"]
 
     modified_components = {}
-
+    
     for unit in gp.current_deployment:
         c, r = unit.split('@')
         if "P" in c:
@@ -172,9 +172,10 @@ def _generate_modified_candidate_files(to_deploy):
 
         if r in to_deploy.keys():
             to_deploy[r] = components[c]["name"]
-
+        
         for container in components[c]["Containers"].values():
             if r in container["candidateExecutionResources"]:  # found the right container
+                components[c]["name"] = gp.current_services_dict[unit].name
                 components[c]["Containers"]["container1"] = container
                 components[c]["Containers"]["container1"]["candidateExecutionResources"] = [r]
                 components[c]["candidateExecutionLayers"] = [gp.resources[r].execution_layer]
@@ -203,7 +204,7 @@ def _generate_modified_dag():
     for unit in gp.current_deployment:
         component_name = gp.current_services_dict[unit].name
         components.append(component_name)
-
+    
     dependencies = []
     for i in range(len(components)):
         if i + 1 == len(components):

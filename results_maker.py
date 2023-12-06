@@ -170,7 +170,7 @@ def make_dataframe_sync_run(run_name, service):
     # makes a list with the requested throughput values
     requested_throughput_list = []
     for interval in gp.run_parameters["synchronous"]["intervals"]:
-        requested_throughput_list.append(round(interval["throughput"] / 60, 2))
+        requested_throughput_list.append(round(interval["throughput"] / 60, 5))
 
     intervals = list(response_times.keys())
     intervals.sort()
@@ -182,7 +182,7 @@ def make_dataframe_sync_run(run_name, service):
         t2 = real_throughput[interval]["end"]
         delta = (t2 - t1).total_seconds()
         count = real_throughput[interval]["count"]
-        observed_throughput_value = round(count / delta, 2)
+        observed_throughput_value = round(count / delta, 5)
         observed_throughput_list.append(observed_throughput_value)
 
     # calculate average response time for each interval
@@ -194,7 +194,7 @@ def make_dataframe_sync_run(run_name, service):
         for response_time in response_times_array:
             average += response_time
         average /= len(response_times_array)
-        average = round(average, 2)
+        average = round(average, 5)
         avg_response_times_list.append(average)
     
     # fill remaining columns
@@ -264,7 +264,7 @@ def make_dataframe_async_run(run_name, service):
 
     delta = (t2 - t1).total_seconds()
     count = len(time_table)
-    observed_throughput = round(count / delta, 2)
+    observed_throughput = round(count / delta, 5)
 
     # calculate average response time of all jobs
     average = 0
@@ -272,7 +272,7 @@ def make_dataframe_async_run(run_name, service):
         average += get_runtime_of_job(job)
 
     average /= count
-    avg_response_time = round(average, 2)
+    avg_response_time = round(average, 5)
 
     unit = service.unit
 

@@ -357,7 +357,7 @@ def set_testing_parameters():
 
     for group in gp.components_groups:  # component1, component2, etc.
         for component in gp.components_groups[group].values():
-
+            
             if "alternative" in component.component_key:
                 component_parameters = gp.run_parameters["components"][component.component_key.split("_alternative")[0]]
             else:
