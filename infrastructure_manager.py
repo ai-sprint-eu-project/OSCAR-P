@@ -171,7 +171,7 @@ def _generate_modified_candidate_files(to_deploy):
         c = c.replace("C", "component")
 
         if r in to_deploy.keys():
-            to_deploy[r] = components[c]["name"]
+            to_deploy[r] = gp.current_services_dict[unit].name
         
         for container in components[c]["Containers"].values():
             if r in container["candidateExecutionResources"]:  # found the right container
