@@ -467,9 +467,9 @@ def wait_oscar_service_completion(service):
         if completed_jobs == old_completed_jobs and pending_jobs == old_pending_jobs:
             stack_counter -= 1
             if stack_counter == 0:
-                completed = True
                 if gp.is_debug:
                     print(colored("Service is stack", "magenta"))
+                raise NameError('StackService')
         else:
             stack_counter = 10
 
