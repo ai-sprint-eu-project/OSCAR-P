@@ -307,9 +307,11 @@ def get_run_parameters():  # todo we should also check that the required files e
     length = len(list(run_parameters["components"].values())[0]["parallelism"])
 
     for component in run_parameters["components"].items():
-        p = len(component[1]["parallelism"])
-        if p != length:
-            show_fatal_error("Parallelism lists of different length in file \"run_parameters.yaml\"")
+
+        if not run_parameters["run"]["test_synchronously"] and not run_parameters["asynchronous"]["combinatorial_test"]:
+            p = len(component[1]["parallelism"])
+            if p != length:
+                show_fatal_error("Parallelism lists of different length in file \"run_parameters.yaml\"")
         check_parallelism_is_in_decreasing_order(component[1]["parallelism"])
 
     # urgent also check that the parallelism array is listed in decreasing order

@@ -76,28 +76,63 @@ def make_current_services():
 def run_scheduler():
     """Comment!"""
     repetitions = gp.run_parameters["run"]["repetitions"]
+    is_combinatorial = gp.run_parameters["asynchronous"]["combinatorial_test"]
 
     # create empty skeletons for runs
-    run_names = ["Run #%s" % (i + 1) for i in range(gp.base_length * repetitions)]
-    gp.scheduled_runs = dict.fromkeys(run_names, None)
-    for key in gp.scheduled_runs:
-        gp.scheduled_runs[key] = {"services": {}, "resources": {}}
+    if not is_combinatorial:
 
-    # add in services
-    for service in gp.current_services_list:
-        expanded_parallelism = [item for item in service.parallelism for i in range(repetitions)]
+        run_names = ["Run #%s" % (i + 1) for i in range(gp.base_length * repetitions)]
+        gp.scheduled_runs = dict.fromkeys(run_names, None)
+        for key in gp.scheduled_runs:
+            gp.scheduled_runs[key] = {"services": {}, "resources": {}}
 
-        for index, element in enumerate(expanded_parallelism):
-            run_name = "Run #%s" % (index + 1)
-            gp.scheduled_runs[run_name]["services"][service.unit] = {"parallelism": element}
+        for service in gp.current_services_list:
+            expanded_parallelism = [item for item in service.parallelism for i in range(repetitions)]
 
-    # add in resources
-    for key, value in gp.resources_node_requirements.items():
-        expanded_nodes = [item for item in value for i in range(repetitions)]
+            for index, element in enumerate(expanded_parallelism):
+                run_name = "Run #%s" % (index + 1)
+                gp.scheduled_runs[run_name]["services"][service.unit] = {"parallelism": element}
 
-        for index, element in enumerate(expanded_nodes):
-            run_name = "Run #%s" % (index + 1)
-            gp.scheduled_runs[run_name]["resources"][key] = {"nodes": element}
+        for key, value in gp.resources_node_requirements.items():
+
+            expanded_nodes = [item for item in value for i in range(repetitions)]
+
+            for index, element in enumerate(expanded_nodes):
+                run_name = "Run #%s" % (index + 1)
+                gp.scheduled_runs[run_name]["resources"][key] = {"nodes": element}
+
+    else: 
+
+        parallelisms = []
+        nodes_name = []
+        nodes_numbers = []
+
+        for service in gp.current_services_list:
+            parallelisms.append([item for item in service.parallelism])
+        for node in gp.resources_node_requirements.items(): 
+            nodes_name.append(node[0])
+            nodes_numbers.append(node[1])
+
+        from itertools import product
+        combinations_parallelism = list(product(*parallelisms))
+        combinations_nodes = list(product(*nodes_numbers))
+
+        run_names = ["Run #%s" % (i + 1) for i in range(len(combinations_parallelism) * repetitions)]
+        gp.scheduled_runs = dict.fromkeys(run_names, None)
+        for key in gp.scheduled_runs:
+            gp.scheduled_runs[key] = {"services": {}, "resources": {}}
+
+        for idx in range(len(gp.current_services_list)):
+
+            index = 0
+            service = gp.current_services_list[idx]
+            
+            for comb_idx in range(len(combinations_parallelism)):
+                for rep in range(repetitions):
+                    run_name = "Run #%s" % (index+1)
+                    gp.scheduled_runs[run_name]["services"][service.unit] = {"parallelism": combinations_parallelism[comb_idx][idx]}
+                    gp.scheduled_runs[run_name]["resources"][nodes_name[idx]] = {"nodes": combinations_nodes[comb_idx][idx]}
+                    index += 1
 
     # print("\nRuns")
     # print(gp.scheduled_runs)
