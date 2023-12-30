@@ -446,7 +446,7 @@ def wait_oscar_service_completion(service):
         pbar.refresh()
 
         # completed is true if there are no jobs running, everything is either completed or pending
-        if not completed:  # resets the counter
+        if not completed:
             retries_counter = 3
         else:
             # if there are no running jobs and the number of pending is under 5%,
@@ -454,11 +454,11 @@ def wait_oscar_service_completion(service):
             if pending_jobs == 0:
                 if gp.is_debug:
                     print(colored("Service completed", "magenta"))
-            elif len(job_list) / 100 * 5 > pending_jobs == old_pending_jobs:
+            elif len(job_list) / 100 * 5 >= pending_jobs == old_pending_jobs:
                 retries_counter -= 1
-                if retries_counter != 0:
+                if retries_counter > 0:
                     completed = False
-            else:  # if I reach here it means everything is pending or some jobs after the 95% of completition finished
+            else:
                 retries_counter = 3
                 completed = False
 
@@ -469,13 +469,16 @@ def wait_oscar_service_completion(service):
             if stack_counter == 0:
                 if gp.is_debug:
                     print(colored("Service is stack", "magenta"))
-                raise NameError('StackService')
+                if completed_jobs < 0.95*len(job_list):
+                    if gp.is_debug:
+                        print(colored("Less than 95% of jobs completed", "magenta"))
+                    raise NameError('StackService')
         else:
-            stack_counter = 10
+            stack_counter = 3
 
         if gp.is_debug:
-            print(colored("\tPending jobs: %s, Running jobs: %s, Completed jobs: %s, Stack counter: %s" % (pending_jobs, running_jobs, completed_jobs, stack_counter), "magenta"))
-            print(colored("\tOld pending jobs: %s, Old completed jobs: %s" % (old_pending_jobs, old_completed_jobs), "magenta"))
+            print(colored("\tPending jobs: %s, Running jobs: %s, Completed jobs: %s, Retries counter: %s, Stack counter: %s" % (pending_jobs, running_jobs, completed_jobs, retries_counter, stack_counter), "magenta"))
+            #print(colored("\tOld pending jobs: %s, Old completed jobs: %s" % (old_pending_jobs, old_completed_jobs), "magenta"))
 
         old_pending_jobs = pending_jobs
 
